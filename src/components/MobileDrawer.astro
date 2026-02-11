@@ -1,0 +1,146 @@
+---
+import { SITE_TITLE } from '../consts';
+import { getNavLinks } from '../data/navLinks';
+
+const BASE = import.meta.env.BASE_URL;
+const NAV_LINKS = getNavLinks(BASE);
+---
+
+<div
+	id="mobile-overlay"
+	class="pointer-events-none fixed inset-0 z-[80] bg-black/40 opacity-0 transition-opacity duration-200 ease-out motion-reduce:transition-none md:hidden [will-change:opacity] hidden"
+	aria-hidden="true"
+></div>
+<aside
+	id="mobile-drawer"
+	class="pointer-events-auto fixed left-0 top-0 z-[90] flex h-[100dvh] w-[88vw] max-w-sm -translate-x-full flex-col border-r border-zinc-200 bg-white/95 p-4 shadow-2xl backdrop-blur transition-transform duration-200 ease-out motion-reduce:transition-none md:hidden dark:border-zinc-800 dark:bg-zinc-950/95 [will-change:transform] hidden"
+	aria-label="Mobile navigation"
+	aria-hidden="true"
+>
+	<div class="mb-6 flex items-center justify-between">
+		<p class="m-0 text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">{SITE_TITLE}</p>
+		<button
+			type="button"
+			id="mobile-menu-close"
+			class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+			aria-label="Close menu"
+		>
+			<svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" aria-hidden="true">
+				<path d="M6.7 5.3a1 1 0 0 0-1.4 1.4L10.6 12l-5.3 5.3a1 1 0 1 0 1.4 1.4l5.3-5.3 5.3 5.3a1 1 0 1 0 1.4-1.4L13.4 12l5.3-5.3a1 1 0 0 0-1.4-1.4L12 10.6 6.7 5.3Z" />
+			</svg>
+		</button>
+	</div>
+	<nav class="flex flex-col gap-2">
+		{
+			NAV_LINKS.map((link) => (
+				<a
+					href={link.href}
+					data-drawer-link
+					class="block rounded-xl px-4 py-3 text-base font-medium text-zinc-700 no-underline transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+				>
+					{link.label}
+				</a>
+			))
+		}
+	</nav>
+</aside>
+
+<script is:inline>
+	const initMobileDrawer = () => {
+		const trigger = document.getElementById('mobile-menu-button');
+		const drawer = document.getElementById('mobile-drawer');
+		const overlay = document.getElementById('mobile-overlay');
+		const closeBtn = document.getElementById('mobile-menu-close');
+		if (!trigger || !drawer || !overlay || !closeBtn || trigger.dataset.drawerBound === 'true') return;
+		trigger.dataset.drawerBound = 'true';
+		const TRANSITION_MS = 220;
+		let closeTimer = null;
+
+		const forceClosedState = () => {
+			drawer.classList.add('-translate-x-full', 'hidden');
+			drawer.classList.remove('translate-x-0');
+			drawer.setAttribute('aria-hidden', 'true');
+			overlay.classList.add('opacity-0', 'pointer-events-none', 'hidden');
+			overlay.classList.remove('opacity-100', 'pointer-events-auto');
+			document.documentElement.classList.remove('overflow-hidden');
+			trigger.setAttribute('aria-expanded', 'false');
+		};
+
+		const setOpenVisualState = () => {
+			drawer.classList.remove('-translate-x-full');
+			drawer.classList.add('translate-x-0');
+			overlay.classList.remove('opacity-0', 'pointer-events-none');
+			overlay.classList.add('opacity-100', 'pointer-events-auto');
+		};
+
+		const closeDrawer = () => {
+			if (closeTimer) {
+				clearTimeout(closeTimer);
+				closeTimer = null;
+			}
+			trigger.setAttribute('aria-expanded', 'false');
+			drawer.setAttribute('aria-hidden', 'true');
+			drawer.classList.add('-translate-x-full');
+			drawer.classList.remove('translate-x-0');
+			overlay.classList.add('opacity-0', 'pointer-events-none');
+			overlay.classList.remove('opacity-100', 'pointer-events-auto');
+			document.documentElement.classList.remove('overflow-hidden');
+			closeTimer = window.setTimeout(() => {
+				drawer.classList.add('hidden');
+				overlay.classList.add('hidden');
+				closeTimer = null;
+			}, TRANSITION_MS);
+		};
+
+		const openDrawer = () => {
+			if (closeTimer) {
+				clearTimeout(closeTimer);
+				closeTimer = null;
+			}
+			trigger.setAttribute('aria-expanded', 'true');
+			drawer.setAttribute('aria-hidden', 'false');
+			drawer.classList.remove('hidden');
+			overlay.classList.remove('hidden');
+			document.documentElement.classList.add('overflow-hidden');
+			window.requestAnimationFrame(setOpenVisualState);
+		};
+
+		trigger.addEventListener('click', openDrawer);
+		closeBtn.addEventListener('click', closeDrawer);
+		overlay.addEventListener('click', closeDrawer);
+
+		const drawerLinks = drawer.querySelectorAll('[data-drawer-link]');
+		for (const link of drawerLinks) {
+			link.addEventListener('click', closeDrawer);
+		}
+
+		forceClosedState();
+	};
+
+	if (document.documentElement.dataset.drawerEscBound !== 'true') {
+		document.addEventListener('keydown', (event) => {
+			if (event.key !== 'Escape') return;
+			const trigger = document.getElementById('mobile-menu-button');
+			const drawer = document.getElementById('mobile-drawer');
+			const overlay = document.getElementById('mobile-overlay');
+			if (!trigger || !drawer || !overlay || trigger.getAttribute('aria-expanded') !== 'true') return;
+
+			trigger.setAttribute('aria-expanded', 'false');
+			drawer.setAttribute('aria-hidden', 'true');
+			drawer.classList.add('-translate-x-full');
+			drawer.classList.remove('translate-x-0');
+			overlay.classList.add('opacity-0', 'pointer-events-none');
+			overlay.classList.remove('opacity-100', 'pointer-events-auto');
+			document.documentElement.classList.remove('overflow-hidden');
+			window.setTimeout(() => {
+				drawer.classList.add('hidden');
+				overlay.classList.add('hidden');
+			}, 220);
+		});
+		document.documentElement.dataset.drawerEscBound = 'true';
+	}
+
+	initMobileDrawer();
+	document.addEventListener('astro:page-load', initMobileDrawer);
+	document.addEventListener('astro:after-swap', initMobileDrawer);
+</script>

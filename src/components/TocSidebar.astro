@@ -1,0 +1,27 @@
+---
+import Toc from './Toc.astro';
+
+type TocHeading = {
+	depth: number;
+	slug: string;
+	text: string;
+};
+
+interface Props {
+	headings?: TocHeading[];
+}
+
+const { headings = [] } = Astro.props as Props;
+const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3);
+---
+
+{
+	tocItems.length > 0 && (
+		<div class="rounded-2xl border border-zinc-200 bg-white/95 p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/90">
+			<p class="m-0 text-sm font-semibold text-zinc-900 dark:text-zinc-100">On this page</p>
+			<div class="mt-2 max-h-[calc(100vh-7rem)] overflow-auto">
+				<Toc headings={tocItems} />
+			</div>
+		</div>
+	)
+}

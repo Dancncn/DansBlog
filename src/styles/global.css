@@ -12,6 +12,10 @@
 		color-scheme: dark;
 	}
 
+	html {
+		scroll-behavior: smooth;
+	}
+
 	body {
 		@apply bg-zinc-50 text-zinc-800 font-sans antialiased transition-colors duration-200 dark:bg-zinc-950 dark:text-zinc-200;
 	}
@@ -139,6 +143,10 @@
 	.markdown-prose iframe[src$='.pdf'] {
 		@apply mt-6 w-full rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900;
 		height: min(80vh, 860px);
+	}
+
+	.markdown-prose :is(h2, h3, h4) {
+		scroll-margin-top: 96px;
 	}
 }
 

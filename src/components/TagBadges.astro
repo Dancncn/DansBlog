@@ -1,0 +1,66 @@
+---
+interface Props {
+	tags?: string[];
+	maxMobile?: number;
+	maxDesktop?: number | null;
+	base?: string;
+}
+
+const {
+	tags = [],
+	maxMobile = 3,
+	maxDesktop = null,
+	base = import.meta.env.BASE_URL,
+} = Astro.props as Props;
+
+const cleanTags = tags.filter((tag) => typeof tag === 'string' && tag.trim().length > 0);
+const mobileTags = cleanTags.slice(0, maxMobile);
+const mobileRemaining = Math.max(cleanTags.length - mobileTags.length, 0);
+const desktopTags = maxDesktop == null ? cleanTags : cleanTags.slice(0, maxDesktop);
+const desktopRemaining = maxDesktop == null ? 0 : Math.max(cleanTags.length - desktopTags.length, 0);
+---
+
+{
+	cleanTags.length > 0 && (
+		<>
+			<div class="flex flex-wrap gap-2 md:hidden">
+				{
+					mobileTags.map((tag) => (
+						<a
+							href={`${base}tags/${encodeURIComponent(tag)}/`}
+							class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs text-zinc-600 no-underline transition hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+						>
+							{tag}
+						</a>
+					))
+				}
+				{
+					mobileRemaining > 0 && (
+						<span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
+							+{mobileRemaining}
+						</span>
+					)
+				}
+			</div>
+			<div class="hidden gap-2 md:flex md:flex-nowrap">
+				{
+					desktopTags.map((tag) => (
+						<a
+							href={`${base}tags/${encodeURIComponent(tag)}/`}
+							class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs text-zinc-600 no-underline transition hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+						>
+							{tag}
+						</a>
+					))
+				}
+				{
+					desktopRemaining > 0 && (
+						<span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
+							+{desktopRemaining}
+						</span>
+					)
+				}
+			</div>
+		</>
+	)
+}

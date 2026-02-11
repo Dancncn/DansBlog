@@ -1,28 +1,69 @@
 ﻿---
 import { BILIBILI_URL, CREATINF_URL, GITHUB_URL, SITE_TITLE } from '../consts';
+import { getNavLinks } from '../data/navLinks';
 import HeaderLink from './HeaderLink.astro';
 
+interface Props {
+	showTocButton?: boolean;
+}
+
 const BASE = import.meta.env.BASE_URL;
+const BLOG_REPO_URL = 'https://github.com/Dancncn/DansBlog';
+const NAV_LINKS = getNavLinks(BASE);
+const { showTocButton = false } = Astro.props as Props;
 ---
 
 <header class="sticky top-0 z-50 border-b border-zinc-200/90 bg-zinc-50/95 backdrop-blur transition-colors duration-200 dark:border-zinc-800 dark:bg-zinc-950/90">
 	<nav class="page-shell flex h-16 items-center justify-between gap-4">
 		<div class="flex items-center gap-6">
-			<a href={`${BASE}`} class="text-base font-semibold tracking-tight text-zinc-900 no-underline dark:text-zinc-100">
+			<button
+				type="button"
+				id="mobile-menu-button"
+				class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 hover:text-zinc-900 md:hidden dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+				aria-controls="mobile-drawer"
+				aria-expanded="false"
+			>
+				<svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" aria-hidden="true">
+					<path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13a1.5 1.5 0 1 1 0 3h-13A1.5 1.5 0 0 1 4 6.5Zm0 5.5a1.5 1.5 0 0 1 1.5-1.5h13a1.5 1.5 0 0 1 0 3h-13A1.5 1.5 0 0 1 4 12Zm1.5 4a1.5 1.5 0 1 0 0 3h13a1.5 1.5 0 0 0 0-3h-13Z" />
+				</svg>
+				<span>Menu</span>
+			</button>
+			{
+				showTocButton && (
+					<button
+						type="button"
+						id="toc-menu-button"
+						class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 hover:text-zinc-900 md:hidden dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+						aria-controls="toc-drawer"
+						aria-expanded="false"
+						aria-label="Open table of contents"
+					>
+						<svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" aria-hidden="true">
+							<path d="M4 6a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1Zm0 6a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1Zm1 5a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H5Z" />
+						</svg>
+						<span>TOC</span>
+					</button>
+				)
+			}
+			<a href={`${BASE}`} class="hidden text-base font-semibold tracking-tight text-zinc-900 no-underline md:inline dark:text-zinc-100">
 				{SITE_TITLE}
 			</a>
 			<div class="hidden items-center gap-1 text-sm md:flex">
-				<HeaderLink href={`${BASE}`}>Home</HeaderLink>
-				<HeaderLink href={`${BASE}blog/`}>Blog</HeaderLink>
-				<HeaderLink href={`${BASE}about/`}>About</HeaderLink>
+				{
+					NAV_LINKS.map((link) => (
+						<HeaderLink href={link.href}>{link.label}</HeaderLink>
+					))
+				}
 			</div>
 		</div>
 		<div class="flex items-center gap-2">
-			<img
-				src={`${BASE}image/DanArnoux.jpg`}
-				alt="Dan Arnoux avatar"
-				class="h-9 w-9 rounded-full border border-zinc-200 object-cover dark:border-zinc-700"
-			/>
+			<a href={BLOG_REPO_URL} target="_blank" rel="noreferrer" aria-label="DanArnoux Blog Repository">
+				<img
+					src={`${BASE}image/DanArnoux.jpg`}
+					alt="Dan Arnoux avatar"
+					class="h-9 w-9 rounded-full border border-zinc-200 object-cover transition-transform duration-200 ease-out hover:scale-105 active:scale-95 dark:border-zinc-700"
+				/>
+			</a>
 			<a
 				href={GITHUB_URL}
 				target="_blank"
@@ -100,5 +141,6 @@ const BASE = import.meta.env.BASE_URL;
 	};
 
 	initThemeToggle();
+	document.addEventListener('astro:page-load', initThemeToggle);
 	document.addEventListener('astro:after-swap', initThemeToggle);
 </script>

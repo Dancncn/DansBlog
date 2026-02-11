@@ -1,7 +1,8 @@
----
+﻿---
 title: GoFile Download Tool -- Complete Usage Guide
 description: A step-by-step guide to downloading files from GoFile using a Python script.
 pubDate: 2026-02-11
+tags: ["tools", "download", "gofile", "guide", "EN"]
 typora-root-url: ./..\..\..\public\image
 ---
 

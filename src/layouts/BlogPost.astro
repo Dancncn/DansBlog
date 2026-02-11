@@ -5,18 +5,25 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
+import MobileDrawer from '../components/MobileDrawer.astro';
+import TocSidebar from '../components/TocSidebar.astro';
+import TocDrawer from '../components/TocDrawer.astro';
 
 type Props = CollectionEntry<'blog'>['data'] & {
 	profileImage?: string;
+	headings?: { depth: number; slug: string; text: string }[];
 };
 
-const { title, description, pubDate, updatedDate, heroImage, profileImage } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, profileImage, tags = [], headings = [] } = Astro.props;
 const BASE = import.meta.env.BASE_URL;
 const withBase = (path: string) => {
 	if (path.startsWith('http://') || path.startsWith('https://')) return path;
 	if (path.startsWith(BASE)) return path;
 	return `${BASE}${path.replace(/^\/+/, '')}`;
 };
+
+const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3);
+const hasToc = tocItems.length > 0;
 ---
 
 <html lang="en">
@@ -24,53 +31,77 @@ const withBase = (path: string) => {
 		<BaseHead title={title} description={description} />
 	</head>
 	<body>
-		<Header />
-		<main class="page-shell py-10 md:py-14" transition:name="page-main" transition:animate="fade">
-			<article class="section-enter mx-auto max-w-3xl">
-				{heroImage && (
-					<div class="mb-8 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
-						{
-							typeof heroImage === 'string' ? (
-								<img src={withBase(heroImage)} alt={title} class="h-auto w-full" loading="lazy" />
-							) : (
-								<Image width={1200} height={620} src={heroImage} alt="" class="h-auto w-full" />
-							)
-						}
-					</div>
-				)}
-				<header class="mb-8 border-b border-zinc-200 pb-6 dark:border-zinc-700">
-					<p class="m-0 text-sm text-zinc-500 dark:text-zinc-400">
-						<FormattedDate date={pubDate} />
-						{
-							updatedDate && (
-								<span class="ml-3 inline-block italic">
-									Updated <FormattedDate date={updatedDate} />
-								</span>
-							)
-						}
-					</p>
-					<div class="mt-3 flex items-start justify-between gap-4">
-						<h1 class="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 md:text-4xl" transition:name="page-title" transition:animate="fade">
-							{title}
-						</h1>
-						{
-							profileImage && (
-								<img
-									src={withBase(profileImage)}
-									alt={`${title} profile`}
-									class="h-14 w-14 shrink-0 rounded-full border border-zinc-200 object-cover dark:border-zinc-700 md:h-16 md:w-16"
-									loading="lazy"
-								/>
-							)
-						}
-					</div>
-					<p class="mt-3 font-serif text-zinc-600 dark:text-zinc-300">{description}</p>
-				</header>
-				<div class="markdown-prose">
-					<slot />
+		<Header showTocButton={hasToc} />
+		<MobileDrawer />
+		<TocDrawer headings={tocItems} />
+		<div class="page-shell py-10 md:py-14" transition:name="page-main" transition:animate="fade">
+			<div class="mx-auto w-full max-w-6xl px-4">
+				<div class:list={['md:gap-8 lg:gap-10', hasToc && 'md:grid md:grid-cols-[240px,minmax(0,1fr)] lg:grid-cols-[260px,minmax(0,1fr)]']}>
+					{hasToc && (
+						<aside class="hidden md:block">
+							<div class="sticky top-24">
+								<TocSidebar headings={tocItems} />
+							</div>
+						</aside>
+					)}
+
+					<main class="min-w-0">
+						<header class="mb-10 border-b border-zinc-200 pb-6 dark:border-zinc-700">
+							<p class="m-0 text-sm text-zinc-500 dark:text-zinc-400">
+								<FormattedDate date={pubDate} />
+								{updatedDate && (
+									<span class="ml-3 inline-block italic">
+										Updated <FormattedDate date={updatedDate} />
+									</span>
+								)}
+							</p>
+							<div class="mt-3 flex items-start justify-between gap-4">
+								<h1 class="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 md:text-4xl" transition:name="page-title" transition:animate="fade">
+									{title}
+								</h1>
+								{profileImage && (
+									<img
+										src={withBase(profileImage)}
+										alt={`${title} profile`}
+										class="h-14 w-14 shrink-0 rounded-full border border-zinc-200 object-cover dark:border-zinc-700 md:h-16 md:w-16"
+										loading="lazy"
+									/>
+								)}
+							</div>
+							<p class="mt-3 font-serif text-zinc-600 dark:text-zinc-300">{description}</p>
+							{tags.length > 0 && (
+								<div class="mt-4 flex flex-wrap gap-2">
+									{tags.map((tag) => (
+										<a
+											href={`${BASE}tags/${encodeURIComponent(tag)}/`}
+											class="rounded-lg border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-600 no-underline transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+										>
+											#{tag}
+										</a>
+									))}
+								</div>
+							)}
+						</header>
+
+						<article class="section-enter mx-auto w-full max-w-3xl md:mx-0 md:max-w-none">
+							{heroImage && (
+								<div class="mb-8 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
+									{typeof heroImage === 'string' ? (
+										<img src={withBase(heroImage)} alt={title} class="h-auto w-full" loading="lazy" />
+									) : (
+										<Image width={1200} height={620} src={heroImage} alt="" class="h-auto w-full" />
+									)}
+								</div>
+							)}
+
+							<div class="markdown-prose">
+								<slot />
+							</div>
+						</article>
+					</main>
 				</div>
-			</article>
-		</main>
+			</div>
+		</div>
 		<Footer />
 	</body>
 </html>

@@ -1,0 +1,119 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import MobileDrawer from '../../components/MobileDrawer.astro';
+import { SITE_TITLE } from '../../consts';
+import { links } from '../../data/links';
+
+const MAX_TAGS = 3;
+const base = import.meta.env.BASE_URL || '/';
+const withBase = (p: string) => `${base.replace(/\/$/, '')}/${String(p).replace(/^\//, '')}`;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Links | ${SITE_TITLE}`} description="Friends & Projects" />
+	</head>
+	<body>
+		<Header />
+		<MobileDrawer />
+		<main class="mx-auto max-w-6xl px-4 py-12" transition:name="page-main" transition:animate="fade">
+			<header>
+				<h1 class="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 md:text-4xl" transition:name="page-title" transition:animate="fade">
+					Links
+				</h1>
+				<p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Friends & Projects</p>
+			</header>
+
+			<section class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+				{
+					links.map((item) => {
+						const tags = item.tags ?? [];
+						const visibleTags = tags.slice(0, MAX_TAGS);
+						const extra = Math.max(tags.length - visibleTags.length, 0);
+						const firstLetter = item.name.trim().charAt(0).toUpperCase() || 'L';
+						const githubAvatar = item.github ? `https://github.com/${item.github}.png?size=160` : null;
+						const avatarSrc = item.avatar ? withBase(item.avatar) : githubAvatar;
+
+						return (
+							<article class="rounded-2xl border border-zinc-200 bg-white/90 p-5 shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950/80">
+								<div class="flex items-start justify-between gap-3">
+									<div class="flex items-center gap-3">
+										{avatarSrc ? (
+											<img
+												src={avatarSrc}
+												alt={`${item.name} avatar`}
+												class="h-11 w-11 rounded-full border border-zinc-200 object-cover dark:border-zinc-700"
+												loading="lazy"
+											/>
+										) : (
+											<span class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-zinc-100 text-sm font-semibold text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200">
+												{firstLetter}
+											</span>
+										)}
+										<div>
+											<h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">{item.name}</h2>
+											{item.status && (
+												<p class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+													{item.status === 'active' ? 'Active' : 'Inactive'}
+												</p>
+											)}
+										</div>
+									</div>
+									<div class="flex items-center gap-2">
+										{item.bilibili && (
+											<a
+												href={item.bilibili}
+												target="_blank"
+												rel="noreferrer"
+												class="icon-button inline-flex h-8 w-8 items-center justify-center rounded-xl border border-zinc-200 text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+												aria-label={`${item.name} Bilibili`}
+											>
+												<svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" aria-hidden="true">
+													<path d="M7.4 2.8a1 1 0 0 1 1.4 0L12 6l3.2-3.2a1 1 0 1 1 1.4 1.4L14.5 6.3h3.8A3.7 3.7 0 0 1 22 10v8.3A3.7 3.7 0 0 1 18.3 22H5.7A3.7 3.7 0 0 1 2 18.3V10a3.7 3.7 0 0 1 3.7-3.7h3.8L7.4 4.2a1 1 0 0 1 0-1.4ZM5.7 8.3A1.7 1.7 0 0 0 4 10v8.3c0 .9.8 1.7 1.7 1.7h12.6c.9 0 1.7-.8 1.7-1.7V10c0-.9-.8-1.7-1.7-1.7H5.7Zm1.8 3a1 1 0 0 1 1 1v3.4a1 1 0 1 1-2 0v-3.4a1 1 0 0 1 1-1Zm9 0a1 1 0 0 1 1 1v3.4a1 1 0 1 1-2 0v-3.4a1 1 0 0 1 1-1Z" />
+												</svg>
+												<span class="sr-only">Bilibili</span>
+											</a>
+										)}
+										{item.url && (
+											<a
+												href={item.url}
+												target="_blank"
+												rel="noreferrer"
+												class="inline-flex items-center rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-medium text-zinc-700 no-underline transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+											>
+												Visit
+											</a>
+										)}
+									</div>
+								</div>
+
+								{item.description && (
+									<p class="mt-4 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{item.description}</p>
+								)}
+
+								{tags.length > 0 && (
+									<div class="mt-4 flex flex-wrap gap-2">
+										{visibleTags.map((tag) => (
+											<span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
+												{tag}
+											</span>
+										))}
+										{extra > 0 && (
+											<span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
+												+{extra}
+											</span>
+										)}
+									</div>
+								)}
+							</article>
+						);
+					})
+				}
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

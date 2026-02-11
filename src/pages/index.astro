@@ -2,8 +2,9 @@
 import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
-import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
+import MobileDrawer from '../components/MobileDrawer.astro';
+import PostCard from '../components/PostCard.astro';
 import TerminalQuote from '../components/TerminalQuote.astro';
 import { BILIBILI_URL, CREATINF_URL, GITHUB_URL, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 
@@ -22,6 +23,7 @@ const HOME_WALLPAPER = `${BASE}image/home/2rd1yuubn4hc1.png`;
 	</head>
 	<body>
 		<Header />
+		<MobileDrawer />
 		<main class="page-shell py-10 md:py-14" transition:name="page-main" transition:animate="fade">
 			<div class="space-y-6">
 				<section class="hero-enter overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
@@ -98,17 +100,16 @@ const HOME_WALLPAPER = `${BASE}image/home/2rd1yuubn4hc1.png`;
 				<ul class="grid gap-4 md:grid-cols-2">
 					{
 						posts.map((post, idx) => (
-							<li class="card-enter" style={`animation-delay: ${160 + idx * 45}ms`}>
-								<a
-									href={`${BASE}blog/${post.id}/`}
-									class="card-surface card-interactive block h-full p-5 no-underline"
-								>
-									<p class="m-0 text-xs text-zinc-500 dark:text-zinc-400">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-									<h3 class="mt-2 text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">{post.data.title}</h3>
-									<p class="mt-2 font-serif text-sm leading-7 text-zinc-600 dark:text-zinc-300">{post.data.description}</p>
-								</a>
+							<li class="card-enter relative" style={`animation-delay: ${160 + idx * 45}ms`}>
+								<PostCard
+									post={post}
+									base={BASE}
+									titleTag="h3"
+									titleClass="mt-2 text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-100"
+									descriptionClass="mt-2 font-serif text-sm leading-7 text-zinc-600 dark:text-zinc-300"
+									maxMobile={3}
+									maxDesktop={3}
+								/>
 							</li>
 						))
 					}

@@ -1,4 +1,4 @@
-﻿---
+---
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
@@ -7,16 +7,33 @@ import MobileDrawer from '../../components/MobileDrawer.astro';
 import PostCard from '../../components/PostCard.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
+export async function getStaticPaths() {
+	const posts = await getCollection('blog');
+	const allTags = new Set<string>();
+	for (const post of posts) {
+		for (const tag of post.data.tags ?? []) {
+			const normalized = tag.trim();
+			if (!normalized) continue;
+			allTags.add(normalized);
+		}
+	}
+
+	return [...allTags].map((tag) => ({
+		params: { tag },
+	}));
+}
+
 const BASE = import.meta.env.BASE_URL;
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+const currentTag = decodeURIComponent(Astro.params.tag ?? '');
+const posts = (await getCollection('blog'))
+	.filter((post) => (post.data.tags ?? []).includes(currentTag))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={`Blog | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+		<BaseHead title={`Tag: ${currentTag} | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 	</head>
 	<body>
 		<Header />
@@ -24,9 +41,11 @@ const posts = (await getCollection('blog')).sort(
 		<main class="page-shell py-10 md:py-14" transition:name="page-main" transition:animate="fade">
 			<section class="section-enter mx-auto max-w-4xl">
 				<h1 class="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 md:text-4xl" transition:name="page-title" transition:animate="fade">
-					Blog
+					Tag: {currentTag}
 				</h1>
-				<p class="mt-2 font-sans text-zinc-500 dark:text-zinc-400">Research notes, engineering logs, and technical essays.</p>
+				<p class="mt-2 font-sans text-zinc-500 dark:text-zinc-400">
+					{posts.length} post{posts.length === 1 ? '' : 's'}
+				</p>
 				<ul class="mt-8 grid gap-4">
 					{
 						posts.map((post, idx) => (
