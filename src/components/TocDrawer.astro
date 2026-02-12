@@ -25,11 +25,11 @@ const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3)
 			></div>
 			<aside
 				id="toc-drawer"
-				class="pointer-events-auto fixed right-0 top-0 z-[95] flex h-[100dvh] w-[88vw] max-w-sm translate-x-full flex-col border-l border-zinc-200 bg-white/95 p-4 shadow-2xl backdrop-blur transition-transform duration-200 ease-out motion-reduce:transition-none md:hidden dark:border-zinc-800 dark:bg-zinc-950/95 [will-change:transform] hidden"
+				class="pointer-events-auto fixed inset-y-0 right-0 z-[95] flex h-[100dvh] max-h-[100dvh] w-[88vw] max-w-sm translate-x-full flex-col border-l border-zinc-200 bg-white/95 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] shadow-2xl transition-transform duration-200 ease-out motion-reduce:transition-none md:hidden dark:border-zinc-800 dark:bg-zinc-950/95 [will-change:transform] hidden"
 				aria-label="Table of contents"
 				aria-hidden="true"
 			>
-				<div class="mb-4 flex items-center justify-between">
+				<div class="mb-4 flex shrink-0 items-center justify-between">
 					<p class="m-0 text-base font-semibold text-zinc-900 dark:text-zinc-100">Contents</p>
 					<button
 						type="button"
@@ -42,8 +42,12 @@ const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3)
 						</svg>
 					</button>
 				</div>
-				<div class="min-h-0 flex-1 overflow-y-auto">
-					<Toc headings={tocItems} />
+				<div class="relative min-h-0 flex-1 overflow-hidden" data-toc-fade-wrap>
+					<div class="toc-scroll h-full min-h-0 overflow-y-auto pb-[max(0.5rem,env(safe-area-inset-bottom))]" data-toc-scroll="drawer">
+						<Toc headings={tocItems} />
+					</div>
+					<div data-toc-fade="top" class="toc-fade toc-fade-top pointer-events-none absolute inset-x-0 top-0 h-8 opacity-0"></div>
+					<div data-toc-fade="bottom" class="toc-fade toc-fade-bottom pointer-events-none absolute inset-x-0 bottom-0 h-8 opacity-0"></div>
 				</div>
 			</aside>
 		</>
@@ -108,6 +112,7 @@ const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3)
 			overlay.classList.remove('hidden');
 			document.documentElement.classList.add('overflow-hidden');
 			window.requestAnimationFrame(setOpenVisualState);
+			window.requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('toc:refresh')));
 		};
 
 		trigger.addEventListener('click', openDrawer);

@@ -13,7 +13,10 @@
 	}
 
 	html {
-		scroll-behavior: smooth;
+		scroll-behavior: auto;
+		scrollbar-gutter: stable;
+		scrollbar-width: thin;
+		scrollbar-color: rgba(120, 120, 120, 0.28) transparent;
 	}
 
 	body {
@@ -75,6 +78,38 @@
 	}
 }
 
+html::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+html::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+	background-color: rgba(120, 120, 120, 0.28);
+	border-radius: 9999px;
+	border: 2px solid transparent;
+	background-clip: content-box;
+}
+
+html:hover::-webkit-scrollbar-thumb {
+	background-color: rgba(120, 120, 120, 0.45);
+}
+
+html.dark {
+	scrollbar-color: rgba(160, 160, 160, 0.3) transparent;
+}
+
+html.dark::-webkit-scrollbar-thumb {
+	background-color: rgba(160, 160, 160, 0.3);
+}
+
+html.dark:hover::-webkit-scrollbar-thumb {
+	background-color: rgba(160, 160, 160, 0.5);
+}
+
 @layer components {
 	.page-shell {
 		@apply mx-auto w-full max-w-5xl px-4;
@@ -134,10 +169,20 @@
 		@apply prose-code:font-mono prose-code:text-[0.9em];
 		@apply prose-code:before:content-none prose-code:after:content-none;
 		@apply prose-blockquote:border-zinc-300 prose-blockquote:text-zinc-600 dark:prose-blockquote:border-zinc-600 dark:prose-blockquote:text-zinc-300;
+		min-width: 0;
+		max-width: 100%;
+	}
+
+	.markdown-prose > * {
+		min-width: 0;
+		max-width: 100%;
 	}
 
 	.markdown-prose :where(code):not(:where(pre code)) {
 		@apply rounded-md bg-zinc-100 px-1.5 py-0.5 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-100;
+		overflow-wrap: anywhere;
+		word-break: break-word;
+		white-space: break-spaces;
 	}
 
 	.markdown-prose iframe[src$='.pdf'] {
@@ -147,6 +192,153 @@
 
 	.markdown-prose :is(h2, h3, h4) {
 		scroll-margin-top: 96px;
+	}
+
+	.markdown-prose :is(blockquote, ul, ol) {
+		max-width: 100%;
+		min-width: 0;
+	}
+
+	.markdown-prose :where(h1, h2, h3, h4, h5, h6, p, li, a, blockquote) {
+		overflow-wrap: anywhere;
+		word-break: break-word;
+		hyphens: auto;
+		max-width: 100%;
+		min-width: 0;
+	}
+
+	.markdown-prose img {
+		cursor: zoom-in;
+		max-width: 100%;
+		height: auto;
+	}
+
+	.markdown-prose :is(
+			table,
+			pre,
+			pre.astro-code,
+			pre.shiki,
+			pre[data-language],
+			.expressive-code,
+			.expressive-code pre,
+			.expressive-code figure,
+			figure[data-rehype-pretty-code-figure],
+			div[data-rehype-pretty-code-fragment],
+			.katex-display,
+			mjx-container[display='true'],
+			iframe,
+			iframe[src$='.pdf'],
+			embed,
+			object
+		) {
+		max-width: 100%;
+		overflow-x: auto;
+		overflow-y: hidden;
+		overscroll-behavior-x: contain;
+		-webkit-overflow-scrolling: touch;
+		touch-action: pan-x;
+		min-width: 0;
+	}
+
+	.markdown-prose table {
+		display: block;
+		width: max-content;
+		min-width: 100%;
+	}
+
+	.markdown-prose :is(
+			pre,
+			pre.astro-code,
+			pre.shiki,
+			pre[data-language],
+			.expressive-code pre,
+			figure[data-rehype-pretty-code-figure] pre,
+			div[data-rehype-pretty-code-fragment] pre
+		) {
+		overflow-wrap: normal;
+		word-break: normal;
+	}
+
+	.markdown-prose :is(
+			pre code,
+			pre.astro-code code,
+			pre.shiki code,
+			pre[data-language] code,
+			.expressive-code pre code,
+			figure[data-rehype-pretty-code-figure] pre code,
+			div[data-rehype-pretty-code-fragment] pre code
+	) {
+		white-space: pre;
+		overflow-wrap: normal;
+		word-break: normal;
+		display: inline-block;
+		width: max-content;
+		min-width: max-content;
+	}
+
+	.markdown-prose :is(
+			pre code .line,
+			pre.astro-code code .line,
+			pre.shiki code .line,
+			pre[data-language] code .line,
+			.expressive-code pre code .line,
+			figure[data-rehype-pretty-code-figure] pre code .line,
+			div[data-rehype-pretty-code-fragment] pre code .line
+		) {
+		display: block;
+		min-width: max-content;
+	}
+
+	.markdown-prose :is(.katex-display, mjx-container[display='true']) {
+		max-width: 100%;
+		overflow-x: auto;
+		overflow-y: hidden;
+		-webkit-overflow-scrolling: touch;
+		overscroll-behavior-x: contain;
+	}
+
+	@media (max-width: 30rem) {
+		header nav.page-shell {
+			min-width: 0;
+		}
+
+		header nav.page-shell > .flex.items-center.gap-6 {
+			min-width: 0;
+			gap: 0.5rem;
+		}
+
+		header nav.page-shell > .flex.items-center.gap-6 > :is(button, a) {
+			min-width: 0;
+		}
+
+		header nav.page-shell > .flex.items-center.gap-6 > button {
+			padding-inline: 0.5rem;
+			gap: 0.25rem;
+		}
+
+		header nav.page-shell > .flex.items-center.gap-2 {
+			min-width: 0;
+			gap: 0.25rem;
+		}
+
+		header nav.page-shell > .flex.items-center.gap-2 > a[aria-label='CreatInf'] {
+			display: none;
+		}
+
+		.blog-post-page,
+		.blog-post-page > div,
+		.blog-post-page main,
+		.blog-post-page article,
+		.blog-post-page .markdown-prose {
+			min-width: 0;
+			max-width: 100%;
+		}
+
+		.blog-post-page .markdown-prose :where(h1, h2, h3, h4, h5, h6, p, li, a, blockquote) {
+			overflow-wrap: anywhere;
+			word-break: break-word;
+			hyphens: auto;
+		}
 	}
 }
 
@@ -229,6 +421,194 @@ html.theme-switching *::after {
 		opacity: 0;
 		transform: translateY(-6px);
 	}
+}
+
+.toc-scroll {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(120, 120, 120, 0.16) transparent;
+	overscroll-behavior: contain;
+	-webkit-overflow-scrolling: touch;
+}
+
+.toc-scroll:hover,
+[data-toc-fade-wrap]:hover .toc-scroll {
+	scrollbar-color: rgba(120, 120, 120, 0.42) transparent;
+}
+
+.toc-scroll::-webkit-scrollbar {
+	width: 5px;
+}
+
+.toc-scroll::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.toc-scroll::-webkit-scrollbar-thumb {
+	background-color: rgba(120, 120, 120, 0.16);
+	border-radius: 9999px;
+	border: 1px solid transparent;
+	background-clip: content-box;
+}
+
+.toc-scroll:hover::-webkit-scrollbar-thumb,
+[data-toc-fade-wrap]:hover .toc-scroll::-webkit-scrollbar-thumb {
+	background-color: rgba(120, 120, 120, 0.42);
+}
+
+.dark .toc-scroll {
+	scrollbar-color: rgba(160, 160, 160, 0.18) transparent;
+}
+
+.dark .toc-scroll:hover,
+.dark [data-toc-fade-wrap]:hover .toc-scroll {
+	scrollbar-color: rgba(180, 180, 180, 0.46) transparent;
+}
+
+.dark .toc-scroll::-webkit-scrollbar-thumb {
+	background-color: rgba(160, 160, 160, 0.18);
+}
+
+.dark .toc-scroll:hover::-webkit-scrollbar-thumb,
+.dark [data-toc-fade-wrap]:hover .toc-scroll::-webkit-scrollbar-thumb {
+	background-color: rgba(180, 180, 180, 0.46);
+}
+
+.toc-fade {
+	transition: opacity 140ms ease-out;
+	z-index: 2;
+}
+
+.toc-fade-top {
+	background: linear-gradient(to bottom, rgba(250, 250, 250, 0.95), rgba(250, 250, 250, 0));
+}
+
+.toc-fade-bottom {
+	background: linear-gradient(to top, rgba(250, 250, 250, 0.95), rgba(250, 250, 250, 0));
+}
+
+.dark .toc-fade-top {
+	background: linear-gradient(to bottom, rgba(9, 9, 11, 0.95), rgba(9, 9, 11, 0));
+}
+
+.dark .toc-fade-bottom {
+	background: linear-gradient(to top, rgba(9, 9, 11, 0.95), rgba(9, 9, 11, 0));
+}
+
+.markdown-prose :is(
+		pre,
+		table,
+		.expressive-code,
+		.expressive-code pre,
+		.expressive-code figure,
+		figure[data-rehype-pretty-code-figure],
+		div[data-rehype-pretty-code-fragment],
+		.katex-display,
+		mjx-container[display='true']
+	) {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(120, 120, 120, 0.32) transparent;
+}
+
+.markdown-prose :is(
+		pre,
+		table,
+		.expressive-code,
+		.expressive-code pre,
+		.expressive-code figure,
+		figure[data-rehype-pretty-code-figure],
+		div[data-rehype-pretty-code-fragment],
+		.katex-display,
+		mjx-container[display='true']
+	)::-webkit-scrollbar {
+	height: 8px;
+	width: 8px;
+}
+
+.markdown-prose :is(
+		pre,
+		table,
+		.expressive-code,
+		.expressive-code pre,
+		.expressive-code figure,
+		figure[data-rehype-pretty-code-figure],
+		div[data-rehype-pretty-code-fragment],
+		.katex-display,
+		mjx-container[display='true']
+	)::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.markdown-prose :is(
+		pre,
+		table,
+		.expressive-code,
+		.expressive-code pre,
+		.expressive-code figure,
+		figure[data-rehype-pretty-code-figure],
+		div[data-rehype-pretty-code-fragment],
+		.katex-display,
+		mjx-container[display='true']
+	)::-webkit-scrollbar-thumb {
+	background-color: rgba(120, 120, 120, 0.32);
+	border-radius: 9999px;
+	border: 2px solid transparent;
+	background-clip: content-box;
+}
+
+.markdown-prose :is(
+		pre,
+		table,
+		.expressive-code,
+		.expressive-code pre,
+		.expressive-code figure,
+		figure[data-rehype-pretty-code-figure],
+		div[data-rehype-pretty-code-fragment],
+		.katex-display,
+		mjx-container[display='true']
+	):hover::-webkit-scrollbar-thumb {
+	background-color: rgba(120, 120, 120, 0.5);
+}
+
+.dark .markdown-prose :is(
+		pre,
+		table,
+		.expressive-code,
+		.expressive-code pre,
+		.expressive-code figure,
+		figure[data-rehype-pretty-code-figure],
+		div[data-rehype-pretty-code-fragment],
+		.katex-display,
+		mjx-container[display='true']
+	) {
+	scrollbar-color: rgba(170, 170, 170, 0.34) transparent;
+}
+
+.dark .markdown-prose :is(
+		pre,
+		table,
+		.expressive-code,
+		.expressive-code pre,
+		.expressive-code figure,
+		figure[data-rehype-pretty-code-figure],
+		div[data-rehype-pretty-code-fragment],
+		.katex-display,
+		mjx-container[display='true']
+	)::-webkit-scrollbar-thumb {
+	background-color: rgba(170, 170, 170, 0.34);
+}
+
+.dark .markdown-prose :is(
+		pre,
+		table,
+		.expressive-code,
+		.expressive-code pre,
+		.expressive-code figure,
+		figure[data-rehype-pretty-code-figure],
+		div[data-rehype-pretty-code-fragment],
+		.katex-display,
+		mjx-container[display='true']
+	):hover::-webkit-scrollbar-thumb {
+	background-color: rgba(170, 170, 170, 0.52);
 }
 
 .sr-only {

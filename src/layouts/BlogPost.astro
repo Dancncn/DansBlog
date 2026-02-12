@@ -12,9 +12,10 @@ import TocDrawer from '../components/TocDrawer.astro';
 type Props = CollectionEntry<'blog'>['data'] & {
 	profileImage?: string;
 	headings?: { depth: number; slug: string; text: string }[];
+	rawBody?: string;
 };
 
-const { title, description, pubDate, updatedDate, heroImage, profileImage, tags = [], headings = [] } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, profileImage, tags = [], headings = [], rawBody = '' } = Astro.props;
 
 const BASE = import.meta.env.BASE_URL;
 const withBase = (path: string) => {
@@ -26,6 +27,9 @@ const withBase = (path: string) => {
 
 const tocItems = headings.filter((h) => h.depth === 2 || h.depth === 3 || h.depth === 4);
 const hasToc = tocItems.length > 0;
+const chars = rawBody.replace(/\s+/g, '').length;
+const minutes = Math.max(1, Math.ceil(chars / 950));
+const charsLabel = chars.toLocaleString('en-US');
 ---
 
 <html lang="en">
@@ -36,21 +40,35 @@ const hasToc = tocItems.length > 0;
 		<Header showTocButton={hasToc} />
 		<MobileDrawer />
 
-		<div class="page-shell py-10 md:py-14" transition:name="page-main" transition:animate="fade">
-			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-				<div class="mt-10 md:grid md:grid-cols-[240px_minmax(0,1fr)] md:items-start md:gap-10">
+		<div class="blog-post-page min-w-0 w-full py-10 md:py-14" transition:name="page-main" transition:animate="fade">
+			<div class="mx-auto max-w-7xl min-w-0 px-4 sm:px-6 lg:px-8">
+				<div class="mt-10 min-w-0 md:grid md:grid-cols-[240px_minmax(0,1fr)] md:items-start md:gap-10 lg:grid-cols-[280px_minmax(0,820px)_minmax(0,1fr)] lg:gap-x-10">
 					{hasToc && (
 						<aside class="hidden md:block md:self-stretch">
-							<div class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-auto pr-2" data-toc-scroll="sidebar">
-								<TocSidebar headings={tocItems} />
+							<div class="relative sticky top-24" data-toc-fade-wrap>
+								<div class="toc-scroll max-h-[calc(100dvh-7.5rem)] overflow-auto pr-2" data-toc-scroll="sidebar">
+									<TocSidebar headings={tocItems} />
+								</div>
+								<div
+									data-toc-fade="top"
+									class="toc-fade toc-fade-top pointer-events-none absolute inset-x-0 top-0 h-8 opacity-0"
+								></div>
+								<div
+									data-toc-fade="bottom"
+									class="toc-fade toc-fade-bottom pointer-events-none absolute inset-x-0 bottom-0 h-8 opacity-0"
+								></div>
 							</div>
 						</aside>
 					)}
 
-					<main class:list={['min-w-0', !hasToc && 'md:col-span-2 md:col-start-1']}>
-						<header class="mb-10 border-b border-zinc-200 pb-6 dark:border-zinc-700">
+					<main class:list={['min-w-0', !hasToc && 'md:col-span-2 md:col-start-1 lg:col-span-1 lg:col-start-2']}>
+						<header class="mb-10 min-w-0 border-b border-zinc-200 pb-6 dark:border-zinc-700">
 							<p class="m-0 text-sm text-zinc-500 dark:text-zinc-400">
 								<FormattedDate date={pubDate} />
+								<span class="mx-1.5">&middot;</span>
+								<span>{charsLabel} chars</span>
+								<span class="mx-1.5">&middot;</span>
+								<span>{minutes} min</span>
 								{updatedDate && (
 									<span class="ml-3 inline-block italic">
 										Updated <FormattedDate date={updatedDate} />
@@ -58,9 +76,9 @@ const hasToc = tocItems.length > 0;
 								)}
 							</p>
 
-							<div class="mt-3 flex items-start justify-between gap-4">
+							<div class="mt-3 flex min-w-0 items-start justify-between gap-4">
 								<h1
-									class="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 md:text-4xl"
+									class="min-w-0 flex-1 text-3xl font-semibold tracking-tight text-zinc-900 [overflow-wrap:anywhere] dark:text-zinc-100 md:text-4xl"
 									transition:name="page-title"
 									transition:animate="fade"
 								>
@@ -93,7 +111,7 @@ const hasToc = tocItems.length > 0;
 							)}
 						</header>
 
-						<article class="section-enter w-full max-w-none">
+						<article class="section-enter min-w-0 w-full max-w-none">
 							{heroImage && (
 								<div class="mb-8 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
 									{typeof heroImage === 'string' ? (
@@ -104,18 +122,44 @@ const hasToc = tocItems.length > 0;
 								</div>
 							)}
 
-							<div class="markdown-prose">
+							<div class="markdown-prose min-w-0">
 								<slot />
 							</div>
 						</article>
 
 						<TocDrawer headings={tocItems} />
 					</main>
+
+					<div class="hidden lg:block" aria-hidden="true"></div>
 				</div>
 			</div>
 		</div>
 
 		<Footer />
+
+		<div
+			id="img-lightbox"
+			class="fixed inset-0 z-[999] hidden items-center justify-center overflow-auto bg-black/70 p-4 md:p-8 dark:bg-black/80"
+			aria-hidden="true"
+		>
+			<button
+				id="img-lightbox-close"
+				type="button"
+				class="fixed right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/35 text-white transition-colors hover:bg-black/55"
+				aria-label="Close image preview"
+				data-lightbox-close
+			>
+				<svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true">
+					<path d="M6.7 5.3a1 1 0 0 0-1.4 1.4L10.6 12l-5.3 5.3a1 1 0 1 0 1.4 1.4l5.3-5.3 5.3 5.3a1 1 0 1 0 1.4-1.4L13.4 12l5.3-5.3a1 1 0 0 0-1.4-1.4L12 10.6 6.7 5.3Z" />
+				</svg>
+			</button>
+			<img
+				id="img-lightbox-target"
+				src=""
+				alt=""
+				class="mx-auto block h-auto max-h-[92dvh] max-w-[92vw] rounded-xl object-contain shadow-lg"
+			/>
+		</div>
 
 		<style is:global>
 			.markdown-prose :is(h2, h3, h4) {
@@ -147,12 +191,12 @@ const hasToc = tocItems.length > 0;
 				if (links.length === 0 || headings.length === 0) return;
 
 				const ACTIVE_CLASSES = [
-					'bg-zinc-100/70',
+					'bg-zinc-100/55',
 					'text-zinc-900',
-					'border-zinc-900/60',
-					'dark:bg-zinc-800/60',
+					'border-zinc-400/90',
+					'dark:bg-zinc-800/55',
 					'dark:text-zinc-100',
-					'dark:border-zinc-200/70',
+					'dark:border-zinc-500/90',
 				];
 
 				const linkMap = new Map();
@@ -236,9 +280,197 @@ const hasToc = tocItems.length > 0;
 				};
 			};
 
+			const initTocScrollFades = () => {
+				if (typeof window.__tocFadeCleanup === 'function') {
+					window.__tocFadeCleanup();
+					window.__tocFadeCleanup = null;
+				}
+
+				const wraps = Array.from(document.querySelectorAll('[data-toc-fade-wrap]'));
+				if (wraps.length === 0) return;
+
+				const cleanups = [];
+				const updateFns = [];
+				const EPS = 1;
+
+				for (const wrap of wraps) {
+					const container = wrap.querySelector('[data-toc-scroll]');
+					const topFade = wrap.querySelector('[data-toc-fade="top"]');
+					const bottomFade = wrap.querySelector('[data-toc-fade="bottom"]');
+					if (!container || !topFade || !bottomFade) continue;
+					let rafId = 0;
+
+					const applyFadeState = () => {
+						rafId = 0;
+						const canScroll = container.scrollHeight - container.clientHeight > EPS;
+						if (!canScroll) {
+							topFade.classList.add('opacity-0');
+							topFade.classList.remove('opacity-100');
+							bottomFade.classList.add('opacity-0');
+							bottomFade.classList.remove('opacity-100');
+							return;
+						}
+
+						const showTop = container.scrollTop > EPS;
+						const showBottom = container.scrollTop + container.clientHeight < container.scrollHeight - EPS;
+
+						topFade.classList.toggle('opacity-100', showTop);
+						topFade.classList.toggle('opacity-0', !showTop);
+						bottomFade.classList.toggle('opacity-100', showBottom);
+						bottomFade.classList.toggle('opacity-0', !showBottom);
+					};
+
+					const scheduleFadeUpdate = () => {
+						if (rafId) return;
+						rafId = requestAnimationFrame(applyFadeState);
+					};
+
+					container.addEventListener('scroll', scheduleFadeUpdate, { passive: true });
+					cleanups.push(() => {
+						container.removeEventListener('scroll', scheduleFadeUpdate);
+						if (rafId) cancelAnimationFrame(rafId);
+					});
+					updateFns.push(applyFadeState);
+					applyFadeState();
+				}
+
+				const refreshAll = () => {
+					for (const update of updateFns) update();
+				};
+
+				window.addEventListener('resize', refreshAll);
+				window.addEventListener('toc:refresh', refreshAll);
+				cleanups.push(() => window.removeEventListener('resize', refreshAll));
+				cleanups.push(() => window.removeEventListener('toc:refresh', refreshAll));
+
+				window.__tocFadeCleanup = () => {
+					for (const fn of cleanups) fn();
+				};
+			};
+
+			const initImageLightbox = () => {
+				if (window.__imgLightboxBound) return;
+				window.__imgLightboxBound = true;
+
+				let lockedScrollY = 0;
+				const bodyStyleBeforeLock = {
+					position: '',
+					top: '',
+					left: '',
+					right: '',
+					width: '',
+					overflow: '',
+				};
+				let isBodyLocked = false;
+
+				const getLightboxElements = () => {
+					const overlay = document.getElementById('img-lightbox');
+					const target = document.getElementById('img-lightbox-target');
+					return { overlay, target };
+				};
+
+				const closeLightbox = () => {
+					const { overlay, target } = getLightboxElements();
+					if (!overlay || !target || overlay.classList.contains('hidden')) return;
+
+					overlay.classList.add('hidden');
+					overlay.classList.remove('flex');
+					overlay.setAttribute('aria-hidden', 'true');
+					target.setAttribute('src', '');
+					target.setAttribute('alt', '');
+
+					if (isBodyLocked) {
+						document.body.style.position = bodyStyleBeforeLock.position;
+						document.body.style.top = bodyStyleBeforeLock.top;
+						document.body.style.left = bodyStyleBeforeLock.left;
+						document.body.style.right = bodyStyleBeforeLock.right;
+						document.body.style.width = bodyStyleBeforeLock.width;
+						document.body.style.overflow = bodyStyleBeforeLock.overflow;
+						window.scrollTo(0, lockedScrollY);
+						isBodyLocked = false;
+					}
+				};
+
+				const openLightbox = (src, altText) => {
+					const { overlay, target } = getLightboxElements();
+					if (!overlay || !target || !src) return;
+
+					if (!isBodyLocked) {
+						lockedScrollY = window.scrollY;
+						bodyStyleBeforeLock.position = document.body.style.position;
+						bodyStyleBeforeLock.top = document.body.style.top;
+						bodyStyleBeforeLock.left = document.body.style.left;
+						bodyStyleBeforeLock.right = document.body.style.right;
+						bodyStyleBeforeLock.width = document.body.style.width;
+						bodyStyleBeforeLock.overflow = document.body.style.overflow;
+						document.body.style.position = 'fixed';
+						document.body.style.top = `-${lockedScrollY}px`;
+						document.body.style.left = '0';
+						document.body.style.right = '0';
+						document.body.style.width = '100%';
+						document.body.style.overflow = 'hidden';
+						isBodyLocked = true;
+					}
+
+					target.setAttribute('src', src);
+					target.setAttribute('alt', altText || '');
+					overlay.classList.remove('hidden');
+					overlay.classList.add('flex');
+					overlay.setAttribute('aria-hidden', 'false');
+				};
+
+				document.addEventListener('click', (event) => {
+					const rawTarget = event.target;
+					if (!(rawTarget instanceof Element)) return;
+
+					const { overlay } = getLightboxElements();
+					if (overlay && !overlay.classList.contains('hidden')) {
+						if (rawTarget === overlay || rawTarget.closest('[data-lightbox-close]')) {
+							event.preventDefault();
+							closeLightbox();
+							return;
+						}
+					}
+
+					if (!(rawTarget instanceof HTMLImageElement)) return;
+					if (!rawTarget.closest('.markdown-prose')) return;
+
+					const anchor = rawTarget.closest('a');
+					if (anchor) event.preventDefault();
+
+					const imgSrc = rawTarget.currentSrc || rawTarget.src;
+					if (!imgSrc) return;
+					openLightbox(imgSrc, rawTarget.alt || '');
+				});
+
+				document.addEventListener('keydown', (event) => {
+					if (event.key !== 'Escape') return;
+					closeLightbox();
+				});
+			};
+
+			const resetPageScrollLocks = () => {
+				document.documentElement.classList.remove('overflow-hidden');
+				const topOffset = Number.parseInt(document.body.style.top || '0', 10);
+				const shouldRestoreBody = document.body.style.position === 'fixed';
+				if (!shouldRestoreBody) return;
+				document.body.style.position = '';
+				document.body.style.top = '';
+				document.body.style.left = '';
+				document.body.style.right = '';
+				document.body.style.width = '';
+				document.body.style.overflow = '';
+				if (!Number.isNaN(topOffset) && topOffset < 0) {
+					window.scrollTo(0, Math.abs(topOffset));
+				}
+			};
+
 			const onPostPageLoad = () => {
+				resetPageScrollLocks();
 				scrollToTopIfNoHash();
 				initTocActiveState();
+				initTocScrollFades();
+				initImageLightbox();
 			};
 
 			onPostPageLoad();
@@ -250,3 +482,4 @@ const hasToc = tocItems.length > 0;
 		</script>
 	</body>
 </html>
+
