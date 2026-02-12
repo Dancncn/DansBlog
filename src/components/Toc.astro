@@ -10,7 +10,7 @@ interface Props {
 }
 
 const { headings = [] } = Astro.props as Props;
-const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3);
+const tocItems = headings.filter((h) => h.depth === 2 || h.depth === 3 || h.depth === 4);
 ---
 
 {
@@ -18,11 +18,11 @@ const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3)
 		<ul class="m-0 list-none space-y-0.5 p-0">
 			{
 				tocItems.map((item) => (
-					<li class:list={['m-0', item.depth === 3 && 'pl-3']}>
+					<li class:list={['m-0', item.depth === 3 && 'pl-3', item.depth === 4 && 'pl-5']}>
 						<a
-							href={`#${item.slug}`}
-							data-toc-link
-							class="block rounded-md px-2 py-1 text-sm leading-6 text-zinc-600 no-underline transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+							href={`#${encodeURIComponent(item.slug)}`}
+							data-toc-link={item.slug}
+							class="block rounded-md border-l-2 border-transparent px-2 py-1 text-sm leading-6 text-zinc-600 no-underline transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
 						>
 							{item.text}
 						</a>

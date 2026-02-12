@@ -1,4 +1,4 @@
-﻿---
+---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
@@ -15,14 +15,16 @@ type Props = CollectionEntry<'blog'>['data'] & {
 };
 
 const { title, description, pubDate, updatedDate, heroImage, profileImage, tags = [], headings = [] } = Astro.props;
+
 const BASE = import.meta.env.BASE_URL;
 const withBase = (path: string) => {
+	if (!path) return path;
 	if (path.startsWith('http://') || path.startsWith('https://')) return path;
 	if (path.startsWith(BASE)) return path;
 	return `${BASE}${path.replace(/^\/+/, '')}`;
 };
 
-const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3);
+const tocItems = headings.filter((h) => h.depth === 2 || h.depth === 3 || h.depth === 4);
 const hasToc = tocItems.length > 0;
 ---
 
@@ -33,19 +35,19 @@ const hasToc = tocItems.length > 0;
 	<body>
 		<Header showTocButton={hasToc} />
 		<MobileDrawer />
-		<TocDrawer headings={tocItems} />
+
 		<div class="page-shell py-10 md:py-14" transition:name="page-main" transition:animate="fade">
-			<div class="mx-auto w-full max-w-6xl px-4">
-				<div class:list={['md:gap-8 lg:gap-10', hasToc && 'md:grid md:grid-cols-[240px,minmax(0,1fr)] lg:grid-cols-[260px,minmax(0,1fr)]']}>
+			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+				<div class="mt-10 md:grid md:grid-cols-[240px_minmax(0,1fr)] md:items-start md:gap-10">
 					{hasToc && (
-						<aside class="hidden md:block">
-							<div class="sticky top-24">
+						<aside class="hidden md:block md:self-stretch">
+							<div class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-auto pr-2" data-toc-scroll="sidebar">
 								<TocSidebar headings={tocItems} />
 							</div>
 						</aside>
 					)}
 
-					<main class="min-w-0">
+					<main class:list={['min-w-0', !hasToc && 'md:col-span-2 md:col-start-1']}>
 						<header class="mb-10 border-b border-zinc-200 pb-6 dark:border-zinc-700">
 							<p class="m-0 text-sm text-zinc-500 dark:text-zinc-400">
 								<FormattedDate date={pubDate} />
@@ -55,10 +57,16 @@ const hasToc = tocItems.length > 0;
 									</span>
 								)}
 							</p>
+
 							<div class="mt-3 flex items-start justify-between gap-4">
-								<h1 class="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 md:text-4xl" transition:name="page-title" transition:animate="fade">
+								<h1
+									class="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 md:text-4xl"
+									transition:name="page-title"
+									transition:animate="fade"
+								>
 									{title}
 								</h1>
+
 								{profileImage && (
 									<img
 										src={withBase(profileImage)}
@@ -68,7 +76,9 @@ const hasToc = tocItems.length > 0;
 									/>
 								)}
 							</div>
+
 							<p class="mt-3 font-serif text-zinc-600 dark:text-zinc-300">{description}</p>
+
 							{tags.length > 0 && (
 								<div class="mt-4 flex flex-wrap gap-2">
 									{tags.map((tag) => (
@@ -83,7 +93,7 @@ const hasToc = tocItems.length > 0;
 							)}
 						</header>
 
-						<article class="section-enter mx-auto w-full max-w-3xl md:mx-0 md:max-w-none">
+						<article class="section-enter w-full max-w-none">
 							{heroImage && (
 								<div class="mb-8 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
 									{typeof heroImage === 'string' ? (
@@ -98,10 +108,145 @@ const hasToc = tocItems.length > 0;
 								<slot />
 							</div>
 						</article>
+
+						<TocDrawer headings={tocItems} />
 					</main>
 				</div>
 			</div>
 		</div>
+
 		<Footer />
+
+		<style is:global>
+			.markdown-prose :is(h2, h3, h4) {
+				scroll-margin-top: 7rem;
+			}
+		</style>
+
+		<script is:inline>
+			const scrollToTopIfNoHash = () => {
+				try {
+					if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+				} catch {}
+				if (!window.location.hash) {
+					requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, 0)));
+				}
+			};
+
+			const initTocActiveState = () => {
+				if (typeof window.__tocCleanup === 'function') {
+					window.__tocCleanup();
+					window.__tocCleanup = null;
+				}
+
+				const links = Array.from(document.querySelectorAll('[data-toc-link]'));
+				const headings = Array.from(
+					document.querySelectorAll('.markdown-prose h2[id], .markdown-prose h3[id], .markdown-prose h4[id]')
+				);
+
+				if (links.length === 0 || headings.length === 0) return;
+
+				const ACTIVE_CLASSES = [
+					'bg-zinc-100/70',
+					'text-zinc-900',
+					'border-zinc-900/60',
+					'dark:bg-zinc-800/60',
+					'dark:text-zinc-100',
+					'dark:border-zinc-200/70',
+				];
+
+				const linkMap = new Map();
+				for (const link of links) {
+					const id = link.dataset.tocLink || '';
+					if (!id) continue;
+					const group = linkMap.get(id) || [];
+					group.push(link);
+					linkMap.set(id, group);
+				}
+
+				const clearActive = () => {
+					for (const link of links) {
+						link.classList.remove(...ACTIVE_CLASSES);
+						link.removeAttribute('aria-current');
+					}
+				};
+
+				const ensureVisibleInToc = (link) => {
+					const container = link.closest('[data-toc-scroll]');
+					if (!container) return;
+					const cRect = container.getBoundingClientRect();
+					const eRect = link.getBoundingClientRect();
+					if (eRect.top < cRect.top || eRect.bottom > cRect.bottom) {
+						link.scrollIntoView({ block: 'nearest' });
+					}
+				};
+
+				const setActive = (id) => {
+					clearActive();
+					if (!id) return;
+					const group = linkMap.get(id) || [];
+					for (const link of group) {
+						link.classList.add(...ACTIVE_CLASSES);
+						link.setAttribute('aria-current', 'true');
+						ensureVisibleInToc(link);
+					}
+				};
+
+				const getActiveIdByScroll = () => {
+					let current = headings[0]?.id || '';
+					for (const heading of headings) {
+						if (heading.getBoundingClientRect().top <= 140) current = heading.id;
+					}
+					return current;
+				};
+
+				let rafId = 0;
+				const scheduleApply = () => {
+					if (rafId) cancelAnimationFrame(rafId);
+					rafId = requestAnimationFrame(() => {
+						setActive(getActiveIdByScroll());
+					});
+				};
+
+				const onHashChange = () => {
+					const id = decodeURIComponent(window.location.hash.replace(/^#/, ''));
+					if (id && linkMap.has(id)) {
+						setActive(id);
+					} else {
+						scheduleApply();
+					}
+				};
+
+				window.addEventListener('scroll', scheduleApply, { passive: true });
+				window.addEventListener('resize', scheduleApply);
+				window.addEventListener('hashchange', onHashChange);
+
+				const hashId = decodeURIComponent(window.location.hash.replace(/^#/, ''));
+				if (hashId && linkMap.has(hashId)) {
+					setActive(hashId);
+				} else {
+					scheduleApply();
+				}
+
+				window.__tocCleanup = () => {
+					if (rafId) cancelAnimationFrame(rafId);
+					window.removeEventListener('scroll', scheduleApply);
+					window.removeEventListener('resize', scheduleApply);
+					window.removeEventListener('hashchange', onHashChange);
+				};
+			};
+
+			const onPostPageLoad = () => {
+				scrollToTopIfNoHash();
+				initTocActiveState();
+			};
+
+			onPostPageLoad();
+			if (!window.__blogPostEventsBound) {
+				document.addEventListener('astro:page-load', onPostPageLoad);
+				document.addEventListener('astro:after-swap', onPostPageLoad);
+				window.__blogPostEventsBound = true;
+			}
+		</script>
 	</body>
 </html>

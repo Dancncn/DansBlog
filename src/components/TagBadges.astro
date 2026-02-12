@@ -14,8 +14,9 @@ const {
 } = Astro.props as Props;
 
 const cleanTags = tags.filter((tag) => typeof tag === 'string' && tag.trim().length > 0);
-const mobileTags = cleanTags.slice(0, maxMobile);
-const mobileRemaining = Math.max(cleanTags.length - mobileTags.length, 0);
+const mobileVisibleCount = cleanTags.length > maxMobile ? Math.max(maxMobile - 1, 0) : maxMobile;
+const mobileTags = cleanTags.slice(0, mobileVisibleCount);
+const mobileRemaining = cleanTags.length > maxMobile ? Math.max(cleanTags.length - mobileVisibleCount, 0) : 0;
 const desktopTags = maxDesktop == null ? cleanTags : cleanTags.slice(0, maxDesktop);
 const desktopRemaining = maxDesktop == null ? 0 : Math.max(cleanTags.length - desktopTags.length, 0);
 ---
@@ -28,7 +29,7 @@ const desktopRemaining = maxDesktop == null ? 0 : Math.max(cleanTags.length - de
 					mobileTags.map((tag) => (
 						<a
 							href={`${base}tags/${encodeURIComponent(tag)}/`}
-							class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs text-zinc-600 no-underline transition hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+							class="inline-flex max-w-[7rem] items-center truncate rounded-md bg-zinc-100 px-2 py-1 text-xs text-zinc-600 no-underline transition hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
 						>
 							{tag}
 						</a>
@@ -42,12 +43,12 @@ const desktopRemaining = maxDesktop == null ? 0 : Math.max(cleanTags.length - de
 					)
 				}
 			</div>
-			<div class="hidden gap-2 md:flex md:flex-nowrap">
+			<div class="hidden gap-2 md:flex md:flex-wrap md:justify-end">
 				{
 					desktopTags.map((tag) => (
 						<a
 							href={`${base}tags/${encodeURIComponent(tag)}/`}
-							class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs text-zinc-600 no-underline transition hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+							class="inline-flex max-w-[7rem] items-center truncate rounded-md bg-zinc-100 px-2 py-1 text-xs text-zinc-600 no-underline transition hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
 						>
 							{tag}
 						</a>
