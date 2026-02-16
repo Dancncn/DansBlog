@@ -2,7 +2,7 @@
 title: "How I Keep My Anime Watching Stable"
 description: "A practical, slightly nerdy, and hopefully friendly guide to watching anime more steadily with the tools I actually use."
 pubDate: 2026-02-14
-tags: ["anime", "p2p", "rss", "EN"]
+tags: ["anime", "p2p", "tools", "guide", "EN"]
 ---
 
 ## Introduction

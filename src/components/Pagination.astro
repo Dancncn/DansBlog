@@ -1,0 +1,145 @@
+---
+interface Props {
+	currentPage: number;
+	lastPage: number;
+	basePath: string;
+}
+
+const { currentPage, lastPage, basePath } = Astro.props as Props;
+
+if (lastPage <= 1) {
+	return null;
+}
+
+const normalizedBase = basePath.replace(/\/+$/, '');
+const pageHref = (page: number) =>
+	page <= 1 ? `${normalizedBase}/` : `${normalizedBase}/page/${page}/`;
+
+const previousPage = currentPage > 1 ? currentPage - 1 : null;
+const nextPage = currentPage < lastPage ? currentPage + 1 : null;
+
+const buildPageItems = () => {
+	if (lastPage <= 7) {
+		return Array.from({ length: lastPage }, (_, index) => index + 1);
+	}
+
+	const pages = new Set<number>([1, lastPage]);
+	const windowStart = Math.max(2, currentPage - 2);
+	const windowEnd = Math.min(lastPage - 1, currentPage + 2);
+
+	for (let page = windowStart; page <= windowEnd; page += 1) {
+		pages.add(page);
+	}
+
+	if (currentPage <= 4) {
+		for (let page = 2; page <= Math.min(5, lastPage - 1); page += 1) {
+			pages.add(page);
+		}
+	}
+
+	if (currentPage >= lastPage - 3) {
+		for (let page = Math.max(2, lastPage - 4); page <= lastPage - 1; page += 1) {
+			pages.add(page);
+		}
+	}
+
+	const sortedPages = Array.from(pages).sort((a, b) => a - b);
+	const items: Array<number | 'ellipsis'> = [];
+
+	for (let index = 0; index < sortedPages.length; index += 1) {
+		const page = sortedPages[index];
+		const previous = sortedPages[index - 1];
+
+		if (index > 0 && previous !== undefined && page - previous > 1) {
+			items.push('ellipsis');
+		}
+
+		items.push(page);
+	}
+
+	return items;
+};
+
+const pageItems = buildPageItems();
+---
+
+<nav class="mt-8 flex items-center justify-center" aria-label="Pagination">
+	<ul class="inline-flex items-center gap-1 rounded-xl border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900">
+		<li>
+			{
+				previousPage ? (
+					<a
+						href={pageHref(previousPage)}
+						class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium text-zinc-600 no-underline transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+						aria-label="Previous page"
+					>
+						Prev
+					</a>
+				) : (
+					<span
+						class="inline-flex h-9 min-w-9 cursor-not-allowed items-center justify-center rounded-lg px-3 text-sm font-medium text-zinc-400 dark:text-zinc-600"
+						aria-disabled="true"
+					>
+						Prev
+					</span>
+				)
+			}
+		</li>
+		{
+			pageItems.map((item) =>
+				item === 'ellipsis' ? (
+					<li>
+						<span
+							class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-2 text-sm text-zinc-500 dark:text-zinc-400"
+							aria-hidden="true"
+						>
+							...
+						</span>
+					</li>
+				) : (
+					<li>
+						{
+							item === currentPage ? (
+								<a
+									href={pageHref(item)}
+									class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg bg-zinc-900 px-3 text-sm font-semibold text-zinc-50 no-underline dark:bg-zinc-100 dark:text-zinc-900"
+									aria-current="page"
+								>
+									{item}
+								</a>
+							) : (
+								<a
+									href={pageHref(item)}
+									class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium text-zinc-600 no-underline transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+									aria-label={`Go to page ${item}`}
+								>
+									{item}
+								</a>
+							)
+						}
+					</li>
+				),
+			)
+		}
+		<li>
+			{
+				nextPage ? (
+					<a
+						href={pageHref(nextPage)}
+						class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium text-zinc-600 no-underline transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+						aria-label="Next page"
+					>
+						Next
+					</a>
+				) : (
+					<span
+						class="inline-flex h-9 min-w-9 cursor-not-allowed items-center justify-center rounded-lg px-3 text-sm font-medium text-zinc-400 dark:text-zinc-600"
+						aria-disabled="true"
+					>
+						Next
+					</span>
+				)
+			}
+		</li>
+	</ul>
+</nav>

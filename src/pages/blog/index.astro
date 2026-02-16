@@ -4,6 +4,7 @@ import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
 import MobileDrawer from '../../components/MobileDrawer.astro';
+import Pagination from '../../components/Pagination.astro';
 import PostCard from '../../components/PostCard.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
@@ -11,6 +12,9 @@ const BASE = import.meta.env.BASE_URL;
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+const PAGE_SIZE = 6;
+const paginatedPosts = posts.slice(0, PAGE_SIZE);
+const lastPage = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
 ---
 
 <!doctype html>
@@ -29,13 +33,14 @@ const posts = (await getCollection('blog')).sort(
 				<p class="mt-2 font-sans text-zinc-500 dark:text-zinc-400">Research notes, engineering logs, and technical essays.</p>
 				<ul class="mt-8 grid gap-4">
 					{
-						posts.map((post, idx) => (
+						paginatedPosts.map((post, idx) => (
 							<li class="card-enter relative" style={`animation-delay: ${90 + idx * 40}ms`}>
 								<PostCard post={post} base={BASE} maxMobile={3} maxDesktop={null} />
 							</li>
 						))
 					}
 				</ul>
+				<Pagination currentPage={1} lastPage={lastPage} basePath={`${BASE}blog`} />
 			</section>
 		</main>
 		<Footer />

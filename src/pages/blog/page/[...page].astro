@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../../components/BaseHead.astro';
+import Footer from '../../../components/Footer.astro';
+import Header from '../../../components/Header.astro';
+import MobileDrawer from '../../../components/MobileDrawer.astro';
+import Pagination from '../../../components/Pagination.astro';
+import PostCard from '../../../components/PostCard.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../../consts';
+
+const BASE = import.meta.env.BASE_URL;
+
+export async function getStaticPaths({ paginate }) {
+	const PAGE_SIZE = 6;
+	const posts = (await getCollection('blog')).sort(
+		(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+	);
+
+	return paginate(posts, { pageSize: PAGE_SIZE }).filter(
+		(entry) => entry.props.page.currentPage > 1,
+	);
+}
+
+const { page } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Blog - Page ${page.currentPage} | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+	</head>
+	<body>
+		<Header />
+		<MobileDrawer />
+		<main class="page-shell py-10 md:py-14" transition:name="page-main" transition:animate="fade">
+			<section class="section-enter mx-auto max-w-4xl">
+				<h1 class="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 md:text-4xl" transition:name="page-title" transition:animate="fade">
+					Blog
+				</h1>
+				<p class="mt-2 font-sans text-zinc-500 dark:text-zinc-400">Research notes, engineering logs, and technical essays.</p>
+				<ul class="mt-8 grid gap-4">
+					{
+						page.data.map((post, idx) => (
+							<li class="card-enter relative" style={`animation-delay: ${90 + idx * 40}ms`}>
+								<PostCard post={post} base={BASE} maxMobile={3} maxDesktop={null} />
+							</li>
+						))
+					}
+				</ul>
+				<Pagination currentPage={page.currentPage} lastPage={page.lastPage} basePath={`${BASE}blog`} />
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

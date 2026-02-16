@@ -2,7 +2,7 @@
 title: "我是如何稳定追番的"
 description: "这篇就讲人话：怎么稳定看番、用什么软件、从哪里开始看。"
 pubDate: 2026-02-14
-tags: ["anime", "p2p", "rss",  "CN"]
+tags: ["anime", "p2p", "tools", "guide","CN"]
 ---
 
 ## 引言
