@@ -1,0 +1,5 @@
+﻿User-agent: *
+Allow: /
+Sitemap: https://dansblog.pages.dev/sitemap.xml
+Sitemap: https://dansblog.pages.dev/sitemap-index.xml
+# If you bind a custom domain later, update the Sitemap URLs above.
