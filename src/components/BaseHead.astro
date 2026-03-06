@@ -108,6 +108,23 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 		root.dataset.theme = theme;
 	})();
 </script>
+<script is:inline>
+	// Token handling: read from URL hash, save to localStorage, remove hash
+	(function() {
+		const TOKEN_KEY = 'blog_token';
+		const hash = window.location.hash || '';
+		const match = hash.match(/(?:^#|&)token=([^&]+)/);
+		if (match) {
+			try {
+				const token = decodeURIComponent(match[1]);
+				localStorage.setItem(TOKEN_KEY, token);
+			} catch (e) {
+				// ignore decode errors
+			}
+			history.replaceState(null, '', window.location.pathname);
+		}
+	})();
+</script>
 {
 	import.meta.env.PROD && cfWebAnalyticsToken && (
 		<script

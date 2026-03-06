@@ -46,6 +46,6 @@ const languageSwitch =
 		: undefined;
 ---
 
-<BlogPost {...post.data} headings={headings} rawBody={post.body} languageSwitch={languageSwitch}>
+<BlogPost {...post.data} headings={headings} rawBody={post.body} slug={post.id} languageSwitch={languageSwitch}>
 	<Content />
 </BlogPost>

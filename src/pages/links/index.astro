@@ -243,8 +243,8 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 			</section>
 		</main>
 		<Footer />
-		<script is:inline>
-			(() => {
+		<script>
+			function initFriends() {
 				const prevButton = document.querySelector('[data-friends-prev]');
 				const nextButton = document.querySelector('[data-friends-next]');
 				const status = document.querySelector('[data-friends-pagination-status]');
@@ -257,7 +257,7 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 				const lastPage = storePages.length - 1;
 				const animationDuration = 280;
 
-				const pageMarkup = (pageIndex) => {
+				const pageMarkup = (pageIndex: number) => {
 					const source = storePages[pageIndex];
 					return source ? source.innerHTML : '';
 				};
@@ -275,7 +275,7 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 					status.textContent = `${currentPage + 1} / ${storePages.length}`;
 				};
 
-				const switchPage = (targetPage) => {
+				const switchPage = (targetPage: number) => {
 					if (isTransitioning) return;
 					if (targetPage < 0 || targetPage > lastPage || targetPage === currentPage) return;
 
@@ -314,7 +314,13 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 				grid.classList.remove('opacity-0');
 				grid.classList.add('opacity-100');
 				syncButtons();
-			})();
+			}
+
+			// Initialize on page load
+			initFriends();
+
+			// Re-initialize on View Transitions
+			document.addEventListener('astro:page-load', initFriends);
 		</script>
 		<style>
 			.friends-desc-clamp {
