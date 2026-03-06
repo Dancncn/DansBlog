@@ -117,14 +117,20 @@ posts.forEach((post) => {
 		</main>
 		<Footer />
 
-		<script>
+		<script is:inline>
 			function initArchiveToggle() {
 				const archiveToggle = document.querySelector('#archive-toggle');
 				const listView = document.querySelector('#list-view');
 				const pagination = document.querySelector('#pagination nav');
 				const archiveView = document.querySelector('#archive-view');
 
-				archiveToggle?.addEventListener('click', () => {
+				if (!archiveToggle) return;
+
+				// Remove existing listener to prevent duplicates
+				archiveToggle.replaceWith(archiveToggle.cloneNode(true));
+				const newToggle = document.querySelector('#archive-toggle');
+
+				newToggle?.addEventListener('click', () => {
 					const isArchiveView = listView?.classList.contains('hidden');
 
 					if (isArchiveView) {
