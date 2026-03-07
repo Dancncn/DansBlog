@@ -174,12 +174,28 @@ const { showTocButton = false } = Astro.props as Props;
 		const userDropdownMenu = document.getElementById('user-dropdown-menu');
 		const logoutButton = document.getElementById('logout-button');
 
-		if (loginButton?.dataset.bound === 'true') return;
-		loginButton?.setAttribute('data-bound', 'true');
+		// Check if this is a fresh page load or View Transition
+		// Use a timestamp to detect fresh loads vs cached page loads
+		const lastInit = window.__lastAuthInit;
+		const now = Date.now();
+
+		// Skip if we've already initialized in the last 2 seconds (prevents duplicate runs)
+		// But allow re-initialization if coming back from OAuth (token in URL)
+		const hasTokenInUrl = window.location.hash.includes('token=');
+		if (lastInit && (now - lastInit) < 2000 && !hasTokenInUrl) {
+			return;
+		}
+		window.__lastAuthInit = now;
 
 		try {
 			storeTokenFromHash();
+			const token = localStorage.getItem('blog_token');
+			console.log('[Auth] Token in storage:', token ? 'yes' : 'no');
 			const user = await getCurrentUser();
+			console.log('[Auth] User:', user);
+
+			// Mark as bound after getting user
+			if (loginButton) loginButton.setAttribute('data-bound', 'true');
 
 		// Modal elements
 		const modal = document.getElementById('login-modal');
