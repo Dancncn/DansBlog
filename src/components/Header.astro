@@ -150,21 +150,15 @@ const { showTocButton = false } = Astro.props as Props;
 <LoginModal />
 
 <script is:inline>
-	// Use shared auth functions from auth.js
-	// Fallback to empty object if __auth is not yet available
-	const auth = window.__auth || {};
-
-	// Initialize auth button
 	const initAuthButton = async () => {
-		const { storeTokenFromHash, getCurrentUser, logout } = auth;
-
-		// If auth functions are not available, skip initialization
+		const { storeTokenFromHash, getCurrentUser, logout } = window.__auth || {};
 		if (!storeTokenFromHash || !getCurrentUser || !logout) {
-			console.warn('Auth functions not available, retrying...');
-			// Retry after a short delay to allow BaseHead script to load
 			setTimeout(initAuthButton, 100);
 			return;
 		}
+
+		if (window.__authInitialized) return;
+		window.__authInitialized = true;
 
 		const loginButton = document.getElementById('auth-button');
 		const userDropdown = document.getElementById('user-dropdown');
@@ -173,90 +167,36 @@ const { showTocButton = false } = Astro.props as Props;
 		const userDropdownButton = document.getElementById('user-dropdown-button');
 		const userDropdownMenu = document.getElementById('user-dropdown-menu');
 		const logoutButton = document.getElementById('logout-button');
-
-		// Check if this is a fresh page load or View Transition
-		// Use a timestamp to detect fresh loads vs cached page loads
-		const lastInit = window.__lastAuthInit;
-		const now = Date.now();
-
-		// Skip if we've already initialized recently BUT only if there's no token to check
-		// Must check localStorage because URL hash may have been cleared by storeTokenFromHash()
-		const hasTokenInUrl = window.location.hash.includes('token=');
-		const hasTokenInStorage = localStorage.getItem('blog_token');
-		if (lastInit && (now - lastInit) < 2000 && !hasTokenInUrl && !hasTokenInStorage) {
-			return;
-		}
-		window.__lastAuthInit = now;
-
-		try {
-			storeTokenFromHash();
-			const token = localStorage.getItem('blog_token');
-			console.log('[Auth] Token in storage:', token ? 'yes' : 'no');
-			const user = await getCurrentUser();
-			console.log('[Auth] User:', user);
-
-			// Mark as bound after getting user
-			if (loginButton) loginButton.setAttribute('data-bound', 'true');
-
-		// Modal elements
 		const modal = document.getElementById('login-modal');
 		const modalClose = document.getElementById('login-modal-close');
 
 		const openModal = () => {
-			if (modal) {
-				// Use requestAnimationFrame to ensure the browser registers the initial state first
-				requestAnimationFrame(() => {
-					modal.classList.remove('opacity-0', 'invisible');
-					modal.classList.add('opacity-100');
-
-					// Animate scale for modal content
-					const content = modal.querySelector('.modal-content');
-					if (content) {
-						content.classList.remove('scale-95', 'opacity-0');
-						content.classList.add('scale-100', 'opacity-100');
-					}
-
-					modal.setAttribute('aria-hidden', 'false');
-				});
-			}
+			if (!modal) return;
+			requestAnimationFrame(() => {
+				modal.classList.remove('opacity-0', 'invisible');
+				modal.classList.add('opacity-100');
+				const content = modal.querySelector('.modal-content');
+				if (content) {
+					content.classList.remove('scale-95', 'opacity-0');
+					content.classList.add('scale-100', 'opacity-100');
+				}
+				modal.setAttribute('aria-hidden', 'false');
+			});
 		};
 
 		const closeModal = () => {
-			if (modal) {
-				modal.classList.remove('opacity-100');
-				modal.classList.add('opacity-0');
-
-				// Animate scale for modal content
-				const content = modal.querySelector('.modal-content');
-				if (content) {
-					content.classList.remove('scale-100', 'opacity-100');
-					content.classList.add('scale-95', 'opacity-0');
-				}
-
-				// Wait for transition to finish before making invisible
-				setTimeout(() => {
-					modal.classList.add('invisible');
-				}, 200);
-				modal.setAttribute('aria-hidden', 'true');
+			if (!modal) return;
+			modal.classList.remove('opacity-100');
+			modal.classList.add('opacity-0');
+			const content = modal.querySelector('.modal-content');
+			if (content) {
+				content.classList.remove('scale-100', 'opacity-100');
+				content.classList.add('scale-95', 'opacity-0');
 			}
+			setTimeout(() => modal.classList.add('invisible'), 200);
+			modal.setAttribute('aria-hidden', 'true');
 		};
 
-		// Bind modal close events
-		if (modal) {
-			modal.addEventListener('click', (e) => {
-				if (e.target === modal) closeModal();
-			});
-		}
-		if (modalClose) {
-			modalClose.addEventListener('click', closeModal);
-		}
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-				closeModal();
-			}
-		});
-
-		// Dropdown toggle
 		const toggleDropdown = () => {
 			if (!userDropdownButton || !userDropdownMenu) return;
 			const isExpanded = userDropdownButton.getAttribute('aria-expanded') === 'true';
@@ -270,7 +210,6 @@ const { showTocButton = false } = Astro.props as Props;
 			}
 		};
 
-		// Close dropdown
 		const closeDropdown = () => {
 			if (!userDropdownButton || !userDropdownMenu) return;
 			userDropdownButton.setAttribute('aria-expanded', 'false');
@@ -278,65 +217,54 @@ const { showTocButton = false } = Astro.props as Props;
 			userDropdownMenu.classList.remove('opacity-100', 'visible');
 		};
 
-		if (user) {
-			// Show user dropdown - use inline style for guaranteed priority
-			console.log('[Auth] Updating UI - user:', user.username);
-			if (loginButton) {
-				loginButton.style.display = 'none';
-				console.log('[Auth] Set loginButton display: none');
-			}
-			if (userDropdown) {
-				userDropdown.style.display = '';
-				console.log('[Auth] Set userDropdown display: empty');
-			}
+		modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+		modalClose?.addEventListener('click', closeModal);
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && modal && !modal.classList.contains('invisible')) closeModal();
+		});
 
-			// Update user info
-			if (userAvatar && user.avatar) userAvatar.src = user.avatar;
-			if (userName) userName.textContent = user.username || 'User';
+		try {
+			storeTokenFromHash();
+			const user = await getCurrentUser();
 
-			// Bind dropdown events
-			if (userDropdownButton) {
-				userDropdownButton.addEventListener('click', (e) => {
+			if (user) {
+				if (loginButton) loginButton.style.display = 'none';
+				if (userDropdown) userDropdown.style.display = 'block';
+				if (userAvatar && user.avatar) userAvatar.src = user.avatar;
+				if (userName) userName.textContent = user.username || 'User';
+
+				userDropdownButton?.addEventListener('click', (e) => {
 					e.stopPropagation();
 					toggleDropdown();
 				});
-			}
-
-			if (logoutButton) {
-				logoutButton.addEventListener('click', async () => {
+				logoutButton?.addEventListener('click', async () => {
 					closeDropdown();
 					await logout();
+					window.__authInitialized = false;
+					window.location.reload();
 				});
+				document.addEventListener('click', (e) => {
+					if (userDropdown && !userDropdown.contains(e.target)) closeDropdown();
+				});
+			} else {
+				if (loginButton) loginButton.style.display = 'inline-flex';
+				if (userDropdown) userDropdown.style.display = 'none';
+				loginButton?.addEventListener('click', openModal);
 			}
-
-			// Close dropdown when clicking outside
-			document.addEventListener('click', (e) => {
-				if (userDropdown && !userDropdown.contains(e.target)) {
-					closeDropdown();
-				}
-			});
-		} else {
-			// Show login button - use inline style for guaranteed priority
-			if (loginButton) {
-				loginButton.style.display = 'inline-flex';
-				loginButton.addEventListener('click', openModal);
-			}
-			if (userDropdown) userDropdown.style.display = 'none';
-		}
 		} catch (error) {
-			console.error('Auth initialization error:', error);
-			// Show login button on error - use inline style for guaranteed priority
-			if (loginButton) {
-				loginButton.style.display = 'inline-flex';
-				loginButton.addEventListener('click', openModal);
-			}
+			console.error('Auth error:', error);
+			if (loginButton) loginButton.style.display = 'inline-flex';
 			if (userDropdown) userDropdown.style.display = 'none';
+			loginButton?.addEventListener('click', openModal);
 		}
 	};
 
+	document.addEventListener('astro:page-load', () => {
+		window.__authInitialized = false;
+		initAuthButton();
+	});
+
 	initAuthButton();
-	document.addEventListener('astro:page-load', initAuthButton);
-	document.addEventListener('astro:after-swap', initAuthButton);
 
 	const initThemeToggle = () => {
 		const button = document.getElementById('theme-toggle');
