@@ -279,9 +279,16 @@ const { showTocButton = false } = Astro.props as Props;
 		};
 
 		if (user) {
-			// Show user dropdown
-			if (loginButton) loginButton.classList.add('hidden');
-			if (userDropdown) userDropdown.classList.remove('hidden');
+			// Show user dropdown - use inline style for guaranteed priority
+			console.log('[Auth] Updating UI - user:', user.username);
+			if (loginButton) {
+				loginButton.style.display = 'none';
+				console.log('[Auth] Set loginButton display: none');
+			}
+			if (userDropdown) {
+				userDropdown.style.display = '';
+				console.log('[Auth] Set userDropdown display: empty');
+			}
 
 			// Update user info
 			if (userAvatar && user.avatar) userAvatar.src = user.avatar;
@@ -309,21 +316,21 @@ const { showTocButton = false } = Astro.props as Props;
 				}
 			});
 		} else {
-			// Show login button
+			// Show login button - use inline style for guaranteed priority
 			if (loginButton) {
-				loginButton.classList.remove('hidden');
+				loginButton.style.display = '';
 				loginButton.addEventListener('click', openModal);
 			}
-			if (userDropdown) userDropdown.classList.add('hidden');
+			if (userDropdown) userDropdown.style.display = 'none';
 		}
 		} catch (error) {
 			console.error('Auth initialization error:', error);
-			// Show login button on error
+			// Show login button on error - use inline style for guaranteed priority
 			if (loginButton) {
-				loginButton.classList.remove('hidden');
+				loginButton.style.display = '';
 				loginButton.addEventListener('click', openModal);
 			}
-			if (userDropdown) userDropdown.classList.add('hidden');
+			if (userDropdown) userDropdown.style.display = 'none';
 		}
 	};
 
