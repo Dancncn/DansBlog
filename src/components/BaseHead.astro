@@ -109,20 +109,102 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 	})();
 </script>
 <script is:inline>
-	// Token handling: read from URL hash, save to localStorage, remove hash
+	// Token handling and auth functions - expose to window for global access
 	(function() {
+		const API_BASE = 'https://api.danarnoux.com';
 		const TOKEN_KEY = 'blog_token';
-		const hash = window.location.hash || '';
-		const match = hash.match(/(?:^#|&)token=([^&]+)/);
-		if (match) {
+
+		// Store on window
+		window.__API_BASE = API_BASE;
+		window.__TOKEN_KEY = TOKEN_KEY;
+
+		// Read token from URL hash
+		function readHashToken() {
+			const hash = window.location.hash || '';
+			const match = hash.match(/(?:^#|&)token=([^&]+)/);
+			if (!match) return null;
 			try {
-				const token = decodeURIComponent(match[1]);
-				localStorage.setItem(TOKEN_KEY, token);
-			} catch (e) {
-				// ignore decode errors
+				return decodeURIComponent(match[1]);
+			} catch {
+				return match[1];
 			}
-			history.replaceState(null, '', window.location.pathname);
 		}
+
+		// Store token from URL hash to localStorage
+		function storeTokenFromHash() {
+			const token = readHashToken();
+			if (!token) return null;
+			localStorage.setItem(TOKEN_KEY, token);
+			history.replaceState(null, '', window.location.pathname);
+			return token;
+		}
+
+		// Get auth token
+		function getAuthToken() {
+			storeTokenFromHash();
+			return localStorage.getItem(TOKEN_KEY);
+		}
+
+		// Get current user
+		async function getCurrentUser() {
+			const token = getAuthToken();
+			if (!token) return null;
+
+			const response = await fetch(`${API_BASE}/api/me`, {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			if (!response.ok) {
+				if (response.status === 401) {
+					localStorage.removeItem(TOKEN_KEY);
+				}
+				return null;
+			}
+
+			const data = await response.json();
+			const user = data?.user ?? data ?? null;
+			if (!user || typeof user !== 'object') return null;
+
+			return {
+				id: user.id ?? '',
+				username: user.username ?? user.login ?? user.name ?? '',
+				avatar: user.avatar ?? user.avatarUrl ?? user.avatar_url ?? '',
+			};
+		}
+
+		// Logout
+		async function logout() {
+			const token = getAuthToken();
+			if (!token) {
+				localStorage.removeItem(TOKEN_KEY);
+				return;
+			}
+
+			try {
+				await fetch(`${API_BASE}/api/auth/logout`, {
+					method: 'POST',
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+			} finally {
+				localStorage.removeItem(TOKEN_KEY);
+			}
+		}
+
+		// Initial token processing on page load
+		storeTokenFromHash();
+
+		// Expose to window
+		window.__auth = {
+			storeTokenFromHash,
+			getAuthToken,
+			getCurrentUser,
+			logout,
+		};
 	})();
 </script>
 {

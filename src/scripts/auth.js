@@ -1,6 +1,12 @@
 const API_BASE = 'https://api.danarnoux.com';
 const TOKEN_KEY = 'blog_token';
 
+// Store on window to avoid redeclaration issues
+if (typeof window !== 'undefined') {
+	window.__API_BASE = API_BASE;
+	window.__TOKEN_KEY = TOKEN_KEY;
+}
+
 function readHashToken() {
 	if (typeof window === 'undefined') return null;
 	const hash = window.location.hash || '';
@@ -22,13 +28,13 @@ function storeTokenFromHash() {
 	return token;
 }
 
-export function getAuthToken() {
+function getAuthToken() {
 	if (typeof window === 'undefined') return null;
 	storeTokenFromHash();
 	return localStorage.getItem(TOKEN_KEY);
 }
 
-export async function getCurrentUser() {
+async function getCurrentUser() {
 	const token = getAuthToken();
 	if (!token) return null;
 
@@ -57,7 +63,7 @@ export async function getCurrentUser() {
 	};
 }
 
-export async function logout() {
+async function logout() {
 	const token = getAuthToken();
 	if (!token) {
 		localStorage.removeItem(TOKEN_KEY);
@@ -76,45 +82,12 @@ export async function logout() {
 	}
 }
 
-export async function initAuthUI() {
-	if (typeof window === 'undefined' || typeof document === 'undefined') return;
-	storeTokenFromHash();
-
-	const loginButton = document.querySelector('[data-auth-login]');
-	const userWrap = document.querySelector('[data-auth-user]');
-	const avatarEl = document.querySelector('[data-auth-avatar]');
-	const nameEl = document.querySelector('[data-auth-name]');
-	const logoutButton = document.querySelector('[data-auth-logout]');
-
-	const showLoggedOut = () => {
-		if (loginButton instanceof HTMLElement) loginButton.classList.remove('hidden');
-		if (userWrap instanceof HTMLElement) userWrap.classList.add('hidden');
+// Attach to window for global access
+if (typeof window !== 'undefined') {
+	window.__auth = {
+		storeTokenFromHash,
+		getAuthToken,
+		getCurrentUser,
+		logout,
 	};
-
-	const showLoggedIn = (user) => {
-		if (loginButton instanceof HTMLElement) loginButton.classList.add('hidden');
-		if (userWrap instanceof HTMLElement) userWrap.classList.remove('hidden');
-		if (avatarEl instanceof HTMLImageElement) {
-			avatarEl.src = user.avatar || '/image/DanArnoux.jpg';
-			avatarEl.alt = `${user.username || 'User'} avatar`;
-		}
-		if (nameEl instanceof HTMLElement) {
-			nameEl.textContent = user.username || 'User';
-		}
-	};
-
-	const user = await getCurrentUser();
-	if (!user) {
-		showLoggedOut();
-	} else {
-		showLoggedIn(user);
-	}
-
-	if (logoutButton instanceof HTMLButtonElement && logoutButton.dataset.bound !== 'true') {
-		logoutButton.dataset.bound = 'true';
-		logoutButton.addEventListener('click', async () => {
-			await logout();
-			showLoggedOut();
-		});
-	}
 }

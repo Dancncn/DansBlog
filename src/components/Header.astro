@@ -150,84 +150,8 @@ const { showTocButton = false } = Astro.props as Props;
 <LoginModal />
 
 <script is:inline>
-	// Store API config on window to avoid redeclaration
-	if (typeof window !== 'undefined') {
-		window.__API_BASE = window.__API_BASE || 'https://api.danarnoux.com';
-		window.__TOKEN_KEY = window.__TOKEN_KEY || 'blog_token';
-	}
-
-	// Read token from URL hash and store it
-	const storeTokenFromHash = () => {
-		if (typeof window === 'undefined') return null;
-		const hash = window.location.hash || '';
-		const match = hash.match(/(?:^#|&)token=([^&]+)/);
-		if (!match) return null;
-		try {
-			const token = decodeURIComponent(match[1]);
-			localStorage.setItem(window.__TOKEN_KEY, token);
-			history.replaceState(null, '', window.location.pathname);
-			return token;
-		} catch {
-			return null;
-		}
-	};
-
-	// Get auth token
-	const getAuthToken = () => {
-		if (typeof window === 'undefined') return null;
-		storeTokenFromHash();
-		return localStorage.getItem(window.__TOKEN_KEY);
-	};
-
-	// Get current user
-	async function getCurrentUser() {
-		const token = getAuthToken();
-		if (!token) return null;
-
-		const response = await fetch(`${window.__API_BASE}/api/me`, {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		});
-
-		if (!response.ok) {
-			if (response.status === 401) {
-				localStorage.removeItem(window.__TOKEN_KEY);
-			}
-			return null;
-		}
-
-		const data = await response.json();
-		const user = data?.user ?? data ?? null;
-		if (!user || typeof user !== 'object') return null;
-
-		return {
-			id: user.id ?? '',
-			username: user.username ?? user.login ?? user.name ?? '',
-			avatar: user.avatar ?? user.avatarUrl ?? user.avatar_url ?? '',
-		};
-	}
-
-	// Logout
-	async function logout() {
-		const token = getAuthToken();
-		if (token) {
-			try {
-				await fetch(`${window.__API_BASE}/api/auth/logout`, {
-					method: 'POST',
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-			} finally {
-				localStorage.removeItem(window.__TOKEN_KEY);
-			}
-		} else {
-			localStorage.removeItem(window.__TOKEN_KEY);
-		}
-		window.location.reload();
-	}
+	// Use shared auth functions from auth.js
+	const { storeTokenFromHash, getCurrentUser, logout } = window.__auth || {};
 
 	// Initialize auth button
 	const initAuthButton = async () => {
