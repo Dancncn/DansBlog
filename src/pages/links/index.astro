@@ -99,7 +99,11 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 											const more = Math.max(tags.length - shown.length, 0);
 											const firstLetter = item.name.trim().charAt(0).toUpperCase() || 'L';
 											const githubAvatar = item.github ? `https://github.com/${item.github}.png?size=160` : null;
-											const avatarSrc = item.avatar ? withBase(item.avatar) : githubAvatar;
+											const avatarSrc = item.avatar
+  ? (item.avatar.startsWith('http://') || item.avatar.startsWith('https://'))
+    ? item.avatar
+    : withBase(item.avatar)
+  : githubAvatar;
 
 											return (
 												<article class="min-h-[210px] rounded-2xl border border-zinc-200 bg-white/90 p-5 shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950/80">
@@ -190,7 +194,11 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 							const visibleTags = tags.slice(0, MAX_TAGS);
 							const firstLetter = item.name.trim().charAt(0).toUpperCase() || 'P';
 							const githubAvatar = item.github ? `https://github.com/${item.github}.png?size=160` : null;
-							const avatarSrc = item.avatar ? withBase(item.avatar) : githubAvatar;
+							const avatarSrc = item.avatar
+  ? (item.avatar.startsWith('http://') || item.avatar.startsWith('https://'))
+    ? item.avatar
+    : withBase(item.avatar)
+  : githubAvatar;
 
 							return (
 								<article class="rounded-2xl border border-zinc-200 bg-white/95 p-6 shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950/85">

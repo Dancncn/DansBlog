@@ -3,6 +3,7 @@ import { GITHUB_URL, SITE_TITLE } from '../consts';
 import { getNavLinks } from '../data/navLinks';
 import HeaderLink from './HeaderLink.astro';
 import LoginModal from './LoginModal.astro';
+import SettingsModal from './SettingsModal.astro';
 
 /*
  * Global site header:
@@ -87,6 +88,18 @@ const { showTocButton = false } = Astro.props as Props;
 				<span class="sr-only">GitHub</span>
 			</a>
 
+			<button
+				type="button"
+				id="theme-toggle"
+				class="icon-button inline-flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+				aria-label="Toggle theme"
+			>
+				<svg data-theme-icon="sun" viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true">
+					<path d="M12 4a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 13a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm8-5a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM7 12a1 1 0 0 1-1 1H5a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm9.7-5.3a1 1 0 0 1 0 1.4L16 8.8a1 1 0 1 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0Zm-7.3 7.3a1 1 0 0 1 0 1.4l-.7.7a1 1 0 0 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0Zm7.3 2.1a1 1 0 0 1-1.4 1.4l-.7-.7a1 1 0 0 1 1.4-1.4l.7.7ZM9.4 8.8A1 1 0 0 1 8 8.8l-.7-.7a1 1 0 1 1 1.4-1.4l.7.7a1 1 0 0 1 0 1.4ZM12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z" />
+				</svg>
+				<span class="sr-only">Toggle theme</span>
+			</button>
+
 			<!-- Login button (shown when not logged in) -->
 			<button
 				type="button"
@@ -115,39 +128,61 @@ const { showTocButton = false } = Astro.props as Props;
 				</button>
 				<div
 					id="user-dropdown-menu"
-					class="absolute right-0 mt-2 w-40 rounded-lg border border-zinc-200 bg-white py-1 shadow-lg opacity-0 invisible transition-all duration-150 dark:border-zinc-700 dark:bg-zinc-800"
+					class="absolute right-0 mt-2 w-56 rounded-lg border border-zinc-200 bg-white py-1 shadow-lg opacity-0 invisible transition-all duration-150 dark:border-zinc-700 dark:bg-zinc-800"
 					role="menu"
 				>
-					<div class="border-b border-zinc-200 px-3 py-2 dark:border-zinc-700">
-						<p id="user-name" class="text-sm font-medium text-zinc-900 dark:text-zinc-100">User</p>
+					<!-- Header: avatar + username + subtitle -->
+					<div class="border-b border-zinc-200 px-3 py-3 dark:border-zinc-700">
+						<div class="flex items-center gap-3">
+							<img
+								id="dropdown-user-avatar"
+								src={`${BASE}image/DanArnoux.jpg`}
+								alt="User avatar"
+								class="h-10 w-10 rounded-full object-cover"
+							/>
+							<div class="min-w-0">
+								<p id="user-name" class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">User</p>
+								<p class="text-xs text-zinc-500 dark:text-zinc-400">Manage your account</p>
+							</div>
+						</div>
 					</div>
+					<!-- Settings button -->
 					<button
 						type="button"
-						id="logout-button"
-						class="w-full px-3 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700"
+						id="settings-button"
+						class="w-full px-3 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-100 flex items-center gap-2 dark:text-zinc-300 dark:hover:bg-zinc-700"
 						role="menuitem"
 					>
-						Logout
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+							<path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+							<path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+						</svg>
+						Settings
 					</button>
+					<!-- Footer: Logout -->
+					<div class="border-t border-zinc-200 pt-1 pb-1 mt-1 dark:border-zinc-700">
+						<button
+							type="button"
+							id="logout-button"
+							class="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-zinc-100 flex items-center gap-2 dark:text-red-400 dark:hover:bg-zinc-700"
+							role="menuitem"
+						>
+							<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+								<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+								<polyline points="16,17 21,12 16,7" />
+								<line x1="21" y1="12" x2="9" y2="12" />
+							</svg>
+							Logout
+						</button>
+					</div>
 				</div>
 			</div>
-
-			<button
-				type="button"
-				id="theme-toggle"
-				class="icon-button inline-flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
-				aria-label="Toggle theme"
-			>
-				<svg data-theme-icon="sun" viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true">
-					<path d="M12 4a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 13a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm8-5a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM7 12a1 1 0 0 1-1 1H5a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm9.7-5.3a1 1 0 0 1 0 1.4L16 8.8a1 1 0 1 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0Zm-7.3 7.3a1 1 0 0 1 0 1.4l-.7.7a1 1 0 0 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0Zm7.3 2.1a1 1 0 0 1-1.4 1.4l-.7-.7a1 1 0 0 1 1.4-1.4l.7.7ZM9.4 8.8A1 1 0 0 1 8 8.8l-.7-.7a1 1 0 1 1 1.4-1.4l.7.7a1 1 0 0 1 0 1.4ZM12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z" />
-				</svg>
-				<span class="sr-only">Toggle theme</span>
-			</button>
 		</div>
 	</nav>
 </header>
 
 <LoginModal />
+<SettingsModal />
 
 <script is:inline>
 	const initAuthButton = async () => {
@@ -232,6 +267,8 @@ const { showTocButton = false } = Astro.props as Props;
 				if (userDropdown) userDropdown.style.display = 'block';
 				if (userAvatar && user.avatar) userAvatar.src = user.avatar;
 				if (userName) userName.textContent = user.username || 'User';
+				const dropdownAvatar = document.getElementById('dropdown-user-avatar');
+				if (dropdownAvatar && user.avatar) dropdownAvatar.src = user.avatar;
 
 				userDropdownButton?.addEventListener('click', (e) => {
 					e.stopPropagation();
@@ -242,6 +279,11 @@ const { showTocButton = false } = Astro.props as Props;
 					await logout();
 					window.__authInitialized = false;
 					window.location.reload();
+				});
+				const settingsButton = document.getElementById('settings-button');
+				settingsButton?.addEventListener('click', () => {
+					closeDropdown();
+					document.getElementById('settings-modal')?.dispatchEvent(new CustomEvent('open-settings'));
 				});
 				document.addEventListener('click', (e) => {
 					if (userDropdown && !userDropdown.contains(e.target)) closeDropdown();

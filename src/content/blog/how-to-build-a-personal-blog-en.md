@@ -159,7 +159,7 @@ This "incremental modification" style prompt is important. Otherwise AI may acci
 
 For example, this is the kind of effect I got when I locked requirements and asked Codex to scaffold it. It is great for getting started. If you feel stuck during debugging, ask AI to help write a precise prompt first. It is often more effective than saying "move this thing a bit left/right." AI code assistants are smart, but they cannot see your screen.
 
-![step2](./how-to-build-a-personal-blog/step2.png)
+![step2](https://img.danarnoux.com/posts/how-to-build-step2.png)
 
 ------
 
@@ -274,7 +274,7 @@ npm create astro@latest
 
 Choose your project name and select **Use blog template**.
 
-![step1](./how-to-build-a-personal-blog/step1.png)
+![step1](https://img.danarnoux.com/posts/how-to-build-step1.png)
 
 2. After project creation, when terminal is ready again (cursor blinking), continue.
 
@@ -370,7 +370,7 @@ git push -u origin main
 
 My recommendation: keep repository name simple and lowercase, which helps avoid mistakes when configuring `base` later.
 
-![step4](./how-to-build-a-personal-blog/step4.png)
+![step4](https://img.danarnoux.com/posts/how-to-build-step4.png)
 
 ### Use My Blog Project as a Reference: Clone First, Then Customize
 
@@ -488,7 +488,7 @@ If you started from Astro's blog template, this file may already exist. Check fi
 
 After that, your site is usually available at:
 
-![step3](./how-to-build-a-personal-blog/step3.png)
+![step3](https://img.danarnoux.com/posts/how-to-build-step3.png)
 
 `https://<your-github-username>.github.io/<your-repo-name>/`
 

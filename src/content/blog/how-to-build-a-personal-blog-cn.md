@@ -150,7 +150,7 @@ Chatgpt给我选了[Tailwind CSS](https://tailwindcss.com/plus/ui-blocks/marketi
 这类“增量修改”提示词很关键，不然 AI 很容易把你已经写好的内容一锅端掉。
 举个例子，这就是我确定好需求后直接让codex帮我大体改出来的效果。很适合项目起步，后续如果您调试的时候自己没头绪，也可以让ai写一份专业的提示词，这样比你说这个东西应该在那个东西的左边右边更加合理，毕竟aicode他看不见嘛，他是个很聪明的盲人。
 
-![step1](./how-to-build-a-personal-blog/step2.png)
+![step1](https://img.danarnoux.com/posts/how-to-build-step2.png)
 
 ------
 
@@ -267,7 +267,7 @@ node -v
 npm create astro@latest
 ```
 
-![step1](./how-to-build-a-personal-blog/step1.png)
+![step1](https://img.danarnoux.com/posts/how-to-build-step1.png)
 
 2.项目创建好后，也就是当你的可以输入了，例如出现了例如，这边有个光标一直在闪
 
@@ -363,7 +363,7 @@ git push -u origin main
 4. 以后每次更新就是 `Commit` + `Push origin`。  
 
 我自己的建议是仓库名尽量简单一点，全小写，后续配置 `base` 的时候不容易输错。
-![step1](./how-to-build-a-personal-blog/step4.png)
+![step1](https://img.danarnoux.com/posts/how-to-build-step4.png)
 
 ### 参考我的博客项目：先 clone 再改成你自己的
 
@@ -480,7 +480,7 @@ jobs:
 
 跑完后一般就能在下面这个地址看到你的网站：
 
-![step1](./how-to-build-a-personal-blog/step3.png)
+![step1](https://img.danarnoux.com/posts/how-to-build-step3.png)
 
 `https://<你的GitHub用户名>.github.io/<你的仓库名>/`
 

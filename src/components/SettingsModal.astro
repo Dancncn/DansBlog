@@ -1,0 +1,118 @@
+---
+// SettingsModal.astro - User settings modal with profile display
+---
+
+<div
+	id="settings-modal"
+	class="fixed inset-0 z-[100] invisible opacity-0 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity duration-200 ease-out"
+	aria-hidden="true"
+>
+	<div
+		class="modal-content mx-4 w-[360px] rounded-xl bg-white p-6 shadow-xl transition-all duration-200 ease-out dark:bg-zinc-900 scale-95 opacity-0"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="settings-modal-title"
+		id="settings-modal-content"
+	>
+		<div class="flex items-center justify-between mb-6">
+			<h2 id="settings-modal-title" class="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+				Settings
+			</h2>
+			<button
+				type="button"
+				id="settings-modal-close"
+				class="p-1 rounded-lg text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+			>
+				<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+					<path d="M6 18L18 6M6 6l12 12" />
+				</svg>
+			</button>
+		</div>
+
+		<div class="flex flex-col items-center py-4">
+			<img
+				id="settings-avatar"
+				src="https://img.danarnoux.com/misc/DanArnoux.jpg"
+				alt="User avatar"
+				class="h-20 w-20 rounded-full border-2 border-zinc-200 object-cover dark:border-zinc-700"
+			/>
+			<h3 id="settings-username" class="mt-3 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+				User
+			</h3>
+			<p id="settings-login" class="text-sm text-zinc-500 dark:text-zinc-400">
+				@login
+			</p>
+		</div>
+	</div>
+</div>
+
+<script is:inline>
+	const initSettingsModal = () => {
+		const modal = document.getElementById('settings-modal');
+		const modalClose = document.getElementById('settings-modal-close');
+		const settingsAvatar = document.getElementById('settings-avatar');
+		const settingsUsername = document.getElementById('settings-username');
+		const settingsLogin = document.getElementById('settings-login');
+
+		const openModal = async () => {
+			if (!modal) return;
+
+			// Fetch current user info
+			const { getCurrentUser } = window.__auth || {};
+			if (getCurrentUser) {
+				try {
+					const user = await getCurrentUser();
+					if (user) {
+						if (settingsAvatar && user.avatar) settingsAvatar.src = user.avatar;
+						if (settingsUsername) settingsUsername.textContent = user.username || 'User';
+						if (settingsLogin) settingsLogin.textContent = '@' + (user.login || user.username || 'user');
+					}
+				} catch (e) {
+					console.error('Failed to load user info:', e);
+				}
+			}
+
+			requestAnimationFrame(() => {
+				modal.classList.remove('opacity-0', 'invisible');
+				modal.classList.add('opacity-100');
+				const content = modal.querySelector('.modal-content');
+				if (content) {
+					content.classList.remove('scale-95', 'opacity-0');
+					content.classList.add('scale-100', 'opacity-100');
+				}
+				modal.setAttribute('aria-hidden', 'false');
+			});
+		};
+
+		const closeModal = () => {
+			if (!modal) return;
+			modal.classList.remove('opacity-100');
+			modal.classList.add('opacity-0');
+			const content = modal.querySelector('.modal-content');
+			if (content) {
+				content.classList.remove('scale-100', 'opacity-100');
+				content.classList.add('scale-95', 'opacity-0');
+			}
+			setTimeout(() => modal.classList.add('invisible'), 200);
+			modal.setAttribute('aria-hidden', 'true');
+		};
+
+		// Listen for custom open-settings event
+		modal?.addEventListener('open-settings', openModal);
+
+		// Close on backdrop click
+		modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+		// Close on close button click
+		modalClose?.addEventListener('click', closeModal);
+
+		// Close on Escape key
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && modal && !modal.classList.contains('invisible')) closeModal();
+		});
+	};
+
+	initSettingsModal();
+	document.addEventListener('astro:page-load', initSettingsModal);
+	document.addEventListener('astro:after-swap', initSettingsModal);
+</script>

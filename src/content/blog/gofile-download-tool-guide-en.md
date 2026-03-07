@@ -25,7 +25,7 @@ You have two ways to obtain it.
 3.  Select **Download ZIP**
 4.  Extract it to any folder
 
-![step1](./gofile-download-tool-guide/images/step1.png)
+![step1](https://img.danarnoux.com/posts/gofile-step1.png)
 
 ------------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ Downloaded files will appear in:
 
     outputs/
 
-![step3](./gofile-download-tool-guide/images/step3.png)
+![step3](https://img.danarnoux.com/posts/gofile-step3.png)
 
 ------------------------------------------------------------------------
 

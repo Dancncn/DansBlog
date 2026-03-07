@@ -293,7 +293,7 @@ Try this once directly: open VS Code, press `Ctrl + Shift + P`, type `Python: Se
 
 After selecting correctly, the status bar usually shows the current Python environment/version (position may vary by theme). That's the most direct success signal.
 
-![VS Code Python extension example](./how-to-get-started-with-programming/3-3-vscode-python.png)
+![VS Code Python extension example](https://img.danarnoux.com/posts/programming-3-3-vscode-python.png)
 
 ### 3.3 VS Code Installation, Chinese Language Pack, and Extensions
 
@@ -451,7 +451,7 @@ I'll split this into "domestic download" and "international download." Follow it
 6. Downloaded filename usually looks like `Miniconda3-latest-Windows-x86_64.exe`; this format is normally correct.
 7. Save the `.exe` installer to an English-path directory (like `Downloads`).
 
-![Tsinghua mirror Miniconda download page](./how-to-get-started-with-programming/3-6-tsinghua-miniconda.png)
+![Tsinghua mirror Miniconda download page](https://img.danarnoux.com/posts/programming-3-6-tsinghua-miniconda.png)
 
 **International users (official site) download path**
 
@@ -665,7 +665,7 @@ In avatar menu, common entries are:
 
 For your first time, knowing these entries is enough.
 
-![GitHub web interface example](./how-to-get-started-with-programming/4-4-github-web.png)
+![GitHub web interface example](https://img.danarnoux.com/posts/programming-4-4-github-web.png)
 
 **GitHub registration (step by step)**
 
@@ -796,7 +796,7 @@ Do first-time sign-in/authorization once, then everything after becomes smoother
 
 Expected result: `File` menu is available, and after one commit, `Publish repository` will appear.
 
-![GitHub Desktop interface](./how-to-get-started-with-programming/4-7-github-desktop.png)
+![GitHub Desktop interface](https://img.danarnoux.com/posts/programming-4-7-github-desktop.png)
 
 Make sure you're already signed into GitHub in Desktop (done above).
 
@@ -1042,7 +1042,7 @@ A) Task Manager -> Performance (most common)
 4. Go to `Performance`, then click `CPU / Memory / Disk / GPU` one by one.  
 5. You'll see: CPU model and base speed, total memory capacity, disk model and active time, GPU name and VRAM usage.  
 
-![Task Manager performance page](./how-to-get-started-with-programming/7-4-performance.png)
+![Task Manager performance page](https://img.danarnoux.com/posts/programming-7-4-performance.png)
 
 B) Device Manager (hardware list and driver state)
 

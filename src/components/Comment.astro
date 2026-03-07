@@ -85,7 +85,7 @@ const { postSlug } = Astro.props;
 				(comment) => `
 			<div class="flex gap-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
 				<img
-					src="${comment.author?.avatar || '/image/DanArnoux.jpg'}"
+					src="${comment.author?.avatar || 'https://img.danarnoux.com/misc/DanArnoux.jpg'}"
 					alt="${comment.author?.username || 'User'} avatar"
 					class="h-10 w-10 shrink-0 rounded-full border border-zinc-200 object-cover dark:border-zinc-700"
 				/>
@@ -102,34 +102,6 @@ const { postSlug } = Astro.props;
 			.join('');
 	};
 
-	// Demo comments for testing UI
-	const DEMO_COMMENTS = [
-		{
-			author: {
-				username: 'Dancncn',
-				avatar: 'https://avatars.githubusercontent.com/u/33920774?v=4'
-			},
-			content: 'This is a great article! Very helpful for getting started with programming.',
-			createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
-		},
-		{
-			author: {
-				username: 'TechExplorer',
-				avatar: 'https://avatars.githubusercontent.com/u/12345678?v=4'
-			},
-			content: 'Thanks for sharing! I learned a lot from this post.',
-			createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() // 1 day ago
-		},
-		{
-			author: {
-				username: 'CodeNewbie',
-				avatar: 'https://avatars.githubusercontent.com/u/87654321?v=4'
-			},
-			content: 'Could you write more tutorials like this? Very clear and easy to follow!',
-			createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days ago
-		}
-	];
-
 	// Load comments
 	async function loadComments(postSlug) {
 		const container = document.getElementById('comments-container');
@@ -140,25 +112,18 @@ const { postSlug } = Astro.props;
 
 		console.log('Loading comments for:', postSlug);
 
-		// Always show demo comments for testing
-		console.log('Showing demo comments');
-		renderComments(DEMO_COMMENTS);
-		return;
-
-		/* Production code - uncomment when API is ready
 		try {
-			const response = await fetch(`${window.__API_BASE}/api/comments?post=${encodeURIComponent(postSlug)}`);
+			const response = await fetch(`https://api.danarnoux.com/api/comments?post_id=${encodeURIComponent(postSlug)}`);
 			if (response.ok) {
 				const data = await response.json();
 				const comments = data?.comments ?? data ?? [];
 				renderComments(comments);
 			} else {
-				renderComments(DEMO_COMMENTS);
+				renderComments([]);
 			}
 		} catch (error) {
-			renderComments(DEMO_COMMENTS);
+			renderComments([]);
 		}
-		*/
 	}
 
 	// Submit comment
@@ -173,7 +138,7 @@ const { postSlug } = Astro.props;
 				Authorization: `Bearer ${token}`,
 			},
 			body: JSON.stringify({
-				post: postSlug,
+				post_id: postSlug,
 				content: content,
 			}),
 		});
