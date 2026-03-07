@@ -32,10 +32,10 @@ export const links: FriendLink[] = [
 		status: 'active',
 	},
 	{
-		name: 'Licyk',
+		name: 'Kymi',
 		kind: 'github',
-		github: 'licyk',
-		url: 'https://licyk.netlify.app/',
+		github: 'kymi1723',
+		url: 'https://github.com/kymi1723',
 		description: 'Builds AI art tooling and automation around Stable Diffusion and image workflows.',
 		tags: ['AI', 'Tools', 'Scripts'],
 		status: 'active',

@@ -1,17 +1,20 @@
-﻿# Dan's Blog
+# Dan's Blog
 
 A static Astro + Tailwind personal blog for research notes, engineering workflows, and reproducible long-form writing.
 
-English is the primary README language. A Simplified Chinese brand-style summary is included at the end.
-
-[![Visit Live Site](https://img.shields.io/badge/Visit-Live%20Site-0f766e?style=for-the-badge&logo=cloudflare&logoColor=white)](https://dansblog.pages.dev/)
+[![Visit Live Site](https://img.shields.io/badge/Visit-Live%20Site-0f766e?style=for-the-badge&logo=cloudflare&logoColor=white)](https://danarnoux.com/)
 [![View GitHub Repository](https://img.shields.io/badge/GitHub-Repository-111827?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Dancncn/DansBlog)
-[![Blog](https://img.shields.io/badge/Open-Blog-1d4ed8?style=for-the-badge)](https://dansblog.pages.dev/blog/)
-[![Tags](https://img.shields.io/badge/Open-Tags-6d28d9?style=for-the-badge)](https://dansblog.pages.dev/tags/)
+[![Blog](https://img.shields.io/badge/Open-Blog-1d4ed8?style=for-the-badge)](https://danarnoux.com/blog/)
+[![Tags](https://img.shields.io/badge/Open-Tags-6d28d9?style=for-the-badge)](https://danarnoux.com/tags/)
+[![Bilibili](https://img.shields.io/badge/Watch-Bilibili-fe738c?style=for-the-badge&logo=bilibili)](https://space.bilibili.com/435440676)
+
+> **Backend Worker**: [DansBlogs_worker](https://github.com/Dancncn/DansBlogs_worker)
+>
+> **中文版**: [查看中文文档](./docs/README.zh-CN.md)
 
 ## Main Site
 
-Primary access is **Cloudflare Pages**: `https://dansblog.pages.dev/`.
+Primary access is **danarnoux.com** (Cloudflare Pages).
 
 GitHub Pages (`https://dancncn.github.io/DansBlog/`) is kept as a mirror deployment for redundancy and compatibility testing.
 
@@ -25,6 +28,11 @@ A practical stack for writing, documenting, and maintaining a technical blog ove
 - Article TOC system: desktop sticky sidebar + mobile drawer
 - Language switch support for paired CN/EN posts
 - Repo-page and root-path deployment support (GitHub Pages + Cloudflare Pages)
+- GitHub OAuth login with session management
+- Comment system (D1 backed, per-post)
+- R2 image hosting via `img.danarnoux.com`
+- User dropdown with Settings modal
+- 404 page
 
 ## System Architecture 🧱
 
@@ -42,6 +50,31 @@ A practical stack for writing, documenting, and maintaining a technical blog ove
 - Navigation and drawers: `Header`, `MobileDrawer`, `TocDrawer`
 - Post list primitives: `PostCard`, `TagBadges`, `Pagination`
 - TOC stack: `Toc`, `TocSidebar`, `TocDrawer`
+
+### Backend Integration
+
+This blog uses a **decoupled architecture** with a separate Cloudflare Worker backend.
+
+**Backend Repository**: [DansBlogs_worker](https://github.com/Dancncn/DansBlogs_worker)
+
+The backend is built with:
+- **Cloudflare Workers** - Edge runtime for API handlers
+- **D1** - SQLite database for users, sessions, and comments
+- **R2** - Object storage for image hosting (`img.danarnoux.com`)
+- **Durable Objects** - Rate limiting mechanism
+- **GitHub OAuth** - Authentication flow with PKCE
+
+**API Base**: `https://api.danarnoux.com`
+
+- **GitHub OAuth**: Redirect to GitHub for authentication, session tokens stored in D1
+- **Comments API**:
+  - `GET /api/comments?slug=<post-slug>` - Fetch comments for a post
+  - `POST /api/comments` - Create a new comment (requires auth)
+- **Image API**:
+  - `POST /api/upload` - Upload image to R2 (requires auth, rate limited)
+  - `GET /api/images` - List uploaded images (requires auth)
+
+For detailed backend implementation, see the [worker documentation](https://github.com/Dancncn/DansBlogs_worker).
 
 ### Routing Map
 
@@ -68,7 +101,7 @@ A practical stack for writing, documenting, and maintaining a technical blog ove
 │  │  ├─ MobileDrawer.astro     # Mobile navigation drawer
 │  │  ├─ PostCard.astro         # Reusable post list card
 │  │  ├─ TagBadges.astro        # Responsive tag rendering rules
-│  │  ├─ Pagination.astro       # Paged navigation with ellipsis logic
+│  │  ├─ Pagination.astro      # Paged navigation with ellipsis logic
 │  │  ├─ Toc*.astro             # TOC list/sidebar/drawer
 │  │  └─ ...
 │  ├─ content/
@@ -131,9 +164,9 @@ Desktop TOC stays in a dedicated sticky column; a placeholder keeps geometry sta
 
 ## Deployment 🌐
 
-### Recommended Primary Environment: Cloudflare Pages
+### Recommended Primary Environment: danarnoux.com
 
-- Primary URL: `https://dansblog.pages.dev/`
+- Primary URL: `https://danarnoux.com/`
 - This is the recommended public access point for latest behavior and performance profile.
 
 ### Mirror / Backup Environment: GitHub Pages
@@ -189,9 +222,12 @@ Use `-cn` / `-en` naming conventions for paired articles, and keep grouping conv
 
 ### Images
 
-- Store static images in `public/image/...`
-- Use `/image/...` in markdown
-- Base path prefixing is handled during build
+- Store local images in `f:\project\Blog\image-store\` with structure:
+  - `posts/` - Article images
+  - `avatars/` - User avatars for comments
+  - `misc/` - Miscellaneous images
+- Upload to R2 using `scripts\upload-images.ps1`
+- Use full URL in markdown: `https://img.danarnoux.com/posts/xxx.png`
 
 ## FAQ / Notes 📌
 
@@ -206,33 +242,3 @@ They still improve overall route feel across the rest of the site. The stricter 
 ### Why keep markdown-first image references?
 
 It keeps writing workflow simple and editor-friendly while remaining deployment-safe through base-path rewriting.
-
----
-
-## 简体中文摘要
-
-### 项目定位
-
-这是一个长期维护的工程型个人博客，核心目标是把研究记录、工程流程和可复现实践持续沉淀为结构化内容。
-
-### 品牌与工程策略
-
-- **主环境优先**：Cloudflare Pages（`https://dansblog.pages.dev/`）作为当前主要访问入口
-- **双部署策略**：GitHub Pages 作为镜像/备用，保证子路径部署兼容性
-- **稳定性优先**：文章入口对高风险路径使用硬导航，减少代码大页的残余视觉抖动
-- **代码块治理**：围绕“防重排”原则处理宽度、行高、字形与滚动容器
-- **字体分工加载**：正文可读性优先，等宽字体尽量降低后到达替换引发的布局波动
-- **TOC 可用性**：桌面 sticky + 移动抽屉，并配合占位与重绑定机制保证一致行为
-
-### 开发与写作
-
-```bash
-npm install
-npm run dev
-npm run build
-npm run preview
-```
-
-- 文章目录：`src/content/blog/`
-- 图片引用：`/image/...`（对应 `public/image/...`）
-- frontmatter 与 `content.config.ts` schema 保持一致
