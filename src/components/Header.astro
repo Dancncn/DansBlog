@@ -179,10 +179,11 @@ const { showTocButton = false } = Astro.props as Props;
 		const lastInit = window.__lastAuthInit;
 		const now = Date.now();
 
-		// Skip if we've already initialized in the last 2 seconds (prevents duplicate runs)
-		// But allow re-initialization if coming back from OAuth (token in URL)
+		// Skip if we've already initialized recently BUT only if there's no token to check
+		// Must check localStorage because URL hash may have been cleared by storeTokenFromHash()
 		const hasTokenInUrl = window.location.hash.includes('token=');
-		if (lastInit && (now - lastInit) < 2000 && !hasTokenInUrl) {
+		const hasTokenInStorage = localStorage.getItem('blog_token');
+		if (lastInit && (now - lastInit) < 2000 && !hasTokenInUrl && !hasTokenInStorage) {
 			return;
 		}
 		window.__lastAuthInit = now;
