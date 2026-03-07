@@ -16,7 +16,7 @@ const isCloudflarePages = Boolean(process.env.CF_PAGES);
 const isProduction = process.env.NODE_ENV === 'production';
 // Cloudflare serves from "/", while GitHub Pages needs the repository subpath.
 const runtimeBase = isCloudflarePages ? '/' : isProduction ? REPO_BASE : '/';
-const runtimeSite = 'https://dansblog.pages.dev';
+const runtimeSite = 'https://danarnoux.com';
 
 /*
  * Rewrites markdown `<img src="/image/...">` to include the active base path.
