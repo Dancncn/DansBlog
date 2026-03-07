@@ -91,7 +91,7 @@ const { showTocButton = false } = Astro.props as Props;
 			<button
 				type="button"
 				id="auth-button"
-				class="inline-flex h-9 items-center justify-center rounded-xl border border-zinc-200 px-3 text-sm font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+				class="hidden inline-flex h-9 items-center justify-center rounded-xl border border-zinc-200 px-3 text-sm font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
 				data-auth-login
 			>
 				Login
@@ -318,7 +318,7 @@ const { showTocButton = false } = Astro.props as Props;
 		} else {
 			// Show login button - use inline style for guaranteed priority
 			if (loginButton) {
-				loginButton.style.display = '';
+				loginButton.style.display = 'inline-flex';
 				loginButton.addEventListener('click', openModal);
 			}
 			if (userDropdown) userDropdown.style.display = 'none';
@@ -327,7 +327,7 @@ const { showTocButton = false } = Astro.props as Props;
 			console.error('Auth initialization error:', error);
 			// Show login button on error - use inline style for guaranteed priority
 			if (loginButton) {
-				loginButton.style.display = '';
+				loginButton.style.display = 'inline-flex';
 				loginButton.addEventListener('click', openModal);
 			}
 			if (userDropdown) userDropdown.style.display = 'none';
