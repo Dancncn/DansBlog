@@ -150,29 +150,33 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 			const token = getAuthToken();
 			if (!token) return null;
 
-			const response = await fetch(`${API_BASE}/api/me`, {
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
+			try {
+				const response = await fetch(`${API_BASE}/api/me`, {
+					method: 'GET',
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
 
-			if (!response.ok) {
-				if (response.status === 401) {
-					localStorage.removeItem(TOKEN_KEY);
+				if (!response.ok) {
+					if (response.status === 401) {
+						localStorage.removeItem(TOKEN_KEY);
+					}
+					return null;
 				}
+
+				const data = await response.json();
+				const user = data?.user ?? data ?? null;
+				if (!user || typeof user !== 'object') return null;
+
+				return {
+					id: user.id ?? '',
+					username: user.username ?? user.login ?? user.name ?? '',
+					avatar: user.avatar ?? user.avatarUrl ?? user.avatar_url ?? '',
+				};
+			} catch {
 				return null;
 			}
-
-			const data = await response.json();
-			const user = data?.user ?? data ?? null;
-			if (!user || typeof user !== 'object') return null;
-
-			return {
-				id: user.id ?? '',
-				username: user.username ?? user.login ?? user.name ?? '',
-				avatar: user.avatar ?? user.avatarUrl ?? user.avatar_url ?? '',
-			};
 		}
 
 		// Logout

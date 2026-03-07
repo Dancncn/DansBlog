@@ -151,10 +151,21 @@ const { showTocButton = false } = Astro.props as Props;
 
 <script is:inline>
 	// Use shared auth functions from auth.js
-	const { storeTokenFromHash, getCurrentUser, logout } = window.__auth || {};
+	// Fallback to empty object if __auth is not yet available
+	const auth = window.__auth || {};
 
 	// Initialize auth button
 	const initAuthButton = async () => {
+		const { storeTokenFromHash, getCurrentUser, logout } = auth;
+
+		// If auth functions are not available, skip initialization
+		if (!storeTokenFromHash || !getCurrentUser || !logout) {
+			console.warn('Auth functions not available, retrying...');
+			// Retry after a short delay to allow BaseHead script to load
+			setTimeout(initAuthButton, 100);
+			return;
+		}
+
 		const loginButton = document.getElementById('auth-button');
 		const userDropdown = document.getElementById('user-dropdown');
 		const userAvatar = document.getElementById('user-avatar');
@@ -166,8 +177,9 @@ const { showTocButton = false } = Astro.props as Props;
 		if (loginButton?.dataset.bound === 'true') return;
 		loginButton?.setAttribute('data-bound', 'true');
 
-		storeTokenFromHash();
-		const user = await getCurrentUser();
+		try {
+			storeTokenFromHash();
+			const user = await getCurrentUser();
 
 		// Modal elements
 		const modal = document.getElementById('login-modal');
@@ -281,6 +293,15 @@ const { showTocButton = false } = Astro.props as Props;
 			});
 		} else {
 			// Show login button
+			if (loginButton) {
+				loginButton.classList.remove('hidden');
+				loginButton.addEventListener('click', openModal);
+			}
+			if (userDropdown) userDropdown.classList.add('hidden');
+		}
+		} catch (error) {
+			console.error('Auth initialization error:', error);
+			// Show login button on error
 			if (loginButton) {
 				loginButton.classList.remove('hidden');
 				loginButton.addEventListener('click', openModal);
