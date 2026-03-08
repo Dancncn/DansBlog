@@ -16,6 +16,15 @@ const blog = defineCollection({
 			important: z.boolean().default(false),
 			importantOrder: z.number().int().default(0),
 			heroImage: image().optional(),
+			// Language and grouping for bilingual posts
+			lang: z.enum(['cn', 'en']).optional(),
+			group: z.string().optional(),
+			author: z.string().optional(),
+			category: z.string().optional(),
+			slug: z.string().optional(),
+			draft: z.boolean().default(false),
+			// For Typora image path compatibility
+			'typora-root-url': z.string().optional(),
 		}),
 });
 

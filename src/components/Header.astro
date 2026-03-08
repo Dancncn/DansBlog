@@ -258,6 +258,12 @@ const { showTocButton = false } = Astro.props as Props;
 			if (e.key === 'Escape' && modal && !modal.classList.contains('invisible')) closeModal();
 		});
 
+		// Always attach click listener to user dropdown button (before async user fetch)
+		userDropdownButton?.addEventListener('click', (e) => {
+			e.stopPropagation();
+			toggleDropdown();
+		});
+
 		try {
 			storeTokenFromHash();
 			const user = await getCurrentUser();
@@ -270,10 +276,6 @@ const { showTocButton = false } = Astro.props as Props;
 				const dropdownAvatar = document.getElementById('dropdown-user-avatar');
 				if (dropdownAvatar && user.avatar) dropdownAvatar.src = user.avatar;
 
-				userDropdownButton?.addEventListener('click', (e) => {
-					e.stopPropagation();
-					toggleDropdown();
-				});
 				logoutButton?.addEventListener('click', async () => {
 					closeDropdown();
 					await logout();

@@ -5,10 +5,8 @@ pubDate: 2026-03-08
 updatedDate: 2026-03-08
 lang: "cn"
 author: "Dan"
-tags: ["Cloudflare", "Domain", "guide", "CN"]
-category: "Cloudflare"
-slug: "how-to-register-a-cloudflare-domain"
-draft: false
+group: "how-to-register-a-cloudflare-domain"
+tags: ["Cloudflare", "Domain", "guide"]
 ---
 
 ## 前言
