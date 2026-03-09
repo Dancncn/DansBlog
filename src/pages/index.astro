@@ -14,7 +14,7 @@ const posts = (await getCollection('blog'))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.slice(0, 6);
 
-const HOME_WALLPAPER = `${BASE}image/home/2rd1yuubn4hc1.png`;
+const HOME_WALLPAPER = 'https://img.danarnoux.com/misc/home-2rd1yuubn4hc1.webp';
 ---
 
 <!doctype html>

@@ -22,11 +22,15 @@ const tocItems = headings.filter((h) => h.depth === 2 || h.depth === 3 || h.dept
 
 {
 	tocItems.length > 0 && (
-		<div class="rounded-2xl border border-zinc-200 bg-white/95 p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/90">
+		<aside
+			class="rounded-2xl border border-zinc-200 bg-white/95 p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/90"
+			data-toc="sidebar"
+			data-toc-scroll="sidebar"
+		>
 			<p class="m-0 text-sm font-semibold text-zinc-900 dark:text-zinc-100">On this page</p>
 			<div class="mt-2">
 				<Toc headings={tocItems} />
 			</div>
-		</div>
+		</aside>
 	)
 }

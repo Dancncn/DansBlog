@@ -154,6 +154,7 @@ export const links: FriendLink[] = [
 		name: 'fumigo',
 		kind: 'project',
 		url: 'https://fumigo.cn/',
+		avatar: 'https://img.danarnoux.com/avatars/fumigo.webp',
 		description: 'A Japanese learning website that applies AI to personalize the learning experience.',
 		tags: ['Japanese', 'AI', 'Personalization'],
 		status: 'active',

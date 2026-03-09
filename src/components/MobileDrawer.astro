@@ -147,6 +147,11 @@ const NAV_LINKS = getNavLinks(BASE);
 		document.documentElement.dataset.drawerEscBound = 'true';
 	}
 
+	// Defensive: ensure scroll is unlocked when leaving page
+	window.addEventListener('pagehide', () => {
+		document.documentElement.classList.remove('overflow-hidden');
+	});
+
 	initMobileDrawer();
 	document.addEventListener('astro:page-load', initMobileDrawer);
 	document.addEventListener('astro:after-swap', initMobileDrawer);

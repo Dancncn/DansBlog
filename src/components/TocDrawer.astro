@@ -32,6 +32,7 @@ const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3)
 			<aside
 				id="toc-drawer"
 				class="pointer-events-auto fixed inset-y-0 right-0 z-[95] flex h-[100dvh] max-h-[100dvh] w-[88vw] max-w-sm translate-x-full flex-col border-l border-zinc-200 bg-white/95 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] shadow-2xl transition-transform duration-200 ease-out motion-reduce:transition-none md:hidden dark:border-zinc-800 dark:bg-zinc-950/95 [will-change:transform] hidden"
+				data-toc="drawer"
 				aria-label="Table of contents"
 				aria-hidden="true"
 			>
@@ -72,13 +73,18 @@ const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3)
 		const TRANSITION_MS = 220;
 		let closeTimer = null;
 
+		const unlockScroll = () => {
+			document.documentElement.classList.remove('overflow-hidden');
+			document.body.classList.remove('overflow-hidden');
+		};
+
 		const forceClosedState = () => {
 			drawer.classList.add('translate-x-full', 'hidden');
 			drawer.classList.remove('translate-x-0');
 			drawer.setAttribute('aria-hidden', 'true');
 			overlay.classList.add('opacity-0', 'pointer-events-none', 'hidden');
 			overlay.classList.remove('opacity-100', 'pointer-events-auto');
-			document.documentElement.classList.remove('overflow-hidden');
+			unlockScroll();
 			trigger.setAttribute('aria-expanded', 'false');
 		};
 
@@ -94,13 +100,13 @@ const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3)
 				clearTimeout(closeTimer);
 				closeTimer = null;
 			}
+			unlockScroll();
 			trigger.setAttribute('aria-expanded', 'false');
 			drawer.setAttribute('aria-hidden', 'true');
 			drawer.classList.add('translate-x-full');
 			drawer.classList.remove('translate-x-0');
 			overlay.classList.add('opacity-0', 'pointer-events-none');
 			overlay.classList.remove('opacity-100', 'pointer-events-auto');
-			document.documentElement.classList.remove('overflow-hidden');
 			closeTimer = window.setTimeout(() => {
 				drawer.classList.add('hidden');
 				overlay.classList.add('hidden');
@@ -118,6 +124,7 @@ const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3)
 			drawer.classList.remove('hidden');
 			overlay.classList.remove('hidden');
 			document.documentElement.classList.add('overflow-hidden');
+			document.body.classList.add('overflow-hidden');
 			// Trigger transform animation in next frame to ensure transition classes are applied cleanly.
 			window.requestAnimationFrame(setOpenVisualState);
 			window.requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('toc:refresh')));
@@ -127,9 +134,13 @@ const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3)
 		closeBtn.addEventListener('click', closeDrawer);
 		overlay.addEventListener('click', closeDrawer);
 
+		// TOC links: close drawer and unlock scroll immediately before navigation
 		const tocLinks = drawer.querySelectorAll('[data-toc-link]');
 		for (const link of tocLinks) {
-			link.addEventListener('click', closeDrawer);
+			link.addEventListener('click', () => {
+				unlockScroll();
+				closeDrawer();
+			});
 		}
 
 		// Always normalize initial state so hydration order does not leak an open drawer.
@@ -151,6 +162,7 @@ const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3)
 			overlay.classList.add('opacity-0', 'pointer-events-none');
 			overlay.classList.remove('opacity-100', 'pointer-events-auto');
 			document.documentElement.classList.remove('overflow-hidden');
+			document.body.classList.remove('overflow-hidden');
 			window.setTimeout(() => {
 				drawer.classList.add('hidden');
 				overlay.classList.add('hidden');
@@ -159,6 +171,18 @@ const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3)
 		// Bind ESC handler only once globally to avoid stacked listeners.
 		document.documentElement.dataset.tocEscBound = 'true';
 	}
+
+	// Defensive: ensure scroll is unlocked when leaving page
+	window.addEventListener('pagehide', () => {
+		document.documentElement.classList.remove('overflow-hidden');
+		document.body.classList.remove('overflow-hidden');
+	});
+
+	// Defensive: ensure scroll is unlocked on page navigation
+	document.addEventListener('astro:page-load', () => {
+		document.documentElement.classList.remove('overflow-hidden');
+		document.body.classList.remove('overflow-hidden');
+	});
 
 	initTocDrawer();
 	document.addEventListener('astro:page-load', initTocDrawer);

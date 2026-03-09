@@ -6,7 +6,7 @@ updatedDate: 2026-03-08
 lang: "en"
 author: "Dan"
 group: "how-to-register-a-cloudflare-domain"
-tags: ["Cloudflare", "Domain", "guide"]
+tags: ["Cloudflare", "Domain", "guide", "EN"]
 ---
 
 ## Introduction

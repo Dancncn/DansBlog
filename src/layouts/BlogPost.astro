@@ -64,10 +64,11 @@ const charsLabel = chars.toLocaleString('en-US');
 		<!-- Page fade is CSS-driven so route changes remain smooth even when shared-element transitions are bypassed. -->
 		<main class="blog-post-page page-fade-in min-h-screen min-w-0 w-full py-10 md:py-14" transition:animate="fade">
 			<div class="mx-auto max-w-7xl min-w-0 px-4 sm:px-6 lg:px-8">
-				<div class="mt-10 min-w-0 md:grid md:grid-cols-[240px_minmax(0,1fr)] md:items-start md:gap-10 lg:grid-cols-[280px_minmax(0,820px)_minmax(0,1fr)] lg:gap-x-10">
-					<aside class="hidden md:block md:self-stretch">
-						<div class="relative sticky top-24" data-toc-fade-wrap>
-							<div class="toc-scroll max-h-[calc(100dvh-7.5rem)] overflow-auto pr-2" data-toc-scroll="sidebar">
+				<div class="mt-10 min-w-0 md:grid md:grid-cols-[240px_minmax(0,1fr)] md:gap-10 lg:grid-cols-[280px_minmax(0,820px)_minmax(0,1fr)] lg:gap-x-10">
+					<aside class="hidden md:block" data-toc-fade-wrap>
+						<div class="sticky top-24 self-start">
+							<div class="relative">
+								<div class="toc-scroll max-h-[calc(100vh-7.5rem)] overflow-auto pr-2" data-toc-scroll="sidebar">
 								{
 									hasToc ? (
 										<TocSidebar headings={tocItems} />
@@ -88,6 +89,7 @@ const charsLabel = chars.toLocaleString('en-US');
 								data-toc-fade="bottom"
 								class="toc-fade toc-fade-bottom pointer-events-none absolute inset-x-0 bottom-0 h-8 opacity-0"
 							></div>
+						</div>
 						</div>
 					</aside>
 
@@ -233,6 +235,7 @@ const charsLabel = chars.toLocaleString('en-US');
 					window.__tocCleanup = null;
 				}
 
+				// Get ALL TOC links from both sidebar and drawer (not scoped to viewport).
 				const links = Array.from(document.querySelectorAll('[data-toc-link]'));
 				const headings = Array.from(
 					document.querySelectorAll('.markdown-prose h2[id], .markdown-prose h3[id], .markdown-prose h4[id]')
@@ -249,10 +252,22 @@ const charsLabel = chars.toLocaleString('en-US');
 					'dark:border-zinc-500/90',
 				];
 
+				// Helper: normalize heading ID for matching (decode URL-encoded IDs).
+				const normalizeId = (id) => {
+					try {
+						return decodeURIComponent(id);
+					} catch {
+						return id;
+					}
+				};
+
+				// Map heading id -> all matching TOC links (both sidebar and drawer)
+				// Use normalized (decoded) IDs for matching with heading.id
 				const linkMap = new Map();
 				for (const link of links) {
-					const id = link.dataset.tocLink || '';
-					if (!id) continue;
+					const rawId = link.dataset.tocLink || '';
+					if (!rawId) continue;
+					const id = normalizeId(rawId);
 					const group = linkMap.get(id) || [];
 					group.push(link);
 					linkMap.set(id, group);
@@ -265,6 +280,7 @@ const charsLabel = chars.toLocaleString('en-US');
 					}
 				};
 
+				// Scroll TOC link into view within its container (if container exists).
 				const ensureVisibleInToc = (link) => {
 					const container = link.closest('[data-toc-scroll]');
 					if (!container) return;
@@ -275,58 +291,116 @@ const charsLabel = chars.toLocaleString('en-US');
 					}
 				};
 
+				// Set active state for ALL matching links (sidebar + drawer).
 				const setActive = (id) => {
 					clearActive();
 					if (!id) return;
-					const group = linkMap.get(id) || [];
+					const normalizedId = normalizeId(id);
+					const group = linkMap.get(normalizedId) || [];
 					for (const link of group) {
 						link.classList.add(...ACTIVE_CLASSES);
 						link.setAttribute('aria-current', 'true');
-						// Scroll only inside the TOC container to avoid jolting the main article viewport.
 						ensureVisibleInToc(link);
 					}
 				};
 
-				const getActiveIdByScroll = () => {
-					let current = headings[0]?.id || '';
-					for (const heading of headings) {
-						if (heading.getBoundingClientRect().top <= 140) current = heading.id;
-					}
-					return current;
-				};
-
+				// Use IntersectionObserver to detect which heading is currently visible.
+				let observer = null;
 				let rafId = 0;
-				const scheduleApply = () => {
+				let currentId = '';
+
+				const updateActive = () => {
 					if (rafId) cancelAnimationFrame(rafId);
 					rafId = requestAnimationFrame(() => {
-						setActive(getActiveIdByScroll());
+						// Find the first heading that is in the visible viewport area.
+						let newId = '';
+						for (const heading of headings) {
+							const rect = heading.getBoundingClientRect();
+							// Heading is "active" when its top is near the top of viewport.
+							if (rect.top <= 140) {
+								newId = heading.id;
+							}
+						}
+						// Also check if the first heading is below viewport (edge case).
+						if (!newId && headings[0]) {
+							const firstRect = headings[0].getBoundingClientRect();
+							if (firstRect.top > 140) {
+								newId = headings[0].id;
+							}
+						}
+						if (newId && newId !== currentId) {
+							currentId = newId;
+							setActive(newId);
+						}
 					});
 				};
 
+				// Try to use IntersectionObserver first (more accurate).
+				try {
+					observer = new IntersectionObserver(
+						(entries) => {
+							// Find the topmost visible heading.
+							let topmost = null;
+							let topmostTop = Infinity;
+							for (const entry of entries) {
+								if (entry.isIntersecting && entry.target.getBoundingClientRect().top < topmostTop) {
+									topmost = entry.target;
+									topmostTop = entry.target.getBoundingClientRect().top;
+								}
+							}
+							if (topmost) {
+								const newId = topmost.id;
+								if (newId !== currentId) {
+									currentId = newId;
+									setActive(newId);
+								}
+							}
+						},
+						{
+							rootMargin: '-140px 0px -60% 0px',
+							threshold: 0
+						}
+					);
+
+					headings.forEach((heading) => {
+						if (heading.id) observer.observe(heading);
+					});
+				} catch (e) {
+					// Fallback to scroll listener if IntersectionObserver fails.
+					window.addEventListener('scroll', updateActive, { passive: true });
+				}
+
 				const onHashChange = () => {
-					const id = decodeURIComponent(window.location.hash.replace(/^#/, ''));
+					const hashId = window.location.hash.replace(/^#/, '');
+					const id = normalizeId(hashId);
 					if (id && linkMap.has(id)) {
+						currentId = id;
 						setActive(id);
-					} else {
-						scheduleApply();
 					}
 				};
 
-				window.addEventListener('scroll', scheduleApply, { passive: true });
-				window.addEventListener('resize', scheduleApply);
+				window.addEventListener('resize', updateActive);
 				window.addEventListener('hashchange', onHashChange);
 
-				const hashId = decodeURIComponent(window.location.hash.replace(/^#/, ''));
+				// Set initial active heading based on URL hash or scroll position.
+				const rawHashId = window.location.hash.replace(/^#/, '');
+				const hashId = normalizeId(rawHashId);
 				if (hashId && linkMap.has(hashId)) {
+					currentId = hashId;
 					setActive(hashId);
-				} else {
-					scheduleApply();
+				} else if (!observer) {
+					// No observer, manually check scroll position.
+					updateActive();
 				}
 
 				window.__tocCleanup = () => {
 					if (rafId) cancelAnimationFrame(rafId);
-					window.removeEventListener('scroll', scheduleApply);
-					window.removeEventListener('resize', scheduleApply);
+					if (observer) {
+						observer.disconnect();
+						observer = null;
+					}
+					window.removeEventListener('scroll', updateActive);
+					window.removeEventListener('resize', updateActive);
 					window.removeEventListener('hashchange', onHashChange);
 				};
 			};
@@ -338,7 +412,13 @@ const charsLabel = chars.toLocaleString('en-US');
 					window.__tocFadeCleanup = null;
 				}
 
-				const wraps = Array.from(document.querySelectorAll('[data-toc-fade-wrap]'));
+				// Only initialize fade effects for the current viewport's TOC container.
+				const isMobile = window.innerWidth < 768;
+				const tocContainer = document.querySelector(isMobile ? '[data-toc="drawer"]' : '[data-toc="sidebar"]');
+				if (!tocContainer) return;
+
+				const wrap = tocContainer.querySelector('[data-toc-fade-wrap]');
+				const wraps = wrap ? [wrap] : [];
 				if (wraps.length === 0) return;
 
 				const cleanups = [];
@@ -529,6 +609,63 @@ const charsLabel = chars.toLocaleString('en-US');
 			};
 
 			onPostPageLoad();
+
+			// Code block enhancements (copy button, fold)
+			(function() {
+				const CONFIG = { maxHeight: 400, copyTimeout: 2000 };
+				const preEls = document.querySelectorAll('.markdown-prose pre');
+				preEls.forEach((pre) => {
+					if (pre.dataset.codeEnhanced) return;
+					pre.dataset.codeEnhanced = 'true';
+					pre.style.position = 'relative';
+					const code = pre.querySelector('code');
+					const codeText = code?.textContent || '';
+					const shouldCollapse = pre.scrollHeight > CONFIG.maxHeight;
+					const lang = (pre.className.match(/language-(\w+)/) || ['',''])[1] || (code?.className?.match(/language-(\w+)/) || ['',''])[1] || pre.getAttribute('data-language');
+					const langSpan = document.createElement('span');
+					langSpan.className = 'code-lang-label';
+					langSpan.textContent = lang || '';
+					const btn = document.createElement('button');
+					btn.className = 'code-copy-btn';
+					btn.type = 'button';
+					btn.setAttribute('aria-label', 'Copy code');
+					btn.innerHTML = '<svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><span class="copy-text">Copy</span>';
+					btn.onclick = async (e) => {
+						e.preventDefault();
+						try {
+							await navigator.clipboard.writeText(codeText);
+							btn.querySelector('.copy-text').textContent = 'Copied!';
+							btn.querySelector('.copy-icon').innerHTML = '<path d="M20 6L9 17l-5-5"></path>';
+							setTimeout(() => {
+								btn.querySelector('.copy-text').textContent = 'Copy';
+								btn.querySelector('.copy-icon').innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>';
+							}, CONFIG.copyTimeout);
+						} catch (err) { console.error('Copy failed:', err); }
+					};
+					const actionBar = document.createElement('div');
+					actionBar.className = 'code-action-bar';
+					if (lang) actionBar.appendChild(langSpan);
+					actionBar.appendChild(btn);
+					pre.appendChild(actionBar);
+					if (shouldCollapse) {
+						pre.style.maxHeight = CONFIG.maxHeight + 'px';
+						pre.style.overflow = 'hidden';
+						const expBtn = document.createElement('button');
+						expBtn.className = 'code-expand-btn';
+						expBtn.type = 'button';
+						expBtn.textContent = 'Expand Code';
+						let expanded = false;
+						expBtn.onclick = () => {
+							expanded = !expanded;
+							pre.style.maxHeight = expanded ? 'none' : CONFIG.maxHeight + 'px';
+							pre.style.overflow = expanded ? 'visible' : 'hidden';
+							expBtn.textContent = expanded ? 'Collapse' : 'Expand Code';
+						};
+						pre.appendChild(expBtn);
+					}
+				});
+			})();
+
 			if (!window.__blogPostEventsBound) {
 				document.addEventListener('astro:page-load', onPostPageLoad);
 				document.addEventListener('astro:after-swap', onPostPageLoad);
