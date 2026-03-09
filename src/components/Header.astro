@@ -22,14 +22,14 @@ const NAV_LINKS = getNavLinks(BASE);
 const { showTocButton = false } = Astro.props as Props;
 ---
 
-<header class="sticky top-0 z-50 border-b border-zinc-200/90 bg-zinc-50/95 backdrop-blur transition-colors duration-200 dark:border-zinc-800 dark:bg-zinc-950/90">
+<header class="sticky top-0 z-50 border-b border-zinc-200/70 bg-zinc-50/72 backdrop-blur-xl transition-colors duration-200 dark:border-zinc-800/80 dark:bg-zinc-950/72">
 	<nav class="page-shell flex h-16 items-center justify-between gap-4">
 		<div class="flex items-center gap-6">
 			<!-- Stable trigger ID consumed by MobileDrawer script. -->
 			<button
 				type="button"
 				id="mobile-menu-button"
-				class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 hover:text-zinc-900 md:hidden dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+				class="header-toolbar-button inline-flex items-center gap-2 px-3 py-2 text-sm font-medium md:hidden"
 				aria-controls="mobile-drawer"
 				aria-expanded="false"
 			>
@@ -44,7 +44,7 @@ const { showTocButton = false } = Astro.props as Props;
 					<button
 						type="button"
 						id="toc-menu-button"
-						class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-400 hover:text-zinc-900 md:hidden dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+						class="header-toolbar-button inline-flex items-center gap-2 px-3 py-2 text-sm font-medium md:hidden"
 						aria-controls="toc-drawer"
 						aria-expanded="false"
 						aria-label="Open table of contents"
@@ -72,14 +72,46 @@ const { showTocButton = false } = Astro.props as Props;
 				<img
 					src="https://img.danarnoux.com/misc/DanArnoux.webp"
 					alt="Dan Arnoux avatar"
-					class="h-9 w-9 rounded-full border border-zinc-200 object-cover transition-transform duration-200 ease-out hover:scale-105 active:scale-95 dark:border-zinc-700"
+					class="h-9 w-9 rounded-full border border-zinc-200/80 object-cover shadow-[0_6px_18px_rgba(15,23,42,0.08)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.03] hover:border-zinc-300 hover:shadow-[0_10px_22px_rgba(15,23,42,0.12)] active:scale-95 dark:border-zinc-700/80 dark:shadow-[0_8px_18px_rgba(0,0,0,0.18)] dark:hover:border-zinc-500"
 				/>
 			</a>
+			<div class="header-toolbar-group hidden md:inline-flex">
+				<a
+					href={GITHUB_URL}
+					target="_blank"
+					rel="noreferrer"
+					class="header-toolbar-icon icon-button inline-flex items-center justify-center"
+					aria-label="GitHub"
+				>
+					<svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true">
+						<path d="M12 .3A12 12 0 0 0 8.2 23.7c.6.1.8-.2.8-.6v-2.3c-3.3.7-4-1.4-4-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.8 1.1 1.8 1.1 1 .1 1.6.7 2 1.3.9.2 1.8.4 2.7.1.1-.7.4-1.3.7-1.7-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.1-3.2-.1-.3-.5-1.5.1-3.2 0 0 .9-.3 3.2 1.1a10.9 10.9 0 0 1 5.9 0c2.2-1.4 3.2-1.1 3.2-1.1.6 1.7.2 2.9.1 3.2.7.8 1.1 1.9 1.1 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .4.2.7.8.6A12 12 0 0 0 12 .3" />
+					</svg>
+					<span class="sr-only">GitHub</span>
+				</a>
+
+				<button
+					type="button"
+					id="theme-toggle"
+					class="header-toolbar-icon icon-button inline-flex items-center justify-center"
+					aria-label="Toggle theme"
+				>
+					<svg data-theme-icon="sun" viewBox="0 0 24 24" class="h-5 w-5 fill-current transition-transform duration-300" aria-hidden="true">
+						<path d="M12 4a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 13a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm8-5a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM7 12a1 1 0 0 1-1 1H5a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm9.7-5.3a1 1 0 0 1 0 1.4L16 8.8a1 1 0 1 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0Zm-7.3 7.3a1 1 0 0 1 0 1.4l-.7.7a1 1 0 0 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0Zm7.3 2.1a1 1 0 0 1-1.4 1.4l-.7-.7a1 1 0 0 1 1.4-1.4l.7.7ZM9.4 8.8A1 1 0 0 1 8 8.8l-.7-.7a1 1 0 1 1 1.4-1.4l.7.7a1 1 0 0 1 0 1.4ZM12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z" />
+					</svg>
+					<span class="sr-only">Toggle theme</span>
+				</button>
+
+				<!-- Login button (shown when not logged in) -->
+				<button type="button" id="auth-button" class="header-toolbar-button hidden h-9 items-center justify-center px-3 text-sm font-medium" data-auth-login>
+					Login
+				</button>
+			</div>
+
 			<a
 				href={GITHUB_URL}
 				target="_blank"
 				rel="noreferrer"
-				class="icon-button inline-flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+				class="header-toolbar-icon icon-button inline-flex items-center justify-center md:hidden"
 				aria-label="GitHub"
 			>
 				<svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true">
@@ -90,24 +122,14 @@ const { showTocButton = false } = Astro.props as Props;
 
 			<button
 				type="button"
-				id="theme-toggle"
-				class="icon-button inline-flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+				id="theme-toggle-mobile"
+				class="header-toolbar-icon icon-button inline-flex items-center justify-center md:hidden"
 				aria-label="Toggle theme"
 			>
-				<svg data-theme-icon="sun" viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true">
+				<svg data-theme-icon="sun" viewBox="0 0 24 24" class="h-5 w-5 fill-current transition-transform duration-300" aria-hidden="true">
 					<path d="M12 4a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 13a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm8-5a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM7 12a1 1 0 0 1-1 1H5a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm9.7-5.3a1 1 0 0 1 0 1.4L16 8.8a1 1 0 1 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0Zm-7.3 7.3a1 1 0 0 1 0 1.4l-.7.7a1 1 0 0 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0Zm7.3 2.1a1 1 0 0 1-1.4 1.4l-.7-.7a1 1 0 0 1 1.4-1.4l.7.7ZM9.4 8.8A1 1 0 0 1 8 8.8l-.7-.7a1 1 0 1 1 1.4-1.4l.7.7a1 1 0 0 1 0 1.4ZM12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z" />
 				</svg>
 				<span class="sr-only">Toggle theme</span>
-			</button>
-
-			<!-- Login button (shown when not logged in) -->
-			<button
-				type="button"
-				id="auth-button"
-				class="hidden inline-flex h-9 items-center justify-center rounded-xl border border-zinc-200 px-3 text-sm font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
-				data-auth-login
-			>
-				Login
 			</button>
 
 			<!-- User dropdown (shown when logged in) -->
@@ -115,7 +137,7 @@ const { showTocButton = false } = Astro.props as Props;
 				<button
 					type="button"
 					id="user-dropdown-button"
-					class="flex items-center gap-2 rounded-full border border-zinc-200 p-0.5 transition-colors hover:border-zinc-400 dark:border-zinc-700 dark:hover:border-zinc-500"
+					class="flex items-center gap-2 rounded-full border border-zinc-200/85 bg-white/82 p-0.5 shadow-[0_8px_22px_rgba(15,23,42,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 hover:bg-white/95 hover:shadow-[0_12px_26px_rgba(15,23,42,0.12)] dark:border-zinc-700/85 dark:bg-zinc-900/80 dark:shadow-[0_8px_18px_rgba(0,0,0,0.18)] dark:hover:border-zinc-500 dark:hover:bg-zinc-800/95"
 					aria-expanded="false"
 					aria-haspopup="true"
 				>
@@ -128,11 +150,11 @@ const { showTocButton = false } = Astro.props as Props;
 				</button>
 				<div
 					id="user-dropdown-menu"
-					class="absolute right-0 mt-2 w-56 rounded-lg border border-zinc-200 bg-white py-1 shadow-lg opacity-0 invisible transition-all duration-150 dark:border-zinc-700 dark:bg-zinc-800"
+					class="absolute right-0 mt-2 w-56 rounded-2xl border border-zinc-200/80 bg-white/92 py-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.14)] opacity-0 invisible transition-all duration-200 dark:border-zinc-700/80 dark:bg-zinc-900/92"
 					role="menu"
 				>
 					<!-- Header: avatar + username + subtitle -->
-					<div class="border-b border-zinc-200 px-3 py-3 dark:border-zinc-700">
+					<div class="border-b border-zinc-200/80 px-3 py-3 dark:border-zinc-700/80">
 						<div class="flex items-center gap-3">
 							<img
 								id="dropdown-user-avatar"
@@ -150,7 +172,7 @@ const { showTocButton = false } = Astro.props as Props;
 					<button
 						type="button"
 						id="settings-button"
-						class="w-full px-3 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-100 flex items-center gap-2 dark:text-zinc-300 dark:hover:bg-zinc-700"
+						class="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-zinc-700 transition-colors hover:bg-zinc-100/90 dark:text-zinc-300 dark:hover:bg-zinc-800"
 						role="menuitem"
 					>
 						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -160,11 +182,11 @@ const { showTocButton = false } = Astro.props as Props;
 						Settings
 					</button>
 					<!-- Footer: Logout -->
-					<div class="border-t border-zinc-200 pt-1 pb-1 mt-1 dark:border-zinc-700">
+					<div class="mt-1 border-t border-zinc-200/80 pb-1 pt-1 dark:border-zinc-700/80">
 						<button
 							type="button"
 							id="logout-button"
-							class="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-zinc-100 flex items-center gap-2 dark:text-red-400 dark:hover:bg-zinc-700"
+							class="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-red-600 transition-colors hover:bg-zinc-100/90 dark:text-red-400 dark:hover:bg-zinc-800"
 							role="menuitem"
 						>
 							<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -183,6 +205,77 @@ const { showTocButton = false } = Astro.props as Props;
 
 <LoginModal />
 <SettingsModal />
+
+<style is:global>
+	.header-toolbar-group {
+		height: 2.5rem;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.25rem;
+		border-radius: 1rem;
+		border: 1px solid rgba(228, 228, 231, 0.78);
+		background: rgba(255, 255, 255, 0.72);
+		box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+		backdrop-filter: blur(14px);
+	}
+
+	html.dark .header-toolbar-group {
+		border-color: rgba(63, 63, 70, 0.8);
+		background: rgba(24, 24, 27, 0.72);
+		box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+	}
+
+	.header-toolbar-button,
+	.header-toolbar-icon {
+		border-radius: 0.9rem;
+		border: 1px solid rgba(228, 228, 231, 0.75);
+		background: rgba(255, 255, 255, 0.7);
+		color: rgb(82 82 91);
+		backdrop-filter: blur(10px);
+		box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+		transition:
+			transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+			background-color 180ms ease,
+			border-color 180ms ease,
+			color 180ms ease,
+			box-shadow 180ms ease;
+	}
+
+	html.dark .header-toolbar-button,
+	html.dark .header-toolbar-icon {
+		border-color: rgba(63, 63, 70, 0.84);
+		background: rgba(39, 39, 42, 0.7);
+		color: rgb(212 212 216);
+		box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+	}
+
+	.header-toolbar-button:hover,
+	.header-toolbar-icon:hover {
+		transform: translateY(-1px);
+		background: rgba(255, 255, 255, 0.96);
+		border-color: rgba(212, 212, 216, 0.98);
+		color: rgb(24 24 27);
+		box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1);
+	}
+
+	html.dark .header-toolbar-button:hover,
+	html.dark .header-toolbar-icon:hover {
+		background: rgba(63, 63, 70, 0.96);
+		border-color: rgba(113, 113, 122, 1);
+		color: rgb(250 250 250);
+		box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
+	}
+
+	.header-toolbar-button:active,
+	.header-toolbar-icon:active {
+		transform: scale(0.97);
+	}
+
+	.header-toolbar-icon {
+		height: 2rem;
+		width: 2rem;
+	}
+</style>
 
 <script is:inline>
 	const initAuthButton = async () => {
@@ -311,28 +404,31 @@ const { showTocButton = false } = Astro.props as Props;
 	initAuthButton();
 
 	const initThemeToggle = () => {
-		const button = document.getElementById('theme-toggle');
-		// Guard prevents duplicate listeners after Astro swaps partial DOM trees.
-		if (!button || button.dataset.bound === 'true') return;
-		button.dataset.bound = 'true';
+		const buttons = Array.from(document.querySelectorAll('[id="theme-toggle"], [id="theme-toggle-mobile"]'));
+		if (!buttons.length) return;
 
 		const root = document.documentElement;
 		const storageKey = 'theme';
 		const updateAria = () => {
 			const isDark = root.classList.contains('dark');
-			button.setAttribute('aria-pressed', String(isDark));
+			buttons.forEach((button) => {
+				button.setAttribute('aria-pressed', String(isDark));
+				const icon = button.querySelector('[data-theme-icon]');
+				if (icon) {
+					icon.classList.toggle('rotate-180', isDark);
+				}
+			});
 		};
 
-		button.addEventListener('click', () => {
-			root.classList.add('theme-switching');
-			const isDark = root.classList.toggle('dark');
-			root.dataset.theme = isDark ? 'dark' : 'light';
-			localStorage.setItem(storageKey, isDark ? 'dark' : 'light');
-			updateAria();
-			window.setTimeout(() => {
-				// Remove temporary class after transition so regular interactions stay snappy.
-				root.classList.remove('theme-switching');
-			}, 240);
+		buttons.forEach((button) => {
+			if (button.dataset.bound === 'true') return;
+			button.dataset.bound = 'true';
+			button.addEventListener('click', () => {
+				const isDark = root.classList.toggle('dark');
+				root.dataset.theme = isDark ? 'dark' : 'light';
+				localStorage.setItem(storageKey, isDark ? 'dark' : 'light');
+				updateAria();
+			});
 		});
 
 		updateAria();

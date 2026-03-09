@@ -29,7 +29,11 @@ const HOME_WALLPAPER = 'https://img.danarnoux.com/misc/home-2rd1yuubn4hc1.webp';
 			<div class="space-y-6">
 				<section class="hero-enter overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
 					<div class="relative h-[44vh] min-h-[300px] w-full">
-						<img src={HOME_WALLPAPER} alt="Homepage wallpaper" class="h-full w-full object-cover" />
+						<img
+							src={HOME_WALLPAPER}
+							alt="Homepage wallpaper"
+							class="h-full w-full object-cover object-[77%_center] md:object-center"
+						/>
 						<div class="absolute inset-0 bg-zinc-900/10 dark:bg-zinc-950/25"></div>
 					</div>
 				</section>
@@ -96,7 +100,16 @@ const HOME_WALLPAPER = 'https://img.danarnoux.com/misc/home-2rd1yuubn4hc1.webp';
 			<section class="section-enter section-enter-delay-2 mt-10">
 				<div class="mb-4 flex items-center justify-between">
 					<h2 class="text-xl font-semibold tracking-tight">Latest Posts</h2>
-					<a href={`${BASE}blog/`} class="text-sm font-medium text-blue-600 no-underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">View all</a>
+					<a
+						href={`${BASE}blog/`}
+						class="inline-flex items-center gap-1.5 rounded-md border border-zinc-300/90 bg-zinc-50/96 px-3 py-1.5 text-sm font-medium text-zinc-700 no-underline transition-colors duration-150 ease-out hover:border-zinc-400 hover:bg-white hover:text-zinc-900 dark:border-zinc-700/90 dark:bg-zinc-900/96 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+					>
+						<span>View all</span>
+						<svg viewBox="0 0 20 20" class="h-4 w-4 opacity-75" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+							<path d="M4.75 10h10.5" stroke-linecap="round" />
+							<path d="M10.75 5.5 15.25 10l-4.5 4.5" stroke-linecap="round" stroke-linejoin="round" />
+						</svg>
+					</a>
 				</div>
 				<ul class="grid gap-4 md:grid-cols-2">
 					{

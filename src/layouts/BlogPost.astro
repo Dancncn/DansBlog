@@ -60,6 +60,7 @@ const charsLabel = chars.toLocaleString('en-US');
 	<body>
 		<Header showTocButton={hasToc} />
 		<MobileDrawer />
+		<TocDrawer headings={tocItems} />
 
 		<!-- Page fade is CSS-driven so route changes remain smooth even when shared-element transitions are bypassed. -->
 		<main class="blog-post-page page-fade-in min-h-screen min-w-0 w-full py-10 md:py-14" transition:animate="fade">
@@ -147,7 +148,7 @@ const charsLabel = chars.toLocaleString('en-US');
 									{tags.map((tag) => (
 										<a
 											href={`${BASE}tags/${encodeURIComponent(tag)}/`}
-											class="rounded-lg border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-600 no-underline transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+										class="inline-flex items-center rounded-md border border-zinc-300/90 bg-zinc-50/96 px-2.5 py-1 text-xs font-medium text-zinc-700 no-underline transition-colors duration-150 ease-out hover:border-zinc-400 hover:bg-white hover:text-zinc-900 dark:border-zinc-700/90 dark:bg-zinc-900/96 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
 										>
 											#{tag}
 										</a>
@@ -176,8 +177,6 @@ const charsLabel = chars.toLocaleString('en-US');
 						</article>
 
 						{slug && <Comment postSlug={slug} />}
-
-						<TocDrawer headings={tocItems} />
 					</main>
 
 					<div class="hidden lg:block" aria-hidden="true"></div>
@@ -280,10 +279,18 @@ const charsLabel = chars.toLocaleString('en-US');
 					}
 				};
 
+				const isElementVisible = (element) => {
+					if (!(element instanceof Element)) return false;
+					if (element.getClientRects().length === 0) return false;
+					const style = window.getComputedStyle(element);
+					return style.display !== 'none' && style.visibility !== 'hidden';
+				};
+
 				// Scroll TOC link into view within its container (if container exists).
 				const ensureVisibleInToc = (link) => {
 					const container = link.closest('[data-toc-scroll]');
 					if (!container) return;
+					if (!isElementVisible(link) || !isElementVisible(container)) return;
 					const cRect = container.getBoundingClientRect();
 					const eRect = link.getBoundingClientRect();
 					if (eRect.top < cRect.top || eRect.bottom > cRect.bottom) {
@@ -335,6 +342,14 @@ const charsLabel = chars.toLocaleString('en-US');
 					});
 				};
 
+				const syncVisibleTocActive = () => {
+					if (currentId && linkMap.has(normalizeId(currentId))) {
+						setActive(currentId);
+						return;
+					}
+					updateActive();
+				};
+
 				// Try to use IntersectionObserver first (more accurate).
 				try {
 					observer = new IntersectionObserver(
@@ -381,6 +396,7 @@ const charsLabel = chars.toLocaleString('en-US');
 
 				window.addEventListener('resize', updateActive);
 				window.addEventListener('hashchange', onHashChange);
+				window.addEventListener('toc:sync-active', syncVisibleTocActive);
 
 				// Set initial active heading based on URL hash or scroll position.
 				const rawHashId = window.location.hash.replace(/^#/, '');
@@ -402,6 +418,7 @@ const charsLabel = chars.toLocaleString('en-US');
 					window.removeEventListener('scroll', updateActive);
 					window.removeEventListener('resize', updateActive);
 					window.removeEventListener('hashchange', onHashChange);
+					window.removeEventListener('toc:sync-active', syncVisibleTocActive);
 				};
 			};
 
@@ -653,12 +670,14 @@ const charsLabel = chars.toLocaleString('en-US');
 						const expBtn = document.createElement('button');
 						expBtn.className = 'code-expand-btn';
 						expBtn.type = 'button';
+						expBtn.setAttribute('data-expanded', 'false');
 						expBtn.textContent = 'Expand Code';
 						let expanded = false;
 						expBtn.onclick = () => {
 							expanded = !expanded;
 							pre.style.maxHeight = expanded ? 'none' : CONFIG.maxHeight + 'px';
 							pre.style.overflow = expanded ? 'visible' : 'hidden';
+							expBtn.setAttribute('data-expanded', String(expanded));
 							expBtn.textContent = expanded ? 'Collapse' : 'Expand Code';
 						};
 						pre.appendChild(expBtn);
@@ -674,5 +693,11 @@ const charsLabel = chars.toLocaleString('en-US');
 		</script>
 	</body>
 </html>
+
+
+
+
+
+
 
 

@@ -53,19 +53,19 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 			<section class="mt-8">
 				<div class="flex items-center justify-between gap-4">
 					<h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Friends</h2>
-					<div class="flex items-center gap-2">
+					<div class="friends-pager inline-flex items-center gap-2 rounded-2xl border border-zinc-200/80 bg-white/80 p-1.5 shadow-[0_8px_24px_rgba(15,23,42,0.06)] backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/70">
 						<button
 							type="button"
-							class="rounded-full border border-zinc-200 bg-white/90 px-3 py-1.5 text-sm text-zinc-700 shadow-sm backdrop-blur transition hover:bg-white dark:border-zinc-800 dark:bg-zinc-950/80 dark:text-zinc-200 dark:hover:bg-zinc-950 opacity-50 pointer-events-none invisible"
+							class="friends-pager-button inline-flex h-10 min-w-[72px] items-center justify-center rounded-xl px-3.5 text-sm font-medium text-zinc-700 transition-all duration-220 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:bg-zinc-100/85 hover:text-zinc-900 hover:shadow-sm dark:text-zinc-200 dark:hover:bg-zinc-800/85 is-hidden"
 							data-friends-prev
 							aria-label="Previous friends page"
 						>
 							Prev
 						</button>
-						<span class="text-sm text-zinc-500 dark:text-zinc-400" data-friends-pagination-status>1 / {friendPageCount}</span>
+						<span class="friends-pager-status min-w-[56px] text-center text-sm font-medium text-zinc-500 dark:text-zinc-400" data-friends-pagination-status>1 / {friendPageCount}</span>
 						<button
 							type="button"
-							class="rounded-full border border-zinc-200 bg-white/90 px-3 py-1.5 text-sm text-zinc-700 shadow-sm backdrop-blur transition hover:bg-white dark:border-zinc-800 dark:bg-zinc-950/80 dark:text-zinc-200 dark:hover:bg-zinc-950"
+							class="friends-pager-button inline-flex h-10 min-w-[72px] items-center justify-center rounded-xl px-3.5 text-sm font-medium text-zinc-700 transition-all duration-220 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:bg-zinc-100/85 hover:text-zinc-900 hover:shadow-sm dark:text-zinc-200 dark:hover:bg-zinc-800/85"
 							data-friends-next
 							aria-label="Next friends page"
 						>
@@ -75,7 +75,7 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 				</div>
 				<div class="mt-4">
 					<div
-						class="grid grid-cols-1 gap-6 opacity-100 transition-opacity duration-300 ease-in-out sm:grid-cols-2 lg:grid-cols-3"
+						class="grid grid-cols-1 gap-6 opacity-100 transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] sm:grid-cols-2 lg:grid-cols-3"
 						data-friends-grid
 					>
 					</div>
@@ -253,17 +253,17 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 		<Footer />
 		<script>
 			function initFriends() {
-				const prevButton = document.querySelector('[data-friends-prev]');
-				const nextButton = document.querySelector('[data-friends-next]');
-				const status = document.querySelector('[data-friends-pagination-status]');
-				const grid = document.querySelector('[data-friends-grid]');
+				const prevButton = document.querySelector<HTMLButtonElement>('[data-friends-prev]');
+				const nextButton = document.querySelector<HTMLButtonElement>('[data-friends-next]');
+				const status = document.querySelector<HTMLElement>('[data-friends-pagination-status]');
+				const grid = document.querySelector<HTMLElement>('[data-friends-grid]');
 				const storePages = Array.from(document.querySelectorAll('[data-friends-store-page]'));
 				if (!prevButton || !nextButton || !status || !grid || !storePages.length) return;
 
 				let currentPage = 0;
 				let isTransitioning = false;
 				const lastPage = storePages.length - 1;
-				const animationDuration = 280;
+				const animationDuration = 170;
 
 				const pageMarkup = (pageIndex: number) => {
 					const source = storePages[pageIndex];
@@ -274,10 +274,12 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 					const hasMultiplePages = storePages.length > 1;
 					const prevDisabled = isTransitioning || currentPage === 0 || !hasMultiplePages;
 					const nextDisabled = isTransitioning || currentPage === lastPage || !hasMultiplePages;
+					const prevVisible = currentPage > 0 && hasMultiplePages;
 
 					prevButton.classList.toggle('pointer-events-none', prevDisabled);
 					prevButton.classList.toggle('opacity-50', prevDisabled);
-					prevButton.classList.toggle('invisible', currentPage === 0);
+					prevButton.classList.toggle('is-hidden', !prevVisible);
+					prevButton.setAttribute('aria-hidden', String(!prevVisible));
 					nextButton.classList.toggle('pointer-events-none', nextDisabled);
 					nextButton.classList.toggle('opacity-50', nextDisabled);
 					status.textContent = `${currentPage + 1} / ${storePages.length}`;
@@ -290,6 +292,7 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 					isTransitioning = true;
 					syncButtons();
 
+					grid.style.transform = 'translateY(4px)';
 					grid.classList.remove('opacity-100');
 					grid.classList.add('opacity-0');
 
@@ -299,6 +302,7 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 						syncButtons();
 
 						requestAnimationFrame(() => {
+							grid.style.transform = 'translateY(0)';
 							grid.classList.remove('opacity-0');
 							grid.classList.add('opacity-100');
 						});
@@ -319,6 +323,7 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 				});
 
 				grid.innerHTML = pageMarkup(0);
+				grid.style.transform = 'translateY(0)';
 				grid.classList.remove('opacity-0');
 				grid.classList.add('opacity-100');
 				syncButtons();
@@ -331,11 +336,37 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 			document.addEventListener('astro:page-load', initFriends);
 		</script>
 		<style>
+			.friends-pager {
+				overflow: clip;
+			}
+
+			.friends-pager-button {
+				transform-origin: center;
+			}
+
+			.friends-pager-button.is-hidden {
+				opacity: 0;
+				max-width: 0;
+				min-width: 0;
+				padding-inline: 0;
+				margin-inline: 0;
+				overflow: hidden;
+				transform: translateX(-6px) scale(0.96);
+				pointer-events: none;
+			}
+
 			.friends-desc-clamp {
 				display: -webkit-box;
 				-webkit-line-clamp: 3;
 				-webkit-box-orient: vertical;
 				overflow: hidden;
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				.friends-pager-button {
+					transition: none !important;
+					transform: none !important;
+				}
 			}
 		</style>
 	</body>

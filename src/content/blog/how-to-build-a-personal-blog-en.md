@@ -22,7 +22,7 @@ The next morning, I asked my high school friend Herbert Skyper. His answer: arou
 
 One of the biggest headaches of running a website is exactly this: domain name, reliable always-on machine (or server), public network accessibility, and so on. There are ways to solve all of these, but if you can avoid extra operations in the early stage, that is usually better.
 
-Skyper mentioned some classmates using [Astro](https://docs.astro.build/), which is a mature framework. Later my friend licyk replied too; he writes with [Hexo](https://hexo.io/) and has a related tutorial: [How to Deploy a Blog with Hexo](https://licyk.github.io/2024/06/26/how-to-deploy-hexo/). He also said deployment on GitHub is not too time-consuming, and it avoids server/domain costs at the start.
+Skyper mentioned some classmates using [Astro](https://docs.astro.build/), which is a mature framework. Later my friend kymi replied too; he writes with [Hexo](https://hexo.io/) and has a related tutorial: [How to Deploy a Blog with Hexo](https://licyk.github.io/2024/06/26/how-to-deploy-hexo/). He also said deployment on GitHub is not too time-consuming, and it avoids server/domain costs at the start.
 
 ------
 

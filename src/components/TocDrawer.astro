@@ -127,7 +127,10 @@ const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3)
 			document.body.classList.add('overflow-hidden');
 			// Trigger transform animation in next frame to ensure transition classes are applied cleanly.
 			window.requestAnimationFrame(setOpenVisualState);
-			window.requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('toc:refresh')));
+			window.requestAnimationFrame(() => {
+				window.dispatchEvent(new CustomEvent('toc:refresh'));
+				window.dispatchEvent(new CustomEvent('toc:sync-active'));
+			});
 		};
 
 		trigger.addEventListener('click', openDrawer);

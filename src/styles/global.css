@@ -172,8 +172,8 @@ html.dark:hover::-webkit-scrollbar-thumb {
 		@apply prose-headings:font-sans prose-headings:font-semibold prose-headings:tracking-tight;
 		@apply prose-p:leading-8 prose-li:leading-8 prose-strong:font-semibold;
 		@apply prose-a:text-blue-600 hover:prose-a:text-blue-700 dark:prose-a:text-blue-400 dark:hover:prose-a:text-blue-300;
-		@apply prose-pre:rounded-xl prose-pre:border prose-pre:border-zinc-200 prose-pre:bg-zinc-900 prose-pre:text-zinc-100;
-		@apply dark:prose-pre:border-zinc-700 dark:prose-pre:bg-zinc-900;
+		@apply prose-pre:rounded-2xl prose-pre:border prose-pre:border-zinc-200 prose-pre:bg-zinc-50 prose-pre:text-zinc-800;
+		@apply dark:prose-pre:border-zinc-700 dark:prose-pre:bg-zinc-900 dark:prose-pre:text-zinc-100;
 		@apply prose-code:font-mono prose-code:text-[0.9em];
 		@apply prose-code:before:content-none prose-code:after:content-none;
 		@apply prose-blockquote:border-zinc-300 prose-blockquote:text-zinc-600 dark:prose-blockquote:border-zinc-600 dark:prose-blockquote:text-zinc-300;
@@ -187,10 +187,114 @@ html.dark:hover::-webkit-scrollbar-thumb {
 	}
 
 	.markdown-prose :where(code):not(:where(pre code)) {
-		@apply rounded-md bg-zinc-100 px-1.5 py-0.5 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-100;
+		@apply rounded-md border border-zinc-200/90 bg-zinc-100/90 px-1.5 py-0.5 text-zinc-800 dark:border-zinc-700/90 dark:bg-zinc-800/90 dark:text-zinc-100;
 		overflow-wrap: anywhere;
 		word-break: break-word;
 		white-space: break-spaces;
+	}
+
+	.markdown-prose blockquote:not(.markdown-alert) {
+		@apply my-6 rounded-r-2xl rounded-l-md border-l-4 border-zinc-300 bg-zinc-50/80 px-5 py-3 text-zinc-700 dark:border-zinc-600 dark:bg-zinc-900/60 dark:text-zinc-300;
+	}
+
+	.markdown-prose blockquote:not(.markdown-alert) > :first-child {
+		margin-top: 0;
+	}
+
+	.markdown-prose blockquote:not(.markdown-alert) > :last-child {
+		margin-bottom: 0;
+	}
+
+	.markdown-prose hr {
+		@apply my-10 border-0 border-t border-zinc-200 dark:border-zinc-800;
+	}
+
+	.markdown-prose mark {
+		@apply rounded-sm bg-amber-100/80 px-1 py-0.5 text-zinc-900 dark:bg-amber-400/20 dark:text-zinc-100;
+	}
+
+	.markdown-prose kbd {
+		@apply rounded-md border border-zinc-300 bg-white px-1.5 py-0.5 text-[0.85em] font-medium text-zinc-700 shadow-sm dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200;
+	}
+
+	.markdown-prose details {
+		@apply my-6 overflow-hidden rounded-2xl border border-zinc-200 bg-white/90 dark:border-zinc-700 dark:bg-zinc-900/80;
+	}
+
+	.markdown-prose details[open] {
+		@apply shadow-sm;
+	}
+
+	.markdown-prose summary {
+		@apply flex cursor-pointer list-none items-center gap-2 px-4 py-3 font-medium text-zinc-800 transition-colors hover:bg-zinc-50 dark:text-zinc-100 dark:hover:bg-zinc-800/70;
+	}
+
+	.markdown-prose summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.markdown-prose summary::before {
+		content: '▸';
+		@apply text-zinc-500 transition-transform duration-150 dark:text-zinc-400;
+	}
+
+	.markdown-prose details[open] > summary::before {
+		transform: rotate(90deg);
+	}
+
+	.markdown-prose details > :not(summary) {
+		@apply border-t border-zinc-200 px-4 py-4 dark:border-zinc-700;
+	}
+
+	.markdown-prose details > :not(summary):last-child {
+		padding-bottom: 1rem;
+	}
+
+	.markdown-prose ul.contains-task-list,
+	.markdown-prose ul:has(> li.task-list-item) {
+		list-style: none;
+		padding-left: 0;
+	}
+
+	.markdown-prose li.task-list-item {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.65rem;
+		padding-left: 0;
+	}
+
+	.markdown-prose li.task-list-item input[type='checkbox'] {
+		margin-top: 0.45rem;
+		accent-color: rgb(37 99 235);
+	}
+
+	.markdown-prose p > a:has(> img[src*='shields.io']),
+	.markdown-prose li > a:has(> img[src*='shields.io']) {
+		display: inline-flex;
+		vertical-align: middle;
+		text-decoration: none;
+		margin: 0.125rem 0.35rem 0.125rem 0;
+	}
+
+	.markdown-prose a > img[src*='shields.io'] {
+		display: block;
+		height: 1.75rem;
+		width: auto;
+		border-radius: 0.375rem;
+		box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+		transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+	}
+
+	.markdown-prose a:hover > img[src*='shields.io'] {
+		transform: translateY(-1px);
+		box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+		opacity: 0.96;
+	}
+
+	@media (max-width: 40rem) {
+		.markdown-prose a > img[src*='shields.io'] {
+			height: 1.55rem;
+		}
 	}
 
 	.markdown-prose iframe[src$='.pdf'] {
@@ -312,6 +416,40 @@ html.dark:hover::-webkit-scrollbar-thumb {
 		line-height: 1.6;
 		font-variant-ligatures: none;
 		scrollbar-gutter: stable;
+		padding: 1.1rem 1rem 1rem;
+	}
+
+	.markdown-prose :is(pre.astro-code, pre.shiki) {
+		border: 1px solid rgb(228 228 231) !important;
+		border-radius: 1rem !important;
+		background-color: rgb(250 250 250) !important;
+		color: var(--shiki-light, inherit) !important;
+	}
+
+	html.dark .markdown-prose :is(pre.astro-code, pre.shiki) {
+		border-color: rgb(75 85 99) !important;
+		background-color: rgb(17 24 39) !important;
+		color: var(--shiki-dark, rgb(244 244 245)) !important;
+	}
+
+	.markdown-prose :is(pre.astro-code, pre.shiki) span[style*='--shiki-light'] {
+		color: var(--shiki-light) !important;
+	}
+
+	html.dark .markdown-prose :is(pre.astro-code, pre.shiki) span[style*='--shiki-dark'] {
+		color: var(--shiki-dark) !important;
+	}
+
+	html.dark .markdown-prose :is(pre.astro-code, pre.shiki) span[style*='--shiki-dark-bg'] {
+		background-color: var(--shiki-dark-bg) !important;
+	}
+
+	html.dark .markdown-prose :is(pre.astro-code, pre.shiki) .line {
+		opacity: 1;
+	}
+
+	.markdown-prose :is(pre.astro-code, pre.shiki) code {
+		background: transparent !important;
 	}
 
 	.markdown-prose :is(
@@ -362,62 +500,80 @@ html.dark:hover::-webkit-scrollbar-thumb {
 
 	.code-action-bar {
 		position: absolute;
-		top: 0;
-		right: 0;
+		top: 0.65rem;
+		right: 0.65rem;
 		display: flex;
 		align-items: center;
-		gap: 0.25rem;
-		padding: 0.25rem 0.5rem;
+		gap: 0.375rem;
+		padding: 0.35rem 0.45rem;
 		z-index: 10;
-		border-bottom-left-radius: 0.5rem;
+		border-radius: 9999px;
 		opacity: 0;
-		transition: opacity 0.2s ease;
-		background-color: rgb(243 244 246);
+		transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+		background-color: rgba(250, 250, 250, 0.78);
+		border: 1px solid rgba(228, 228, 231, 0.95);
+		box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+		backdrop-filter: blur(10px);
+		transform: translateY(-3px) scale(0.98);
 	}
 	html.dark .code-action-bar {
-		background-color: rgb(39 39 42);
+		background-color: rgba(31, 41, 55, 0.92);
+		border-color: rgba(75, 85, 99, 0.95);
+		box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
 	}
 
 	.markdown-prose pre:hover .code-action-bar {
 		opacity: 1;
+		transform: translateY(0) scale(1);
 	}
 
 	.code-lang-label {
 		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 		font-size: 0.75rem;
-		padding-right: 0.25rem;
-		margin-right: 0.25rem;
-		border-right: 1px solid rgb(212 212 216);
-		color: rgb(113 113 122);
+		padding: 0.2rem 0.5rem;
+		border-radius: 9999px;
+		background-color: rgba(244, 244, 245, 0.92);
+		color: rgb(82 82 91);
+		letter-spacing: 0.01em;
 	}
 	html.dark .code-lang-label {
-		border-right-color: rgb(82 82 91);
-		color: rgb(161 161 170);
+		background-color: rgba(55, 65, 81, 0.92);
+		color: rgb(244 244 245);
 	}
 
 	.code-copy-btn {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
-		padding: 0.125rem 0.375rem;
-		border-radius: 0.25rem;
+		justify-content: center;
+		gap: 0.35rem;
+		min-height: 2rem;
+		padding: 0.35rem 0.7rem;
+		border-radius: 9999px;
 		font-size: 0.75rem;
-		background: transparent;
-		border: none;
+		font-weight: 600;
+		background: rgba(255, 255, 255, 0.85);
+		border: 1px solid rgba(228, 228, 231, 0.95);
 		cursor: pointer;
-		transition: all 0.15s ease;
-		color: rgb(113 113 122);
+		transition: all 0.18s ease;
+		color: rgb(63 63 70);
 	}
 	.code-copy-btn:hover {
-		color: rgb(63 63 70);
-		background-color: rgb(228 228 231);
+		color: rgb(24 24 27);
+		background-color: rgba(255, 255, 255, 0.98);
+		border-color: rgba(212, 212, 216, 1);
+		transform: translateY(-1px);
+		box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 	}
 	html.dark .code-copy-btn {
-		color: rgb(161 161 170);
+		color: rgb(244 244 245);
+		background: rgba(55, 65, 81, 0.98);
+		border-color: rgba(107, 114, 128, 0.95);
 	}
 	html.dark .code-copy-btn:hover {
-		color: rgb(228 228 231);
-		background-color: rgb(63 63 70);
+		color: rgb(250 250 250);
+		background-color: rgba(75, 85, 99, 0.98);
+		border-color: rgba(156, 163, 175, 1);
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 	}
 
 	.code-copy-btn svg {
@@ -427,28 +583,51 @@ html.dark:hover::-webkit-scrollbar-thumb {
 
 	.code-expand-btn {
 		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		width: 100%;
-		padding: 1.5rem 0.5rem 0.5rem;
+		left: 50%;
+		bottom: 0.85rem;
+		transform: translateX(-50%);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.45rem;
+		padding: 0.5rem 0.95rem;
 		text-align: center;
 		font-size: 0.75rem;
-		background: transparent;
-		border: none;
+		font-weight: 600;
+		background: rgba(250, 250, 250, 0.92);
+		border: 1px solid rgba(228, 228, 231, 0.95);
+		border-radius: 9999px;
 		cursor: pointer;
-		color: rgb(113 113 122);
-		background-image: linear-gradient(transparent, rgb(249 250 251));
+		color: rgb(82 82 91);
+		box-shadow: 0 10px 26px rgba(15, 23, 42, 0.1);
+		backdrop-filter: blur(10px);
+		transition: all 0.18s ease;
 	}
 	html.dark .code-expand-btn {
-		color: rgb(161 161 170);
-		background-image: linear-gradient(transparent, rgb(3 3 3));
+		color: rgb(244 244 245);
+		background: rgba(55, 65, 81, 0.96);
+		border-color: rgba(75, 85, 99, 0.95);
+		box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
 	}
 	.code-expand-btn:hover {
-		color: rgb(63 63 70);
+		background: rgba(255, 255, 255, 0.98);
+		border-color: rgba(212, 212, 216, 1);
 	}
 	html.dark .code-expand-btn:hover {
-		color: rgb(228 228 231);
+		color: rgb(250 250 250);
+		background: rgba(75, 85, 99, 0.98);
+		border-color: rgba(156, 163, 175, 1);
+	}
+
+	.code-expand-btn::before {
+		content: '▾';
+		font-size: 0.78rem;
+		line-height: 1;
+		transition: transform 0.18s ease;
+	}
+
+	.code-expand-btn[data-expanded='true']::before {
+		transform: rotate(180deg);
 	}
 
 	@media (max-width: 30rem) {
@@ -496,13 +675,15 @@ html.dark:hover::-webkit-scrollbar-thumb {
 	}
 }
 
-html.theme-switching *,
-html.theme-switching *::before,
-html.theme-switching *::after {
-	/* Theme transition is color-only to prevent geometry changes during dark/light toggles. */
-	transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, box-shadow;
-	transition-duration: 200ms;
-	transition-timing-function: ease-in-out;
+html,
+body,
+header,
+nav,
+main,
+footer,
+aside,
+section {
+	transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
 @keyframes hero-fade-up {

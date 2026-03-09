@@ -11,6 +11,71 @@ import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
 
+/*
+ * Minimal GitHub-style alert parser for markdown blockquotes.
+ * Supports:
+ * > [!NOTE]
+ * > [!TIP]
+ * > [!IMPORTANT]
+ * > [!WARNING]
+ * > [!CAUTION]
+ */
+function remarkGitHubAlertFallback() {
+	const ALERT_TYPES = new Set(['note', 'tip', 'important', 'warning', 'caution']);
+
+	return (tree) => {
+		const visit = (node) => {
+			if (!node || typeof node !== 'object') return;
+
+			if (node.type === 'blockquote' && Array.isArray(node.children) && node.children.length > 0) {
+				const first = node.children[0];
+				if (first?.type === 'paragraph' && Array.isArray(first.children) && first.children.length > 0) {
+					const firstChild = first.children[0];
+					if (firstChild?.type === 'text') {
+						const match = firstChild.value.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*/i);
+						if (match) {
+							const rawType = match[1].toLowerCase();
+							if (ALERT_TYPES.has(rawType)) {
+								firstChild.value = firstChild.value.replace(match[0], '');
+								if (!firstChild.value.length) {
+									first.children.shift();
+								}
+
+								node.data ??= {};
+								node.data.hName = 'blockquote';
+								node.data.hProperties = {
+									className: ['markdown-alert', `markdown-alert-${rawType}`],
+								};
+
+								const titleNode = {
+									type: 'paragraph',
+									data: {
+										hName: 'p',
+										hProperties: { className: ['markdown-alert-title'] },
+									},
+									children: [{ type: 'text', value: rawType }],
+								};
+
+								if (first.children.length === 0) {
+									node.children.shift();
+								}
+
+								node.children.unshift(titleNode);
+							}
+						}
+					}
+				}
+			}
+
+			if (Array.isArray(node.children)) {
+				for (const child of node.children) visit(child);
+			}
+		};
+
+		visit(tree);
+	};
+}
+
 const REPO_BASE = '/DansBlog/';
 const isCloudflarePages = Boolean(process.env.CF_PAGES);
 const isProduction = process.env.NODE_ENV === 'production';
@@ -59,7 +124,16 @@ export default defineConfig({
 	integrations: [mdx(), sitemap()],
 	markdown: {
 		// Keep markdown image URLs deployment-agnostic.
+		remarkPlugins: [remarkGitHubAlertFallback],
 		rehypePlugins: [rehypePrefixPublicImageBase(runtimeBase)],
+		syntaxHighlight: 'shiki',
+		shikiConfig: {
+			themes: {
+				light: 'github-light',
+				dark: 'github-dark',
+			},
+			wrap: false,
+		},
 	},
 	vite: {
 		plugins: [tailwindcss()],

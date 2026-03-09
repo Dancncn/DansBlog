@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "remark-github-blockquote-alert": "^2.0.1"
+  }
+}

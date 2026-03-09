@@ -38,24 +38,25 @@ const tags = (post.data.tags ?? []).filter((tag) => tag.trim().length > 0);
 const Heading = titleTag;
 ---
 
-{
-	tags.length > 0 && (
-		// Reserve a dedicated corner for badges so long titles keep a stable reading area.
-		<div class="pointer-events-auto absolute right-3 top-3 z-10 flex max-w-[55%] flex-wrap justify-end gap-2 md:max-w-none md:flex-nowrap">
-			<TagBadges tags={tags} base={base} maxMobile={maxMobile} maxDesktop={maxDesktop} />
-		</div>
-	)
-}
+<div class="card-surface card-interactive relative h-full">
+	{
+		tags.length > 0 && (
+			// Mobile keeps tags in normal flow to prevent overlap; desktop pins them to the corner.
+			<div class="pointer-events-auto px-5 pt-5 md:absolute md:right-3 md:top-3 md:z-10 md:mt-0 md:flex md:max-w-[55%] md:flex-wrap md:justify-end md:gap-2 md:max-w-none md:flex-nowrap md:px-0 md:pt-0">
+				<TagBadges tags={tags} base={base} maxMobile={maxMobile} maxDesktop={maxDesktop} />
+			</div>
+		)
+	}
 
-<a
-	href={`${base}blog/${post.id}/`}
-	// Optional hard navigation allows targeted VT bypass without changing global routing behavior.
-	data-astro-reload={reloadOnNavigate ? '' : undefined}
-	class="card-surface card-interactive relative block h-full p-5 no-underline"
->
-	<p class="m-0 text-xs text-zinc-500 dark:text-zinc-400">
-		<FormattedDate date={post.data.pubDate} />
-	</p>
-	<Heading class:list={[titleClass, tags.length > 0 && 'pr-24 md:pr-0']}>{post.data.title}</Heading>
-	<p class={descriptionClass}>{post.data.description}</p>
-</a>
+	<a
+		href={`${base}blog/${post.id}/`}
+		data-astro-reload={reloadOnNavigate ? '' : undefined}
+		class:list={['block h-full p-5 no-underline', tags.length > 0 && 'pt-3 md:pt-5']}
+	>
+		<p class="m-0 text-xs text-zinc-500 dark:text-zinc-400">
+			<FormattedDate date={post.data.pubDate} />
+		</p>
+		<Heading class:list={[titleClass, tags.length > 0 && 'md:pr-24 lg:pr-28']}>{post.data.title}</Heading>
+		<p class={descriptionClass}>{post.data.description}</p>
+	</a>
+</div>
