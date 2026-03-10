@@ -242,3 +242,4 @@ They still improve overall route feel across the rest of the site. The stricter 
 ### Why keep markdown-first image references?
 
 It keeps writing workflow simple and editor-friendly while remaining deployment-safe through base-path rewriting.
+V2
