@@ -1,0 +1,36 @@
+---
+import Toc from './Toc.astro';
+
+/*
+ * Desktop TOC card wrapper.
+ * Keeps visual framing separate from list logic so Toc.astro stays reusable.
+ */
+type TocHeading = {
+	depth: number;
+	slug: string;
+	text: string;
+};
+
+interface Props {
+	// Full heading list from the article renderer.
+	headings?: TocHeading[];
+}
+
+const { headings = [] } = Astro.props as Props;
+const tocItems = headings.filter((h) => h.depth === 2 || h.depth === 3 || h.depth === 4);
+---
+
+{
+	tocItems.length > 0 && (
+		<aside
+			class="rounded-2xl border border-zinc-200 bg-white/95 p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/90"
+			data-toc="sidebar"
+			data-toc-scroll="sidebar"
+		>
+			<p class="m-0 text-sm font-semibold text-zinc-900 dark:text-zinc-100">On this page</p>
+			<div class="mt-2">
+				<Toc headings={tocItems} />
+			</div>
+		</aside>
+	)
+}

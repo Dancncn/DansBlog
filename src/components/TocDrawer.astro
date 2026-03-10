@@ -1,0 +1,193 @@
+---
+import Toc from './Toc.astro';
+
+/*
+ * Mobile TOC drawer:
+ * - off-canvas list for article headings on small screens
+ * - reuses Toc.astro so active-state styling stays in sync with desktop TOC
+ */
+type TocHeading = {
+	depth: number;
+	slug: string;
+	text: string;
+};
+
+interface Props {
+	// Headings extracted from article markdown.
+	headings?: TocHeading[];
+}
+
+const { headings = [] } = Astro.props as Props;
+const tocItems = headings.filter((item) => item.depth === 2 || item.depth === 3);
+---
+
+{
+	tocItems.length > 0 && (
+		<>
+			<div
+				id="toc-overlay"
+				class="pointer-events-none fixed inset-0 z-[85] bg-black/40 opacity-0 transition-opacity duration-200 ease-out motion-reduce:transition-none md:hidden [will-change:opacity] hidden"
+				aria-hidden="true"
+			></div>
+			<aside
+				id="toc-drawer"
+				class="pointer-events-auto fixed inset-y-0 right-0 z-[95] flex h-[100dvh] max-h-[100dvh] w-[88vw] max-w-sm translate-x-full flex-col border-l border-zinc-200 bg-white/95 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] shadow-2xl transition-transform duration-200 ease-out motion-reduce:transition-none md:hidden dark:border-zinc-800 dark:bg-zinc-950/95 [will-change:transform] hidden"
+				data-toc="drawer"
+				aria-label="Table of contents"
+				aria-hidden="true"
+			>
+				<div class="mb-4 flex shrink-0 items-center justify-between">
+					<p class="m-0 text-base font-semibold text-zinc-900 dark:text-zinc-100">Contents</p>
+					<button
+						type="button"
+						id="toc-menu-close"
+						class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+						aria-label="Close table of contents"
+					>
+						<svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" aria-hidden="true">
+							<path d="M6.7 5.3a1 1 0 0 0-1.4 1.4L10.6 12l-5.3 5.3a1 1 0 1 0 1.4 1.4l5.3-5.3 5.3 5.3a1 1 0 1 0 1.4-1.4L13.4 12l5.3-5.3a1 1 0 0 0-1.4-1.4L12 10.6 6.7 5.3Z" />
+						</svg>
+					</button>
+				</div>
+				<div class="relative min-h-0 flex-1 overflow-hidden" data-toc-fade-wrap>
+					<div class="toc-scroll h-full min-h-0 overflow-y-auto pb-[max(0.5rem,env(safe-area-inset-bottom))]" data-toc-scroll="drawer">
+						<Toc headings={tocItems} />
+					</div>
+					<div data-toc-fade="top" class="toc-fade toc-fade-top pointer-events-none absolute inset-x-0 top-0 h-8 opacity-0"></div>
+					<div data-toc-fade="bottom" class="toc-fade toc-fade-bottom pointer-events-none absolute inset-x-0 bottom-0 h-8 opacity-0"></div>
+				</div>
+			</aside>
+		</>
+	)
+}
+
+<script is:inline>
+	const initTocDrawer = () => {
+		const trigger = document.getElementById('toc-menu-button');
+		const drawer = document.getElementById('toc-drawer');
+		const overlay = document.getElementById('toc-overlay');
+		const closeBtn = document.getElementById('toc-menu-close');
+		// Guard against duplicate listeners after Astro client-side swaps.
+		if (!trigger || !drawer || !overlay || !closeBtn || trigger.dataset.tocBound === 'true') return;
+		trigger.dataset.tocBound = 'true';
+		const TRANSITION_MS = 220;
+		let closeTimer = null;
+
+		const unlockScroll = () => {
+			document.documentElement.classList.remove('overflow-hidden');
+			document.body.classList.remove('overflow-hidden');
+		};
+
+		const forceClosedState = () => {
+			drawer.classList.add('translate-x-full', 'hidden');
+			drawer.classList.remove('translate-x-0');
+			drawer.setAttribute('aria-hidden', 'true');
+			overlay.classList.add('opacity-0', 'pointer-events-none', 'hidden');
+			overlay.classList.remove('opacity-100', 'pointer-events-auto');
+			unlockScroll();
+			trigger.setAttribute('aria-expanded', 'false');
+		};
+
+		const setOpenVisualState = () => {
+			drawer.classList.remove('translate-x-full');
+			drawer.classList.add('translate-x-0');
+			overlay.classList.remove('opacity-0', 'pointer-events-none');
+			overlay.classList.add('opacity-100', 'pointer-events-auto');
+		};
+
+		const closeDrawer = () => {
+			if (closeTimer) {
+				clearTimeout(closeTimer);
+				closeTimer = null;
+			}
+			unlockScroll();
+			trigger.setAttribute('aria-expanded', 'false');
+			drawer.setAttribute('aria-hidden', 'true');
+			drawer.classList.add('translate-x-full');
+			drawer.classList.remove('translate-x-0');
+			overlay.classList.add('opacity-0', 'pointer-events-none');
+			overlay.classList.remove('opacity-100', 'pointer-events-auto');
+			closeTimer = window.setTimeout(() => {
+				drawer.classList.add('hidden');
+				overlay.classList.add('hidden');
+				closeTimer = null;
+			}, TRANSITION_MS);
+		};
+
+		const openDrawer = () => {
+			if (closeTimer) {
+				clearTimeout(closeTimer);
+				closeTimer = null;
+			}
+			trigger.setAttribute('aria-expanded', 'true');
+			drawer.setAttribute('aria-hidden', 'false');
+			drawer.classList.remove('hidden');
+			overlay.classList.remove('hidden');
+			document.documentElement.classList.add('overflow-hidden');
+			document.body.classList.add('overflow-hidden');
+			// Trigger transform animation in next frame to ensure transition classes are applied cleanly.
+			window.requestAnimationFrame(setOpenVisualState);
+			window.requestAnimationFrame(() => {
+				window.dispatchEvent(new CustomEvent('toc:refresh'));
+				window.dispatchEvent(new CustomEvent('toc:sync-active'));
+			});
+		};
+
+		trigger.addEventListener('click', openDrawer);
+		closeBtn.addEventListener('click', closeDrawer);
+		overlay.addEventListener('click', closeDrawer);
+
+		// TOC links: close drawer and unlock scroll immediately before navigation
+		const tocLinks = drawer.querySelectorAll('[data-toc-link]');
+		for (const link of tocLinks) {
+			link.addEventListener('click', () => {
+				unlockScroll();
+				closeDrawer();
+			});
+		}
+
+		// Always normalize initial state so hydration order does not leak an open drawer.
+		forceClosedState();
+	};
+
+	if (document.documentElement.dataset.tocEscBound !== 'true') {
+		document.addEventListener('keydown', (event) => {
+			if (event.key !== 'Escape') return;
+			const trigger = document.getElementById('toc-menu-button');
+			const drawer = document.getElementById('toc-drawer');
+			const overlay = document.getElementById('toc-overlay');
+			if (!trigger || !drawer || !overlay || trigger.getAttribute('aria-expanded') !== 'true') return;
+
+			trigger.setAttribute('aria-expanded', 'false');
+			drawer.setAttribute('aria-hidden', 'true');
+			drawer.classList.add('translate-x-full');
+			drawer.classList.remove('translate-x-0');
+			overlay.classList.add('opacity-0', 'pointer-events-none');
+			overlay.classList.remove('opacity-100', 'pointer-events-auto');
+			document.documentElement.classList.remove('overflow-hidden');
+			document.body.classList.remove('overflow-hidden');
+			window.setTimeout(() => {
+				drawer.classList.add('hidden');
+				overlay.classList.add('hidden');
+			}, 220);
+		});
+		// Bind ESC handler only once globally to avoid stacked listeners.
+		document.documentElement.dataset.tocEscBound = 'true';
+	}
+
+	// Defensive: ensure scroll is unlocked when leaving page
+	window.addEventListener('pagehide', () => {
+		document.documentElement.classList.remove('overflow-hidden');
+		document.body.classList.remove('overflow-hidden');
+	});
+
+	// Defensive: ensure scroll is unlocked on page navigation
+	document.addEventListener('astro:page-load', () => {
+		document.documentElement.classList.remove('overflow-hidden');
+		document.body.classList.remove('overflow-hidden');
+	});
+
+	initTocDrawer();
+	document.addEventListener('astro:page-load', initTocDrawer);
+	document.addEventListener('astro:after-swap', initTocDrawer);
+</script>

@@ -1,0 +1,30 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+/*
+ * Nav link primitive used by Header.
+ * Encapsulates active-state detection so navigation styling stays consistent everywhere.
+ */
+type Props = HTMLAttributes<'a'>;
+
+const { href, class: className, ...props } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL;
+const pathname = Astro.url.pathname.replace(baseUrl, '/');
+const subpath = pathname.match(/[^\/]+/g);
+const normalizedHref = typeof href === 'string' ? href.replace(baseUrl, '/').replace(/\/+$/, '/') : href;
+const firstSegmentPath = subpath?.[0] ? `/${subpath[0]}/` : '/';
+// Segment-level match keeps parent sections highlighted across nested routes.
+const isActive = normalizedHref === pathname || normalizedHref === firstSegmentPath;
+---
+
+<a
+	href={href}
+	class:list={[
+		className,
+		'nav-item rounded-lg px-3 py-2 font-sans text-zinc-600 no-underline hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100',
+		{ 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100': isActive },
+	]}
+	{...props}
+>
+	<slot />
+</a>

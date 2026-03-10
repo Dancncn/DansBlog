@@ -1,0 +1,43 @@
+﻿---
+import Layout from '../layouts/BlogPost.astro';
+import TerminalQuote from '../components/TerminalQuote.astro';
+
+const nowText =
+	"Now: Learning finite element analysis (FEA) software,using ANSA, ANSYS, and COMSOL,for battery-related engineering problems, running electrochemical testing and analysis, and building PV parking lot EMS features step by step.";
+---
+
+<Layout
+	title="About Me"
+	description="You can call me DanArnoux, or 符笙."
+	pubDate={new Date('Feb 10 2026')}
+	heroImage="https://img.danarnoux.com/misc/about-image.webp"
+	profileImage="https://img.danarnoux.com/misc/DanArnoux.webp"
+>
+	<p>
+		I am DanArnoux (符笙), an energy engineering student from China. I care about practical
+		engineering, clear reasoning, and building systems that can be explained and reproduced.
+		This blog is my long-term notebook for experiments, tools, and technical decisions.
+	</p>
+
+	<h2>Focus</h2>
+	<ul>
+		<li>Electrochemistry and materials aging: CV / EIS / ECSA analysis, battery degradation, and characterization</li>
+		<li>Simulation and modeling: battery-oriented FEM studies, Simulink models, and reproducible workflows</li>
+		<li>
+			AI and applied systems: Stable Diffusion, LLM-assisted tooling, and
+			<a href="https://creatinf.com/" target="_blank" rel="noreferrer">CreatInf</a>
+		</li>
+	</ul>
+
+	<h2>Now</h2>
+	<TerminalQuote text={nowText} once={true} fixedHeight={false} />
+
+	<h2>Contact</h2>
+	<p>
+		The most reliable way to reach me is by email:
+		<code>2819045467@qq.com</code>
+		or
+		<code>danchennuo@gmail.com</code>.
+		You can also find me via GitHub and Bilibili from the site navigation.
+	</p>
+</Layout>

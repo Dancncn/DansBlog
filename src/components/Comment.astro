@@ -1,0 +1,213 @@
+---
+interface Props {
+	postSlug: string;
+}
+
+const { postSlug } = Astro.props;
+---
+
+<section class="comments-section mt-12 border-t border-zinc-200 pt-8 dark:border-zinc-700">
+	<h2 class="mb-6 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Comments</h2>
+
+	<div id="comment-form-container" class="mt-8">
+		<!-- Show login prompt when not logged in -->
+		<div id="login-prompt" class="hidden">
+			<p class="text-zinc-600 dark:text-zinc-400">
+				<a href="https://api.danarnoux.com/api/auth/github/start" class="text-blue-600 hover:underline dark:text-blue-400">
+					Login with GitHub
+				</a>
+				to comment
+			</p>
+		</div>
+
+		<!-- Comment form - visible when logged in -->
+		<form id="comment-form" class="hidden space-y-4">
+			<textarea
+				id="comment-content"
+				name="content"
+				rows="4"
+				required
+				placeholder="Write a comment..."
+				class="w-full rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-zinc-900 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500"
+			></textarea>
+			<button
+				type="submit"
+				class="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+			>
+				Submit Comment
+			</button>
+		</form>
+	</div>
+
+	<!-- Comments list -->
+	<div id="comments-container" class="mt-8 space-y-6" data-comments-container data-post-slug={postSlug}></div>
+</section>
+
+<script is:inline>
+	// Use shared auth functions from auth.js
+	const { storeTokenFromHash, getAuthToken, getCurrentUser } = window.__auth || {};
+
+	// Format relative time
+	const formatRelativeTime = (dateString) => {
+		const date = new Date(dateString);
+		const now = new Date();
+		const diff = now - date;
+		const seconds = Math.floor(diff / 1000);
+		const minutes = Math.floor(seconds / 60);
+		const hours = Math.floor(minutes / 60);
+		const days = Math.floor(hours / 24);
+
+		if (days > 7) {
+			return date.toLocaleDateString();
+		} else if (days > 0) {
+			return `${days} day${days > 1 ? 's' : ''} ago`;
+		} else if (hours > 0) {
+			return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+		} else if (minutes > 0) {
+			return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+		} else {
+			return 'Just now';
+		}
+	};
+
+	// Render comments
+	const renderComments = (comments) => {
+		const container = document.getElementById('comments-container');
+		if (!container) return;
+
+		if (!comments || comments.length === 0) {
+			container.innerHTML = '<p class="text-zinc-500 dark:text-zinc-400">No comments yet. Be the first to comment!</p>';
+			return;
+		}
+
+		container.innerHTML = comments
+			.map(
+				(comment) => `
+			<div class="flex gap-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+				<img
+					src="${comment.author?.avatar || 'https://img.danarnoux.com/misc/DanArnoux.webp'}"
+					alt="${comment.author?.username || 'User'} avatar"
+					class="h-10 w-10 shrink-0 rounded-full border border-zinc-200 object-cover dark:border-zinc-700"
+				/>
+				<div class="min-w-0 flex-1">
+					<div class="flex items-center gap-2">
+						<span class="font-medium text-zinc-900 dark:text-zinc-100">${comment.author?.username || 'Anonymous'}</span>
+						<span class="text-sm text-zinc-500 dark:text-zinc-400">${formatRelativeTime(comment.createdAt || comment.created_at)}</span>
+					</div>
+					<p class="mt-1 text-zinc-700 dark:text-zinc-300">${comment.content}</p>
+				</div>
+			</div>
+		`
+			)
+			.join('');
+	};
+
+	// Load comments
+	async function loadComments(postSlug) {
+		const container = document.getElementById('comments-container');
+		if (!container) {
+			console.log('Comments container not found');
+			return;
+		}
+
+		console.log('Loading comments for:', postSlug);
+
+		try {
+			const response = await fetch(`https://api.danarnoux.com/api/comments?post_id=${encodeURIComponent(postSlug)}`);
+			if (response.ok) {
+				const data = await response.json();
+				const comments = data?.comments ?? data ?? [];
+				renderComments(comments);
+			} else {
+				renderComments([]);
+			}
+		} catch (error) {
+			renderComments([]);
+		}
+	}
+
+	// Submit comment
+	async function submitComment(postSlug, content) {
+		const token = getAuthToken();
+		if (!token) return false;
+
+		const response = await fetch(`${window.__API_BASE}/api/comments`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify({
+				post_id: postSlug,
+				content: content,
+			}),
+		});
+
+		return response.ok;
+	}
+
+	// Initialize comments
+	const initComments = async () => {
+		const container = document.getElementById('comments-container');
+		if (!container) return;
+
+		const postSlug = container.dataset.postSlug;
+		if (!postSlug) return;
+
+		storeTokenFromHash();
+
+		const user = await getCurrentUser();
+		const loginPrompt = document.getElementById('login-prompt');
+		const commentForm = document.getElementById('comment-form');
+
+		// Show comment form if logged in, otherwise show login prompt
+		if (user) {
+			if (loginPrompt) loginPrompt.classList.add('hidden');
+			if (commentForm) commentForm.classList.remove('hidden');
+		} else {
+			if (loginPrompt) loginPrompt.classList.remove('hidden');
+			if (commentForm) commentForm.classList.add('hidden');
+		}
+
+		// Load demo comments for testing
+		loadComments(postSlug);
+
+		// Bind form submit
+		const form = document.getElementById('comment-form');
+		if (form && form.dataset.bound !== 'true') {
+			form.dataset.bound = 'true';
+			form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				const textarea = document.getElementById('comment-content');
+				const content = textarea?.value?.trim();
+				if (!content) return;
+
+				const button = form.querySelector('button[type="submit"]');
+				if (button) {
+					button.disabled = true;
+					button.textContent = 'Submitting...';
+				}
+
+				const success = await submitComment(postSlug, content);
+
+				if (success) {
+					textarea.value = '';
+					loadComments(postSlug);
+				} else {
+					alert('Failed to submit comment. Please try again.');
+				}
+
+				if (button) {
+					button.disabled = false;
+					button.textContent = 'Submit Comment';
+				}
+			});
+		}
+
+		loadComments(postSlug);
+	};
+
+	initComments();
+	document.addEventListener('astro:page-load', initComments);
+	document.addEventListener('astro:after-swap', initComments);
+</script>

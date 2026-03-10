@@ -1,0 +1,5 @@
+﻿User-agent: *
+Allow: /
+Sitemap: https://danarnoux.com/sitemap.xml
+Sitemap: https://danarnoux.com/sitemap-index.xml
+# If you bind a custom domain later, update the Sitemap URLs above.

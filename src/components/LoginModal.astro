@@ -1,0 +1,41 @@
+---
+// LoginModal.astro - Solid background login modal with Apple-style animation
+---
+
+<div
+	id="login-modal"
+	class="fixed inset-0 z-[100] invisible opacity-0 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity duration-200 ease-out"
+	aria-hidden="true"
+>
+	<div
+		class="modal-content mx-4 w-[360px] rounded-xl bg-white p-6 shadow-xl transition-all duration-200 ease-out dark:bg-zinc-900 scale-95 opacity-0"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="login-modal-title"
+		id="login-modal-content"
+	>
+		<h2 id="login-modal-title" class="mb-6 text-center text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+			Login
+		</h2>
+
+		<a
+			href="https://api.danarnoux.com/api/auth/github/start"
+			class="flex w-full items-center justify-center gap-3 rounded-lg bg-black px-4 py-3 text-base font-medium text-white transition-colors hover:bg-gray-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-gray-200"
+		>
+			<svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+				<path
+					d="M12 .3A12 12 0 0 0 8.2 23.7c.6.1.8-.2.8-.6v-2.3c-3.3.7-4-1.4-4-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.8 1.1 1.8 1.1 1 .1 1.6.7 2 1.3.9.2 1.8.4 2.7.1.1-.7.4-1.3.7-1.7-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.1-3.2-.1-.3-.5-1.5.1-3.2 0 0 .9-.3 3.2 1.1a10.9 10.9 0 0 1 5.9 0c2.2-1.4 3.2-1.1 3.2-1.1.6 1.7.2 2.9.1 3.2.7.8 1.1 1.9 1.1 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .4.2.7.8.6A12 12 0 0 0 12 .3"
+				/>
+			</svg>
+			Login with GitHub
+		</a>
+
+		<button
+			type="button"
+			id="login-modal-close"
+			class="mt-4 w-full rounded-lg border border-zinc-200 px-4 py-2 text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+		>
+			Cancel
+		</button>
+	</div>
+</div>

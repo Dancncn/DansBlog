@@ -1,0 +1,22 @@
+---
+/*
+ * Tiny formatting component for publication/update dates.
+ * Keeps date locale/format stable across cards, headers, and metadata rows.
+ */
+interface Props {
+	// Raw Date object from content collections.
+	date: Date;
+}
+
+const { date } = Astro.props;
+---
+
+<time datetime={date.toISOString()}>
+	{
+		date.toLocaleDateString('en-us', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+		})
+	}
+</time>

@@ -1,0 +1,5 @@
+.git/
+.git_disable/
+node_modules/
+.astro/
+dist/

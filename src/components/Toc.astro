@@ -1,0 +1,40 @@
+---
+/*
+ * Pure TOC list renderer used by both desktop sidebar and mobile drawer.
+ * A shared `data-toc-link` contract allows one active-state script to style both.
+ */
+type TocHeading = {
+	depth: number;
+	slug: string;
+	text: string;
+};
+
+interface Props {
+	// Headings generated from markdown render pipeline.
+	headings?: TocHeading[];
+}
+
+const { headings = [] } = Astro.props as Props;
+const tocItems = headings.filter((h) => h.depth === 2 || h.depth === 3 || h.depth === 4);
+---
+
+{
+	tocItems.length > 0 && (
+		<ul class="m-0 list-none space-y-0.5 p-0">
+			{
+				tocItems.map((item) => (
+					<li class:list={['m-0', item.depth === 3 && 'pl-3', item.depth === 4 && 'pl-4']}>
+						<a
+							href={`#${encodeURIComponent(item.slug)}`}
+							// Stable key consumed by BlogPost observer logic for active section highlighting.
+							data-toc-link={item.slug}
+							class="block rounded-md border-l-2 border-transparent px-2 py-1 text-[13px] leading-5 font-medium text-zinc-500 no-underline transition-colors hover:bg-zinc-100/70 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-100"
+						>
+							{item.text}
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	)
+}

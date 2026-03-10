@@ -1,0 +1,62 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import FormattedDate from './FormattedDate.astro';
+import TagBadges from './TagBadges.astro';
+
+/*
+ * Reusable post preview card used across all list surfaces.
+ * Centralizing this component keeps spacing, typography, and tag behavior consistent.
+ */
+interface Props {
+	// Content entry rendered as a preview card.
+	post: CollectionEntry<'blog'>;
+	// Deployment-aware base path injected by parent pages.
+	base?: string;
+	// Allows cards to fit contexts that need different heading hierarchy.
+	titleTag?: 'h2' | 'h3';
+	titleClass?: string;
+	descriptionClass?: string;
+	// Per-breakpoint tag display limits to avoid title overlap on small cards.
+	maxMobile?: number;
+	maxDesktop?: number | null;
+	// Optional hard navigation switch to bypass View Transition for specific routes.
+	reloadOnNavigate?: boolean;
+}
+
+const {
+	post,
+	base = import.meta.env.BASE_URL,
+	titleTag = 'h2',
+	titleClass = 'mt-2 text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100',
+	descriptionClass = 'mt-2 font-serif leading-8 text-zinc-600 dark:text-zinc-300',
+	maxMobile = 3,
+	maxDesktop = 3,
+	reloadOnNavigate = false,
+} = Astro.props as Props;
+
+const tags = (post.data.tags ?? []).filter((tag) => tag.trim().length > 0);
+const Heading = titleTag;
+---
+
+<div class="card-surface card-interactive relative h-full">
+	{
+		tags.length > 0 && (
+			// Mobile keeps tags in normal flow to prevent overlap; desktop pins them to the corner.
+			<div class="pointer-events-auto px-5 pt-5 md:absolute md:right-3 md:top-3 md:z-10 md:mt-0 md:flex md:max-w-[55%] md:flex-wrap md:justify-end md:gap-2 md:max-w-none md:flex-nowrap md:px-0 md:pt-0">
+				<TagBadges tags={tags} base={base} maxMobile={maxMobile} maxDesktop={maxDesktop} />
+			</div>
+		)
+	}
+
+	<a
+		href={`${base}blog/${post.id}/`}
+		data-astro-reload={reloadOnNavigate ? '' : undefined}
+		class:list={['block h-full p-5 no-underline', tags.length > 0 && 'pt-3 md:pt-5']}
+	>
+		<p class="m-0 text-xs text-zinc-500 dark:text-zinc-400">
+			<FormattedDate date={post.data.pubDate} />
+		</p>
+		<Heading class:list={[titleClass, tags.length > 0 && 'md:pr-24 lg:pr-28']}>{post.data.title}</Heading>
+		<p class={descriptionClass}>{post.data.description}</p>
+	</a>
+</div>

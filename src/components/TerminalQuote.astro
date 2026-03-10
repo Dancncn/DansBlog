@@ -1,0 +1,224 @@
+﻿---
+import quotesData from '../data/quotes.json';
+
+/*
+ * Stateful terminal-style quote component for hero/about sections.
+ * Supports one-shot and looping modes while remaining resilient to Astro route swaps.
+ */
+
+type Quote = {
+	text: string;
+	author?: string;
+	lang?: string;
+	tag?: string;
+	easterEgg?: boolean;
+};
+
+interface Props {
+	// Optional inline quote text; when set, JSON data is bypassed.
+	text?: string;
+	// One-shot mode for pages that should stop updating after first render.
+	once?: boolean;
+	// Fixed height prevents surrounding layout drift when quote length changes.
+	fixedHeight?: boolean;
+}
+
+const { text, once = false, fixedHeight = true } = Astro.props as Props;
+
+const rawQuotes = Array.isArray(quotesData)
+	? quotesData
+	: (quotesData as { quotes?: Quote[] }).quotes ?? [];
+const normalizedText = typeof text === 'string' ? text.trim() : '';
+const quotes = normalizedText
+	? [{ text: normalizedText, lang: 'en', tag: 'custom' }]
+	: rawQuotes.filter((q) => typeof q.text === 'string' && q.text.trim().length > 0);
+const shouldLoop = !once && !normalizedText;
+const encodedQuotes = encodeURIComponent(JSON.stringify(quotes));
+---
+
+<aside
+	data-terminal-quote
+	data-quotes={encodedQuotes}
+	data-loop={shouldLoop ? 'true' : 'false'}
+	class:list={[
+		'w-full overflow-hidden rounded-2xl border border-zinc-200 bg-white/90 shadow-sm backdrop-blur-sm transition-colors duration-200 dark:border-zinc-800 dark:bg-zinc-950/70 flex flex-col',
+		fixedHeight ? 'h-[200px]' : 'min-h-[200px] h-auto',
+	]}
+>
+	<div class="flex items-center justify-between border-b border-zinc-200 px-4 py-2.5 dark:border-zinc-800">
+		<div class="flex items-center gap-1.5">
+			<span class="h-2.5 w-2.5 rounded-full bg-red-400/90"></span>
+			<span class="h-2.5 w-2.5 rounded-full bg-amber-300/90"></span>
+			<span class="h-2.5 w-2.5 rounded-full bg-emerald-400/90"></span>
+		</div>
+		<p class="m-0 font-mono text-xs text-zinc-500 dark:text-zinc-400">~/dan/status</p>
+	</div>
+
+	<div class="flex flex-1 flex-col p-4 font-mono text-sm leading-7 text-zinc-700 dark:text-zinc-200">
+		<p class="m-0">
+			<span class="text-sky-600 dark:text-sky-400">dan@blog</span>
+			<span>:~$</span>
+			<span class="ml-1">quote</span>
+		</p>
+
+		<div class="mt-3 flex-1 min-h-0 overflow-y-auto">
+			<p class="m-0 whitespace-normal break-words text-zinc-700 dark:text-zinc-200">
+				<span data-quote-text></span><span data-cursor class="ml-0.5 inline-block h-[1em] w-[0.5em] animate-pulse bg-sky-500 align-[-0.1em]" aria-hidden="true"></span>
+			</p>
+			<p data-quote-author class="m-0 mt-2 hidden whitespace-normal break-words text-xs text-zinc-500 dark:text-zinc-400"></p>
+		</div>
+	</div>
+</aside>
+
+<script is:inline>
+	(() => {
+		const GLOBAL_KEY = '__terminalQuoteManager';
+		const existingManager = window[GLOBAL_KEY];
+		if (existingManager?.initialized) {
+			existingManager.initAll();
+			return;
+		}
+
+		// Shared manager avoids duplicate timers when multiple terminal instances coexist.
+		const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+		const registry = new WeakMap();
+
+		const parseQuotes = (rawValue) => {
+			if (!rawValue) return [];
+			try {
+				const direct = JSON.parse(rawValue);
+				return Array.isArray(direct) ? direct : [];
+			} catch {}
+
+			try {
+				const decoded = decodeURIComponent(rawValue);
+				const parsed = JSON.parse(decoded);
+				return Array.isArray(parsed) ? parsed : [];
+			} catch {
+				return [];
+			}
+		};
+
+		const stopRoot = (root) => {
+			// Soft stop lets in-flight async loops exit without throwing or leaking.
+			const state = registry.get(root);
+			if (state) state.active = false;
+		};
+
+		const initRoot = (root) => {
+			const textEl = root.querySelector('[data-quote-text]');
+			const authorEl = root.querySelector('[data-quote-author]');
+			const cursorEl = root.querySelector('[data-cursor]');
+			const loopEnabled = root.getAttribute('data-loop') === 'true';
+			if (!textEl || !authorEl || !cursorEl) return;
+
+			const previous = registry.get(root);
+			if (previous) previous.active = false;
+			const state = { active: true };
+			registry.set(root, state);
+
+			const raw = root.getAttribute('data-quotes') || '[]';
+			let quotes = parseQuotes(raw);
+
+			quotes = Array.isArray(quotes)
+				? quotes.filter((q) => typeof q?.text === 'string' && q.text.trim().length > 0)
+				: [];
+
+			if (quotes.length === 0) {
+				// Explicit message prevents a blank card when quote data is malformed.
+				textEl.textContent = 'Quote data is empty or invalid.';
+				cursorEl.classList.add('hidden');
+				return;
+			}
+
+			const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			if (reducedMotion) cursorEl.classList.remove('animate-pulse');
+
+			let lastIndex = -1;
+
+			const pickNext = () => {
+				if (quotes.length === 1) {
+					lastIndex = 0;
+					return quotes[0];
+				}
+				let idx = Math.floor(Math.random() * quotes.length);
+				// Avoid immediate repeats to preserve the perception of rotation.
+				while (idx === lastIndex) idx = Math.floor(Math.random() * quotes.length);
+				lastIndex = idx;
+				return quotes[idx];
+			};
+
+			const renderAuthor = (quote) => {
+				const show = quote?.easterEgg === true;
+				if (show && quote?.author) {
+					authorEl.textContent = `- ${quote.author}`;
+					authorEl.classList.remove('hidden');
+				} else {
+					authorEl.textContent = '';
+					authorEl.classList.add('hidden');
+				}
+			};
+
+			const typeText = async (value) => {
+				textEl.textContent = '';
+				if (reducedMotion) {
+					textEl.textContent = value;
+					return;
+				}
+				for (let i = 1; i <= value.length; i++) {
+					if (!state.active) return;
+					textEl.textContent = value.slice(0, i);
+					const delay = 20 + Math.floor(Math.random() * 21);
+					await sleep(delay);
+				}
+			};
+
+			const showQuote = async () => {
+				const quote = pickNext();
+				renderAuthor(quote);
+				await typeText(quote.text || '');
+			};
+
+			const run = async () => {
+				await showQuote();
+				if (reducedMotion || !loopEnabled || !state.active) return;
+				while (state.active) {
+					await sleep(5000);
+					if (!state.active) return;
+					textEl.textContent = '';
+					authorEl.textContent = '';
+					authorEl.classList.add('hidden');
+					await sleep(120);
+					if (!state.active) return;
+					await showQuote();
+				}
+			};
+
+			run();
+		};
+
+		const initAll = () => {
+			const roots = document.querySelectorAll('[data-terminal-quote]');
+			for (const root of roots) initRoot(root);
+		};
+
+		const cleanupBeforeSwap = () => {
+			const roots = document.querySelectorAll('[data-terminal-quote]');
+			for (const root of roots) stopRoot(root);
+		};
+
+		const initAfterNavigation = () => {
+			window.requestAnimationFrame(initAll);
+		};
+
+		window[GLOBAL_KEY] = {
+			initialized: true,
+			initAll,
+		};
+
+		initAfterNavigation();
+		document.addEventListener('astro:before-swap', cleanupBeforeSwap);
+		document.addEventListener('astro:after-swap', initAfterNavigation);
+		document.addEventListener('astro:page-load', initAfterNavigation);
+	})();
+</script>

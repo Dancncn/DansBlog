@@ -1,0 +1,104 @@
+---
+/*
+ * Lightweight terminal-style quote card.
+ * Kept as a simple visual component for static contexts where full quote orchestration is unnecessary.
+ */
+const QUOTES = [
+	'We are what we repeatedly do. Excellence, then, is not an act, but a habit.',
+	'Simplicity is prerequisite for reliability.',
+	'First, solve the problem. Then, write the code.',
+	'The best way to predict the future is to build it.',
+	'Stay hungry, stay foolish.',
+];
+
+const quote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+---
+
+<aside
+	class="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white/90 shadow-sm backdrop-blur-sm transition-colors duration-200 dark:border-zinc-800 dark:bg-zinc-950/70"
+	data-terminal-card
+>
+	<div class="flex items-center justify-between border-b border-zinc-200 px-4 py-2.5 dark:border-zinc-800">
+		<div class="flex items-center gap-1.5">
+			<span class="h-2.5 w-2.5 rounded-full bg-red-400/90"></span>
+			<span class="h-2.5 w-2.5 rounded-full bg-amber-300/90"></span>
+			<span class="h-2.5 w-2.5 rounded-full bg-emerald-400/90"></span>
+		</div>
+		<p class="m-0 font-mono text-xs text-zinc-500 dark:text-zinc-400">~/dan/status</p>
+	</div>
+
+	<div class="space-y-2 p-4 font-mono text-sm leading-7 text-zinc-700 dark:text-zinc-200">
+		<p class="m-0">
+			<span class="text-sky-600 dark:text-sky-400">dan@blog</span>
+			<span>:~$</span>
+			<span class="ml-1">quote</span>
+		</p>
+		<p class="m-0 text-zinc-600 dark:text-zinc-300">
+			<span data-terminal-quote data-quote={quote}>{quote}</span><span class="terminal-cursor" aria-hidden="true"></span>
+		</p>
+	</div>
+</aside>
+
+<script is:inline>
+	(() => {
+		// Only animate typing when motion is allowed; preserve instant readability otherwise.
+		const cards = document.querySelectorAll('[data-terminal-card]');
+		if (!cards.length) return;
+
+		const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+		for (const card of cards) {
+			const quoteEl = card.querySelector('[data-terminal-quote]');
+			if (!quoteEl) continue;
+
+			const fullText = quoteEl.getAttribute('data-quote') || '';
+			if (!fullText || prefersReducedMotion) {
+				quoteEl.textContent = fullText;
+				continue;
+			}
+
+			quoteEl.textContent = '';
+			let i = 0;
+			const type = () => {
+				i += 1;
+				quoteEl.textContent = fullText.slice(0, i);
+				if (i < fullText.length) {
+					const delay = 20 + Math.floor(Math.random() * 21);
+					window.setTimeout(type, delay);
+				}
+			};
+
+			window.setTimeout(type, 120);
+		}
+	})();
+</script>
+
+<style>
+	.terminal-cursor {
+		display: inline-block;
+		width: 0.5em;
+		height: 1.1em;
+		margin-left: 0.12rem;
+		background: rgb(14 165 233);
+		vertical-align: -0.15em;
+		animation: terminal-blink 1s ease-in-out infinite;
+	}
+
+	@keyframes terminal-blink {
+		0%,
+		45% {
+			opacity: 1;
+		}
+		50%,
+		100% {
+			opacity: 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.terminal-cursor {
+			animation: none;
+			opacity: 1;
+		}
+	}
+</style>

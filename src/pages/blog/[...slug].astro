@@ -1,0 +1,51 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import BlogPost from '../../layouts/BlogPost.astro';
+
+export async function getStaticPaths() {
+	const posts = await getCollection('blog');
+	return posts.map((post) => ({
+		params: { slug: post.id },
+		props: post,
+	}));
+}
+type Props = CollectionEntry<'blog'>;
+
+const post = Astro.props;
+const { Content, headings } = await render(post);
+
+const BASE = import.meta.env.BASE_URL;
+const allPosts = await getCollection('blog');
+const postMeta = post.data as CollectionEntry<'blog'>['data'] & { lang?: string; group?: string };
+const idMatch = post.id.match(/-(cn|en)$/);
+const currentLang = (postMeta.lang === 'cn' || postMeta.lang === 'en' ? postMeta.lang : idMatch?.[1]) as
+	| 'cn'
+	| 'en'
+	| undefined;
+const currentGroup = postMeta.group ?? post.id.replace(/-(cn|en)$/, '');
+const targetLang = currentLang === 'cn' ? 'en' : currentLang === 'en' ? 'cn' : undefined;
+
+const altPost =
+	targetLang === undefined
+		? undefined
+		: allPosts.find(
+				(item) =>
+					item.id !== post.id &&
+					((item.data as CollectionEntry<'blog'>['data'] & { group?: string }).group ?? item.id.replace(/-(cn|en)$/, '')) ===
+						currentGroup &&
+					((item.data as CollectionEntry<'blog'>['data'] & { lang?: string }).lang ??
+						(item.id.match(/-(cn|en)$/)?.[1] as 'cn' | 'en' | undefined)) === targetLang
+			);
+
+const languageSwitch =
+	altPost && currentLang
+		? {
+				href: `${BASE}blog/${altPost.id}/`,
+				label: currentLang === 'cn' ? 'English Version' : '中文版',
+			}
+		: undefined;
+---
+
+<BlogPost {...post.data} headings={headings} rawBody={post.body} slug={post.id} languageSwitch={languageSwitch}>
+	<Content />
+</BlogPost>

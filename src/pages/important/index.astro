@@ -1,0 +1,65 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import MobileDrawer from '../../components/MobileDrawer.astro';
+import PostCard from '../../components/PostCard.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+
+const BASE = import.meta.env.BASE_URL;
+
+const importantPosts = (await getCollection('blog'))
+	.filter((post) => post.data.important === true)
+	.sort((a, b) => {
+		const byOrder = (b.data.importantOrder ?? 0) - (a.data.importantOrder ?? 0);
+		if (byOrder !== 0) return byOrder;
+		return b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
+	});
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Important | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+	</head>
+	<body>
+		<Header />
+		<MobileDrawer />
+		<main class="page-shell page-fade-in py-10 md:py-14" transition:name="page-main" transition:animate="fade">
+			<section class="section-enter mx-auto max-w-4xl">
+				<div class="mb-6 flex items-center gap-3">
+					<span class="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-100 px-3 py-1 text-xs font-semibold tracking-wide text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200">
+						IMPORTANT
+					</span>
+				</div>
+				<h1 class="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 md:text-4xl" transition:name="page-title" transition:animate="fade">
+					Important Posts
+				</h1>
+				<p class="mt-2 font-sans text-zinc-500 dark:text-zinc-400">Key articles worth reading first.</p>
+
+				{
+					importantPosts.length > 0 ? (
+						<ul class="mt-8 grid gap-4">
+							{
+								importantPosts.map((post, idx) => (
+									<li class="card-enter relative" style={`animation-delay: ${90 + idx * 40}ms`}>
+										<PostCard post={post} base={BASE} maxMobile={3} maxDesktop={null} reloadOnNavigate={true} />
+									</li>
+								))
+							}
+						</ul>
+					) : (
+						<div class="mt-8 rounded-2xl border border-dashed border-zinc-300 bg-white/80 p-8 text-center dark:border-zinc-700 dark:bg-zinc-900/70">
+							<p class="text-sm text-zinc-500 dark:text-zinc-400">
+								No important posts yet. Mark articles with <code>important: true</code> in frontmatter.
+							</p>
+						</div>
+					)
+				}
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>
+

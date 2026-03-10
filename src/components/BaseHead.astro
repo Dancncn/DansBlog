@@ -1,0 +1,234 @@
+---
+/*
+ * Shared document head for every route.
+ * Centralizing this keeps metadata/base-path behavior consistent across environments.
+ */
+import '../styles/global.css';
+import { ViewTransitions } from 'astro:transitions';
+import type { ImageMetadata } from 'astro';
+import FallbackImage from '../assets/blog-placeholder-1.jpg';
+import { SITE_TITLE } from '../consts';
+
+interface Props {
+	// Human-readable page title used by document title and social metadata.
+	title: string;
+	// Summary used by search/social cards and meta description.
+	description: string;
+	// Optional social preview image; falls back to a local placeholder for consistency.
+	image?: ImageMetadata;
+}
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+const { title, description, image = FallbackImage } = Astro.props;
+const BASE = import.meta.env.BASE_URL;
+const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
+---
+
+<!-- Global Metadata -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<!-- Keep View Transitions globally enabled so only targeted links/routes opt out when needed. -->
+<ViewTransitions />
+<link rel="icon" type="image/x-icon" href={`${BASE}image/favicon.ico`} />
+<link rel="shortcut icon" href={`${BASE}image/favicon.ico`} />
+<link rel="sitemap" href={`${BASE}sitemap-index.xml`} />
+<link
+	rel="alternate"
+	type="application/rss+xml"
+	title={SITE_TITLE}
+	href={`${BASE}rss.xml`}
+/>
+<meta name="generator" content={Astro.generator} />
+
+<!-- Font preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<style is:inline>
+	{`
+		@font-face {
+			font-family: "Alibaba PuHuiTi";
+			src: url('${BASE}fonts/AlibabaPuHuiTi-3-55-RegularL3.woff2') format('woff2');
+			font-weight: 400;
+			font-style: normal;
+			font-display: swap;
+		}
+		@font-face {
+			font-family: "Alibaba PuHuiTi";
+			src: url('${BASE}fonts/AlibabaPuHuiTi-3-75-SemiBold.woff2') format('woff2');
+			font-weight: 600;
+			font-style: normal;
+			font-display: swap;
+		}
+	`}
+</style>
+<!-- UI/body fonts prioritize immediate paint to reduce perceived loading delay. -->
+<link
+	rel="stylesheet"
+	href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+SC:wght@400;600&display=swap"
+/>
+<!-- Code font is optional to avoid post-paint metric swaps on large code blocks. -->
+<link
+	rel="stylesheet"
+	href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=optional"
+/>
+
+<script is:inline>
+	(() => {
+		const hostname = window.location.hostname;
+		const shouldRedirect = hostname === 'dansblog.pages.dev' || hostname.includes('github.io');
+
+		if (!shouldRedirect) return;
+
+		const targetUrl = `https://danarnoux.com${window.location.pathname}${window.location.search}${window.location.hash}`;
+		window.location.replace(targetUrl);
+	})();
+</script>
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+<meta name="google-site-verification" content="c9eLQFflOQPGAa5ykLn2PnyXDt5rup4VJNQe3P8hW7Y" />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content={Astro.url} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={new URL(image.src, Astro.url)} />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={new URL(image.src, Astro.url)} />
+
+<script is:inline>
+	(() => {
+		// Apply theme before hydration to avoid light/dark flash during initial paint.
+		const storageKey = 'theme';
+		const root = document.documentElement;
+		const stored = localStorage.getItem(storageKey);
+		const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		const theme = stored === 'dark' || stored === 'light' ? stored : systemPrefersDark ? 'dark' : 'light';
+		root.classList.toggle('dark', theme === 'dark');
+		root.dataset.theme = theme;
+	})();
+</script>
+<script is:inline>
+	// Token handling and auth functions - expose to window for global access
+	(function() {
+		const API_BASE = 'https://api.danarnoux.com';
+		const TOKEN_KEY = 'blog_token';
+
+		// Store on window
+		window.__API_BASE = API_BASE;
+		window.__TOKEN_KEY = TOKEN_KEY;
+
+		// Read token from URL hash
+		function readHashToken() {
+			const hash = window.location.hash || '';
+			const match = hash.match(/(?:^#|&)token=([^&]+)/);
+			if (!match) return null;
+			try {
+				return decodeURIComponent(match[1]);
+			} catch {
+				return match[1];
+			}
+		}
+
+		// Store token from URL hash to localStorage
+		function storeTokenFromHash() {
+			const token = readHashToken();
+			if (!token) return null;
+			localStorage.setItem(TOKEN_KEY, token);
+			history.replaceState(null, '', window.location.pathname);
+			return token;
+		}
+
+		// Get auth token
+		function getAuthToken() {
+			storeTokenFromHash();
+			return localStorage.getItem(TOKEN_KEY);
+		}
+
+		// Get current user
+		async function getCurrentUser() {
+			const token = getAuthToken();
+			if (!token) return null;
+
+			try {
+				const response = await fetch(`${API_BASE}/api/me`, {
+					method: 'GET',
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+
+				if (!response.ok) {
+					if (response.status === 401) {
+						localStorage.removeItem(TOKEN_KEY);
+					}
+					return null;
+				}
+
+				const data = await response.json();
+				const user = data?.user ?? data ?? null;
+				if (!user || typeof user !== 'object') return null;
+
+				return {
+					id: user.id ?? '',
+					username: user.username ?? user.login ?? user.name ?? '',
+					avatar: user.avatar ?? user.avatarUrl ?? user.avatar_url ?? '',
+				};
+			} catch {
+				return null;
+			}
+		}
+
+		// Logout
+		async function logout() {
+			const token = getAuthToken();
+			if (!token) {
+				localStorage.removeItem(TOKEN_KEY);
+				return;
+			}
+
+			try {
+				await fetch(`${API_BASE}/api/auth/logout`, {
+					method: 'POST',
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+			} finally {
+				localStorage.removeItem(TOKEN_KEY);
+			}
+		}
+
+		// Initial token processing on page load
+		storeTokenFromHash();
+
+		// Expose to window
+		window.__auth = {
+			storeTokenFromHash,
+			getAuthToken,
+			getCurrentUser,
+			logout,
+		};
+	})();
+</script>
+{
+	import.meta.env.PROD && cfWebAnalyticsToken && (
+		<script
+			defer
+			src="https://static.cloudflareinsights.com/beacon.min.js"
+			data-cf-beacon={`{"token":"${cfWebAnalyticsToken}"}`}
+		></script>
+	)
+}
