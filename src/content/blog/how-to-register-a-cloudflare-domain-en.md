@@ -137,3 +137,5 @@ You can follow my setup—use CNAME for analysis. The redacted parts aren't impo
 ## Wrapping Up
 
 I won't go into SSL/TLS details here—Cloudflare sets up a universal certificate by default. I'll cover more in future posts, like how to do SEO right and GitHub OAuth. Stay tuned!
+
+Video Guide: https://www.bilibili.com/video/BV1tvc6z1EfD/?share_source=copy_web&vd_source=b29b2491306fe84f395d46cf297dc405

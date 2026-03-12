@@ -603,6 +603,7 @@ Online validation checklist:
 - Renaming the project usually changes the subdomain prefix.
 - If you want your own domain, you usually need to purchase one first.
 - Cloudflare Pages supports custom domain binding directly in project settings.
+- Regarding domain acquisition and setup, please consult the guide on **[How to Register a Cloudflare Domain](https://danarnoux.com/blog/how-to-register-a-cloudflare-domain-en/)**, which includes a video tutorial.
 
 ### Accessibility for International & Mainland China Users
 

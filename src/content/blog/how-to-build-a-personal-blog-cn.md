@@ -525,7 +525,7 @@ jobs:
    - `Production branch`: `main`
 6. 点击部署，等构建完成后先用 `xxx.pages.dev` 域名访问。
 
-第一次部署建议先别急着绑定自定义域名，先把默认域名验收跑通，排错成本最低。
+第一次部署建议先别急着绑定自定义域名，先把默认域名验收跑通，排错成本最低。对于域名购买以及配置教程，请参考[如何注册一个cloudflare域名](https://danarnoux.com/blog/how-to-register-a-cloudflare-domain-cn/)，附带视频教程。
 
 ### 必踩坑：base 路径导致样式丢失（以及如何修）
 
