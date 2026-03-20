@@ -1,12 +1,12 @@
 ---
-title: "How to Register a Cloudflare Domain"
+title: "Cloudflare Domain Registration Guide"
 description: "A step-by-step tutorial on registering a domain with Cloudflare, configuring DNS, and using it for your website or blog."
-pubDate: 2026-03-08
-updatedDate: 2026-03-08
+pubDate: 2026-02-17
+updatedDate: 2026-02-17
 lang: "en"
 author: "Dan"
 group: "how-to-register-a-cloudflare-domain"
-tags: ["Cloudflare", "Domain", "guide", "EN"]
+tags: ["Cloudflare", "Domain", "Guide"]
 ---
 
 ## Introduction
