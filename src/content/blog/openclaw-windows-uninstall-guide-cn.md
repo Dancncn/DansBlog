@@ -1,6 +1,6 @@
 ---
 title: "OpenClaw Windows 卸载教程"
-description: "简单几步教你如何在 Windows 上完全卸载 OpenClaw。"
+description: "简单几步教你如何在 Windows 上完全卸载 OpenClaw，包括删除配置目录和验证卸载成功。"
 pubDate: 2026-03-16
 updatedDate: 2026-03-16
 lang: "cn"

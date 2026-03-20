@@ -1,6 +1,6 @@
 ﻿---
 title: GoFile 下载工具 -- 完整使用指南
-description: 一份使用 Python 脚本从 GoFile 下载文件的分步指南。
+description: 一份使用 Python 脚本从 GoFile 下载文件的分步指南，包含环境配置和实战演示。
 pubDate: 2026-02-11
 tags: ["tools", "download", "gofile", "guide", "CN"]
 lang: "cn"

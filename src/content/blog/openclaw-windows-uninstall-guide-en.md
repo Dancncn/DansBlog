@@ -1,6 +1,6 @@
 ---
 title: "OpenClaw Windows Uninstall Guide"
-description: "A simple guide on how to completely uninstall OpenClaw on Windows."
+description: "A simple guide on how to completely uninstall OpenClaw on Windows, including removing config directories and verifying the uninstallation."
 pubDate: 2026-03-16
 updatedDate: 2026-03-16
 lang: "en"
