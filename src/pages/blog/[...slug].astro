@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry, getCollection, render } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
+import { getRelatedPosts } from '../../utils/posts';
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog');
@@ -44,8 +45,11 @@ const languageSwitch =
 				label: currentLang === 'cn' ? 'English Version' : '中文版',
 			}
 		: undefined;
+
+// Get related posts (same language, ranked by tag similarity)
+const relatedPosts = getRelatedPosts(post, allPosts, 4);
 ---
 
-<BlogPost {...post.data} headings={headings} rawBody={post.body} slug={post.id} languageSwitch={languageSwitch}>
+<BlogPost {...post.data} headings={headings} rawBody={post.body} slug={post.id} languageSwitch={languageSwitch} relatedPosts={relatedPosts} relatedPostsLang={currentLang}>
 	<Content />
 </BlogPost>

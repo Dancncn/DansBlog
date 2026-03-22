@@ -1,4 +1,4 @@
-﻿---
+---
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
@@ -9,10 +9,22 @@ import PostCard from '../../components/PostCard.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
 const BASE = import.meta.env.BASE_URL;
-// The first page is served from /blog/ for canonical URL stability and cleaner SEO.
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+
+// Determine view from pathname
+const pathname = Astro.url.pathname;
+const isImportant = pathname.endsWith('/important') || pathname === `${BASE}blog/important`;
+const isArchive = pathname.endsWith('/archive') || pathname === `${BASE}blog/archive`;
+
+// Get all posts
+const allPosts = await getCollection('blog');
+const posts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// Filter important posts (where important === true), sorted by importantOrder
+const importantPosts = allPosts
+	.filter((post) => post.data.important === true)
+	.sort((a, b) => (b.data.importantOrder || 0) - (a.data.importantOrder || 0));
+
+// Pagination for Latest view
 const PAGE_SIZE = 6;
 const paginatedPosts = posts.slice(0, PAGE_SIZE);
 const lastPage = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
@@ -35,6 +47,39 @@ posts.forEach((post) => {
 	}
 	postsByYearMonth[year][month].push(post);
 });
+
+// Determine active view and posts to show
+let displayPosts: typeof posts = [];
+let showPagination = false;
+let archiveData: { year: string; months: { name: string; posts: typeof posts }[] }[] | null = null;
+
+if (isImportant) {
+	displayPosts = importantPosts;
+} else if (isArchive) {
+	archiveData = Object.entries(postsByYearMonth)
+		.sort(([a], [b]) => parseInt(b) - parseInt(a))
+		.map(([year, months]) => ({
+			year,
+			months: Object.entries(months)
+				.sort(([a], [b]) => parseInt(b) - parseInt(a))
+				.map(([month, monthPosts]) => ({
+					name: monthNames[parseInt(month)],
+					posts: monthPosts,
+				})),
+		}));
+} else {
+	// Default to Latest
+	displayPosts = paginatedPosts;
+	showPagination = true;
+}
+
+// View URLs
+const importantUrl = `${BASE}blog/important/`;
+const latestUrl = `${BASE}blog/`;
+const archiveUrl = `${BASE}blog/archive/`;
+
+// Determine current view for active state
+const currentView = isImportant ? 'important' : isArchive ? 'archive' : 'latest';
 ---
 
 <!doctype html>
@@ -51,203 +96,146 @@ posts.forEach((post) => {
 					<h1 class="font-sans text-3xl font-semibold leading-tight tracking-tight text-zinc-900 dark:text-zinc-100 md:text-4xl">
 						Blog
 					</h1>
+					<!-- Segmented Control with 3 options -->
 					<div
-						id="blog-view-toggle"
-						class="blog-segment relative inline-grid grid-cols-2 items-center rounded-2xl border border-zinc-200/80 bg-white/75 p-1 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-md dark:border-zinc-700/80 dark:bg-zinc-900/70"
+						class="view-toggle inline-flex items-center rounded-2xl border border-zinc-200/80 bg-white/75 p-1 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-md dark:border-zinc-700/80 dark:bg-zinc-900/70"
 						role="tablist"
 						aria-label="Blog view switch"
-						data-view="list"
 					>
-						<div class="blog-segment-indicator absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-xl bg-zinc-900/6 shadow-[0_6px_18px_rgba(15,23,42,0.08)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] dark:bg-white/10"></div>
-						<button
-							type="button"
-							id="list-toggle"
-							class="blog-segment-button relative z-10 inline-flex min-w-[88px] items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-zinc-700 transition-all duration-200 dark:text-zinc-300"
+						<a
+							href={importantUrl}
+							class:list={[
+								'relative inline-flex items-center justify-center rounded-xl px-2 py-2 text-sm font-medium transition-all duration-200 md:px-3 md:gap-2',
+								currentView === 'important'
+									? 'bg-zinc-900/6 text-zinc-900 shadow-[0_6px_18px_rgba(15,23,42,0.08)] dark:bg-white/10 dark:text-white'
+									: 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200',
+							]}
 							role="tab"
-							aria-selected="true"
-							aria-controls="list-view"
-							data-view-target="list"
+							aria-selected={currentView === 'important'}
 						>
-							<span>Latest</span>
-						</button>
-						<button
-							type="button"
-							id="archive-toggle"
-							class="blog-segment-button group relative z-10 inline-flex min-w-[88px] items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-zinc-500 transition-all duration-200 dark:text-zinc-400"
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+							</svg>
+							<span class="hidden md:inline">Important</span>
+						</a>
+						<a
+							href={latestUrl}
+							class:list={[
+								'relative inline-flex items-center justify-center rounded-xl px-2 py-2 text-sm font-medium transition-all duration-200 md:px-3 md:gap-2',
+								currentView === 'latest'
+									? 'bg-zinc-900/6 text-zinc-900 shadow-[0_6px_18px_rgba(15,23,42,0.08)] dark:bg-white/10 dark:text-white'
+									: 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200',
+							]}
 							role="tab"
-							aria-selected="false"
-							aria-controls="archive-view"
-							data-view-target="archive"
+							aria-selected={currentView === 'latest'}
 						>
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:rotate-[10deg]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+							</svg>
+							<span class="hidden md:inline">Latest</span>
+						</a>
+						<a
+							href={archiveUrl}
+							class:list={[
+								'relative inline-flex items-center justify-center rounded-xl px-2 py-2 text-sm font-medium transition-all duration-200 md:px-3 md:gap-2',
+								currentView === 'archive'
+									? 'bg-zinc-900/6 text-zinc-900 shadow-[0_6px_18px_rgba(15,23,42,0.08)] dark:bg-white/10 dark:text-white'
+									: 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200',
+							]}
+							role="tab"
+							aria-selected={currentView === 'archive'}
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
 							</svg>
-							<span>Archive</span>
-						</button>
+							<span class="hidden md:inline">Archive</span>
+						</a>
 					</div>
 				</div>
 				<p class="mt-2 font-sans text-zinc-500 dark:text-zinc-400">Research notes, engineering logs, and technical essays.</p>
 
-				<div id="blog-view-stage" class="blog-view-stage relative mt-8 min-h-[24rem]">
-					<!-- List View (default) -->
-					<div id="list-panel" class="blog-view-panel is-active" data-view-panel="list">
-						<ul id="list-view" class="grid gap-4">
-							{
-								paginatedPosts.map((post, idx) => (
+				<div class="mt-8 min-h-[24rem]">
+					<!-- Important View -->
+					{currentView === 'important' && (
+						<div role="tabpanel">
+							{displayPosts.length > 0 ? (
+								<ul class="grid gap-4">
+									{displayPosts.map((post, idx) => (
+										<li class="card-enter relative" style={`animation-delay: ${90 + idx * 40}ms`}>
+											<PostCard post={post} base={BASE} maxMobile={3} maxDesktop={null} reloadOnNavigate={true} />
+										</li>
+									))}
+								</ul>
+							) : (
+								<div class="flex h-32 flex-col items-center justify-center text-zinc-500 dark:text-zinc-400">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+									</svg>
+									<p>No important posts yet</p>
+								</div>
+							)}
+						</div>
+					)}
+
+					<!-- Latest View (default) -->
+					{currentView === 'latest' && (
+						<div role="tabpanel">
+							<ul class="grid gap-4">
+								{displayPosts.map((post, idx) => (
 									<li class="card-enter relative" style={`animation-delay: ${90 + idx * 40}ms`}>
 										<PostCard post={post} base={BASE} maxMobile={3} maxDesktop={null} reloadOnNavigate={true} />
 									</li>
-								))
-							}
-						</ul>
-						<div id="pagination" class="mt-8">
-							<Pagination currentPage={1} lastPage={lastPage} basePath={`${BASE}blog`} />
+								))}
+							</ul>
+							{showPagination && (
+								<div class="mt-8">
+									<Pagination currentPage={1} lastPage={lastPage} basePath={`${BASE}blog`} />
+								</div>
+							)}
 						</div>
-					</div>
+					)}
 
-					<!-- Archive View (hidden by default, shows all posts without pagination) -->
-					<div id="archive-panel" class="blog-view-panel is-hidden" data-view-panel="archive" aria-hidden="true" inert>
-						<div id="archive-view" class="pb-8">
-					{
-						Object.entries(postsByYearMonth).sort(([a], [b]) => parseInt(b) - parseInt(a)).map(([year, months], yearIdx) => (
-							<div class="archive-year blog-archive-group" style={`animation-delay: ${yearIdx * 80}ms`}>
-								<h2 class="mt-8 first:mt-0 text-2xl font-bold text-zinc-800 dark:text-zinc-200">{year}</h2>
-								{
-									Object.entries(months).sort(([a], [b]) => parseInt(b) - parseInt(a)).map(([month, monthPosts], monthIdx) => (
-										<div class="archive-month blog-archive-group" style={`animation-delay: ${(yearIdx * 80) + (monthIdx * 40) + 40}ms`}>
+					<!-- Archive View -->
+					{currentView === 'archive' && (
+						<div role="tabpanel" class="pb-8">
+							{archiveData && archiveData.map((yearData, yearIdx) => (
+								<div class="archive-year" style={`animation-delay: ${yearIdx * 80}ms`}>
+									<h2 class="mt-8 first:mt-0 text-2xl font-bold text-zinc-800 dark:text-zinc-200">{yearData.year}</h2>
+									{yearData.months.map((monthData, monthIdx) => (
+										<div class="archive-month" style={`animation-delay: ${(yearIdx * 80) + (monthIdx * 40) + 40}ms`}>
 											<h3 class="mt-6 first:mt-4 text-lg font-semibold text-zinc-600 dark:text-zinc-400">
-												{monthNames[parseInt(month)]}
+												{monthData.name}
 											</h3>
 											<ul class="mt-3 space-y-3 border-l-2 border-zinc-200 dark:border-zinc-700 pl-4">
-												{
-													monthPosts.map((post, postIdx) => (
-														<li class="relative blog-archive-item" style={`animation-delay: ${(yearIdx * 80) + (monthIdx * 40) + (postIdx * 20) + 80}ms`}>
-															<span class="absolute -left-[21px] top-2 h-2 w-2 rounded-full bg-zinc-300 dark:bg-zinc-600"></span>
-															<a
-																href={`${BASE}blog/${post.id}/`}
-																class="block rounded-xl p-3 text-zinc-700 transition-all duration-200 hover:bg-zinc-100/85 hover:translate-x-0.5 dark:text-zinc-300 dark:hover:bg-zinc-800/85"
-															>
-																<span class="font-medium">{post.data.title}</span>
-																<p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400 line-clamp-1">{post.data.description}</p>
-															</a>
-														</li>
-													))
-												}
+												{monthData.posts.map((post, postIdx) => (
+													<li class="relative" style={`animation-delay: ${(yearIdx * 80) + (monthIdx * 40) + (postIdx * 20) + 80}ms`}>
+														<span class="absolute -left-[21px] top-2 h-2 w-2 rounded-full bg-zinc-300 dark:bg-zinc-600"></span>
+														<a
+															href={`${BASE}blog/${post.id}/`}
+															class="block rounded-xl p-3 text-zinc-700 transition-all duration-200 hover:bg-zinc-100/85 hover:translate-x-0.5 dark:text-zinc-300 dark:hover:bg-zinc-800/85"
+														>
+															<span class="font-medium">{post.data.title}</span>
+															<p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400 line-clamp-1">{post.data.description}</p>
+														</a>
+													</li>
+												))}
 											</ul>
 										</div>
-									))
-								}
-							</div>
-						))
-					}
+									))}
+								</div>
+							))}
 						</div>
-					</div>
+					)}
 				</div>
 			</section>
 		</main>
 		<Footer />
 
 		<style is:global>
-			.blog-view-stage {
-				contain: layout style;
-			}
-
-			.blog-view-panel {
-				transition:
-					opacity 180ms cubic-bezier(0.22, 1, 0.36, 1),
-					transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
-				will-change: opacity, transform;
-			}
-
-			.blog-view-panel.is-active {
-				opacity: 1;
-				transform: translateY(0) scale(1);
-				filter: blur(0);
-				pointer-events: auto;
-				position: relative;
-				visibility: visible;
-			}
-
-			.blog-view-panel.is-exiting {
-				opacity: 0;
-				transform: translateY(6px) scale(0.988);
-				pointer-events: none;
-			}
-
-			.blog-view-panel.is-entering {
-				opacity: 1;
-				transform: translateY(0) scale(1);
-				pointer-events: auto;
-				visibility: visible;
-			}
-
-			.blog-view-panel.is-hidden {
-				opacity: 0;
-				transform: translateY(8px) scale(0.992);
-				pointer-events: none;
-				position: absolute;
-				inset: 0;
-				visibility: hidden;
-			}
-
-			.blog-segment[data-view='archive'] .blog-segment-indicator {
-				transform: translateX(calc(100% + 0.25rem));
-			}
-
-			.blog-segment-button[aria-selected='true'] {
-				color: rgb(24 24 27);
-				transform: translateY(-0.5px);
-			}
-
-			html.dark .blog-segment-button[aria-selected='true'] {
-				color: rgb(244 244 245);
-			}
-
-			.blog-segment-button[aria-selected='false'] {
-				color: rgb(113 113 122);
-			}
-
-			html.dark .blog-segment-button[aria-selected='false'] {
-				color: rgb(161 161 170);
-			}
-
-			.blog-segment-button:active {
-				transform: scale(0.97);
-			}
-
-			.blog-segment[data-view='archive'] #archive-toggle svg {
-				transform: rotate(10deg) scale(1.03);
-			}
-
-			.blog-archive-group,
-			.blog-archive-item {
-				opacity: 0;
-				transform: translateY(8px);
-			}
-
-			#archive-panel.is-entering .blog-archive-group,
-			#archive-panel.is-entering .blog-archive-item,
-			#archive-panel.is-active .blog-archive-group,
-			#archive-panel.is-active .blog-archive-item {
-				animation: blogArchiveRise 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
-			}
-
-			@keyframes blogArchiveRise {
-				from {
-					opacity: 0;
-					transform: translateY(6px);
-				}
-				to {
-					opacity: 1;
-					transform: translateY(0);
-				}
-			}
-
 			@media (prefers-reduced-motion: reduce) {
-				.blog-view-panel,
-				.blog-segment-indicator,
-				.blog-archive-group,
-				.blog-archive-item {
+				.card-enter,
+				.archive-year,
+				.archive-month {
 					transition: none !important;
 					animation: none !important;
 					transform: none !important;
@@ -255,84 +243,5 @@ posts.forEach((post) => {
 				}
 			}
 		</style>
-
-		<script is:inline>
-			function initArchiveToggle() {
-				const toggle = document.querySelector('#blog-view-toggle');
-				const listBtn = document.querySelector('#list-toggle');
-				const archiveBtn = document.querySelector('#archive-toggle');
-				const listPanel = document.querySelector('#list-panel');
-				const archivePanel = document.querySelector('#archive-panel');
-				if (!toggle || !listBtn || !archiveBtn || !listPanel || !archivePanel) return;
-
-				if (toggle.dataset.bound === 'true') return;
-				toggle.dataset.bound = 'true';
-
-				const DURATION = 210;
-				let activeView = toggle.getAttribute('data-view') || 'list';
-				let timer = 0;
-
-				const setButtonState = (view) => {
-					toggle.setAttribute('data-view', view);
-					listBtn.setAttribute('aria-selected', String(view === 'list'));
-					archiveBtn.setAttribute('aria-selected', String(view === 'archive'));
-				};
-
-				const setPanelAccessibility = (panel, isActive) => {
-					panel.setAttribute('aria-hidden', String(!isActive));
-					if (isActive) {
-						panel.removeAttribute('inert');
-					} else {
-						panel.setAttribute('inert', '');
-					}
-				};
-
-				const switchView = (nextView) => {
-					if (nextView === activeView) return;
-					if (timer) {
-						window.clearTimeout(timer);
-						timer = 0;
-					}
-
-					const currentPanel = activeView === 'list' ? listPanel : archivePanel;
-					const nextPanel = nextView === 'list' ? listPanel : archivePanel;
-
-					setButtonState(nextView);
-					setPanelAccessibility(currentPanel, false);
-					setPanelAccessibility(nextPanel, true);
-
-					currentPanel.classList.remove('is-active', 'is-entering');
-					currentPanel.classList.add('is-exiting');
-
-					nextPanel.classList.remove('is-hidden', 'is-exiting');
-					nextPanel.classList.add('is-entering');
-
-					timer = window.setTimeout(() => {
-						currentPanel.classList.remove('is-exiting');
-						currentPanel.classList.add('is-hidden');
-						nextPanel.classList.remove('is-entering');
-						nextPanel.classList.add('is-active');
-						activeView = nextView;
-						timer = 0;
-					}, DURATION);
-				};
-
-				listBtn.addEventListener('click', () => switchView('list'));
-				archiveBtn.addEventListener('click', () => switchView('archive'));
-
-				setButtonState(activeView);
-				setPanelAccessibility(listPanel, activeView === 'list');
-				setPanelAccessibility(archivePanel, activeView === 'archive');
-			}
-
-			// Initialize on page load
-			initArchiveToggle();
-
-			// Re-initialize on View Transitions
-			document.addEventListener('astro:page-load', initArchiveToggle);
-			document.addEventListener('astro:after-swap', initArchiveToggle);
-		</script>
 	</body>
 </html>
-
-

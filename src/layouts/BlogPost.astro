@@ -20,6 +20,8 @@ type Props = CollectionEntry<'blog'>['data'] & {
 		href: string;
 		label: string;
 	};
+	relatedPosts?: CollectionEntry<'blog'>[];
+	relatedPostsLang?: 'cn' | 'en';
 };
 
 const {
@@ -34,6 +36,8 @@ const {
 	rawBody = '',
 	slug,
 	languageSwitch,
+	relatedPosts = [],
+	relatedPostsLang = 'en',
 } = Astro.props;
 
 const BASE = import.meta.env.BASE_URL;
@@ -175,6 +179,45 @@ const charsLabel = chars.toLocaleString('en-US');
 								<slot />
 							</div>
 						</article>
+
+						<!-- Related Posts Section -->
+						{
+							relatedPosts.length > 0 && (
+								<section class="mt-12 border-t border-zinc-200 pt-10 dark:border-zinc-700">
+									<h2 class="mb-6 font-sans text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+										{relatedPostsLang === 'cn' ? '相关推荐' : 'Related Posts'}
+									</h2>
+									<div class="grid gap-4 sm:grid-cols-2">
+										{relatedPosts.map((relatedPost) => {
+											const postUrl = `${BASE}blog/${relatedPost.id}/`;
+											const postTags = (relatedPost.data.tags ?? []).slice(0, 3);
+											return (
+												<a
+													href={postUrl}
+													class="group block rounded-xl border border-zinc-200 bg-white p-4 transition-all duration-200 hover:border-zinc-300 hover:shadow-lg hover:-translate-y-0.5 dark:border-zinc-700 dark:bg-zinc-800/50 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+												>
+													<h3 class="font-semibold text-zinc-900 transition-colors group-hover:text-orange-600 dark:text-zinc-100 dark:group-hover:text-orange-400">
+														{relatedPost.data.title}
+													</h3>
+													<p class="mt-1 line-clamp-2 text-sm text-zinc-600 dark:text-zinc-400">
+														{relatedPost.data.description}
+													</p>
+													{postTags.length > 0 && (
+														<div class="mt-3 flex flex-wrap gap-1.5">
+															{postTags.map((tag) => (
+																<span class="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+																	#{tag}
+																</span>
+															))}
+														</div>
+													)}
+												</a>
+											);
+										})}
+									</div>
+								</section>
+							)
+						}
 
 						{slug && <Comment postSlug={slug} />}
 					</main>

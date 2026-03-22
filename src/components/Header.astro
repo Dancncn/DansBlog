@@ -68,6 +68,58 @@ const { showTocButton = false } = Astro.props as Props;
 			</div>
 		</div>
 		<div class="flex items-center gap-2">
+			<!-- RSS Dropdown -->
+			<div class="relative" id="rss-dropdown">
+				<button
+					type="button"
+					id="rss-button"
+					class="header-toolbar-icon icon-button inline-flex items-center justify-center"
+					aria-label="RSS Feed"
+					aria-expanded="false"
+					aria-haspopup="true"
+				>
+					<svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true">
+						<path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z" />
+					</svg>
+				</button>
+				<div
+					id="rss-menu"
+					class="absolute right-0 top-full z-50 mt-2 hidden w-36 rounded-xl border border-zinc-200/80 bg-white/92 py-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.14)] dark:border-zinc-700/80 dark:bg-zinc-900/92"
+					role="menu"
+				>
+					<a
+						href={`${BASE}rss.xml`}
+						class="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100/90 dark:text-zinc-300 dark:hover:bg-zinc-800"
+						role="menuitem"
+					>
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+							<path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z" />
+						</svg>
+						All Posts
+					</a>
+					<a
+						href={`${BASE}rss-zh.xml`}
+						class="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100/90 dark:text-zinc-300 dark:hover:bg-zinc-800"
+						role="menuitem"
+					>
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+							<path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z" />
+						</svg>
+						中文
+					</a>
+					<a
+						href={`${BASE}rss-en.xml`}
+						class="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100/90 dark:text-zinc-300 dark:hover:bg-zinc-800"
+						role="menuitem"
+					>
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+							<path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z" />
+						</svg>
+						English
+					</a>
+				</div>
+			</div>
+
 			<a href={BLOG_REPO_URL} target="_blank" rel="noreferrer" aria-label="DanArnoux Blog Repository">
 				<img
 					src="https://img.danarnoux.com/misc/DanArnoux.webp"
@@ -438,4 +490,57 @@ const { showTocButton = false } = Astro.props as Props;
 	// Rebind on client-side navigation because header can be re-rendered by View Transitions.
 	document.addEventListener('astro:page-load', initThemeToggle);
 	document.addEventListener('astro:after-swap', initThemeToggle);
+
+	// RSS Dropdown
+	const initRssDropdown = () => {
+		const rssDropdown = document.getElementById('rss-dropdown');
+		const rssButton = document.getElementById('rss-button');
+		const rssMenu = document.getElementById('rss-menu');
+
+		console.log('RSS Dropdown init:', { rssDropdown: !!rssDropdown, rssButton: !!rssButton, rssMenu: !!rssMenu });
+
+		if (!rssDropdown || !rssButton || !rssMenu) return;
+
+		// Prevent double binding
+		if (rssButton.dataset.rssBound === 'true') return;
+		rssButton.dataset.rssBound = 'true';
+
+		const toggleDropdown = (e) => {
+			e.stopPropagation();
+			const isExpanded = rssButton.getAttribute('aria-expanded') === 'true';
+			rssButton.setAttribute('aria-expanded', String(!isExpanded));
+			console.log('Toggle dropdown, isExpanded:', isExpanded);
+			if (isExpanded) {
+				rssMenu.classList.add('hidden');
+			} else {
+				rssMenu.classList.remove('hidden');
+			}
+		};
+
+		const closeDropdown = () => {
+			rssButton.setAttribute('aria-expanded', 'false');
+			rssMenu.classList.add('hidden');
+		};
+
+		// Click to toggle on all devices (mobile-friendly)
+		rssButton.addEventListener('click', toggleDropdown);
+
+		// Close when clicking outside
+		document.addEventListener('click', (e) => {
+			if (!rssDropdown.contains(e.target)) {
+				closeDropdown();
+			}
+		});
+
+		// Close on Escape
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && !rssMenu.classList.contains('hidden')) {
+				closeDropdown();
+			}
+		});
+	};
+
+	initRssDropdown();
+	document.addEventListener('astro:page-load', initRssDropdown);
+	document.addEventListener('astro:after-swap', initRssDropdown);
 </script>
