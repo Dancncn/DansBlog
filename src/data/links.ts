@@ -159,4 +159,13 @@ export const links: FriendLink[] = [
 		tags: ['Japanese', 'AI', 'Personalization'],
 		status: 'active',
 	},
+	{
+		name: 'SilverTuanzi',
+		kind: 'github',
+		github: 'silvertuanzi',
+		url: 'https://silvertuanzi.github.io/',
+		description: 'Sharing insights on Linux and Stable Diffusion - exploring automation and AI art workflows.',
+		tags: ['Linux', 'Stable Diffusion', 'Automation'],
+		status: 'active',
+	},
 ];

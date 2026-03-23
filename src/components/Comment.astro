@@ -4,6 +4,8 @@ interface Props {
 }
 
 const { postSlug } = Astro.props;
+const isDev = import.meta.env.DEV;
+const API_BASE = isDev ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 ---
 
 <section class="comments-section mt-12 border-t border-zinc-200 pt-8 dark:border-zinc-700">
@@ -13,7 +15,7 @@ const { postSlug } = Astro.props;
 		<!-- Show login prompt when not logged in -->
 		<div id="login-prompt" class="hidden">
 			<p class="text-zinc-600 dark:text-zinc-400">
-				<a href="https://api.danarnoux.com/api/auth/github/start" class="text-blue-600 hover:underline dark:text-blue-400">
+				<a href={`${API_BASE}/api/auth/github/start`} class="text-blue-600 hover:underline dark:text-blue-400">
 					Login with GitHub
 				</a>
 				to comment
@@ -113,7 +115,7 @@ const { postSlug } = Astro.props;
 		console.log('Loading comments for:', postSlug);
 
 		try {
-			const response = await fetch(`https://api.danarnoux.com/api/comments?post_id=${encodeURIComponent(postSlug)}`);
+			const response = await fetch(`${API_BASE}/api/comments?post_id=${encodeURIComponent(postSlug)}`);
 			if (response.ok) {
 				const data = await response.json();
 				const comments = data?.comments ?? data ?? [];

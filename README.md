@@ -28,8 +28,9 @@ A practical stack for writing, documenting, and maintaining a technical blog ove
 - Article TOC system: desktop sticky sidebar + mobile drawer
 - Language switch support for paired CN/EN posts
 - Repo-page and root-path deployment support (GitHub Pages + Cloudflare Pages)
-- GitHub OAuth login with session management
+- GitHub OAuth + Email login with session management
 - Comment system (D1 backed, per-post)
+- Cloudflare Turnstile captcha protection
 - R2 image hosting via `img.danarnoux.com`
 - User dropdown with Settings modal
 - 404 page
@@ -61,12 +62,18 @@ The backend is built with:
 - **Cloudflare Workers** - Edge runtime for API handlers
 - **D1** - SQLite database for users, sessions, and comments
 - **R2** - Object storage for image hosting (`img.danarnoux.com`)
+- **KV** - Rate limiting for email login
 - **Durable Objects** - Rate limiting mechanism
 - **GitHub OAuth** - Authentication flow with PKCE
+- **Resend** - Email service for login links
+- **Cloudflare Turnstile** - Captcha protection
 
 **API Base**: `https://api.danarnoux.com`
 
 - **GitHub OAuth**: Redirect to GitHub for authentication, session tokens stored in D1
+- **Email Login**:
+  - `POST /api/auth/email/send` - Send login link to email (requires Turnstile captcha)
+  - `GET /api/auth/email/verify` - Verify login token and create session
 - **Comments API**:
   - `GET /api/comments?slug=<post-slug>` - Fetch comments for a post
   - `POST /api/comments` - Create a new comment (requires auth)

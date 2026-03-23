@@ -2,7 +2,7 @@
  * Auth helper for handling GitHub OAuth authentication
  */
 
-const API_BASE = 'https://api.danarnoux.com';
+const API_BASE = import.meta.env.DEV ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 const TOKEN_KEY = 'blog_token';
 
 export interface User {
@@ -95,5 +95,30 @@ export async function logout(): Promise<void> {
 		}
 	} else {
 		localStorage.removeItem(TOKEN_KEY);
+	}
+}
+
+/**
+ * Send email login link
+ */
+export async function sendEmailLogin(email: string, turnstileToken?: string): Promise<{ ok: boolean; error?: string }> {
+	try {
+		const response = await fetch(`${API_BASE}/api/auth/email/send`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ email, turnstileToken }),
+		});
+
+		const data = await response.json();
+
+		if (!response.ok) {
+			return { ok: false, error: data.error ?? 'Failed to send email' };
+		}
+
+		return { ok: true };
+	} catch (error) {
+		return { ok: false, error: 'Network error' };
 	}
 }

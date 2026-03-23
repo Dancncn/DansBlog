@@ -1,6 +1,7 @@
 ---
 // LoginModal.astro - Solid background login modal with Apple-style animation
 ---
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 <div
 	id="login-modal"
@@ -30,6 +31,48 @@
 			Login with GitHub
 		</a>
 
+		<div class="relative my-4">
+			<div class="absolute inset-0 flex items-center">
+				<div class="w-full border-t border-zinc-200 dark:border-zinc-700"></div>
+			</div>
+			<div class="relative flex justify-center text-sm">
+				<span class="bg-white px-2 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">or</span>
+			</div>
+		</div>
+
+		<form id="email-login-form" class="space-y-3" method="post">
+			<input
+				type="email"
+				id="email-login-input"
+				name="email"
+				placeholder="Your email address"
+				required
+				class="w-full rounded-lg border border-zinc-200 px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500"
+			/>
+			<div class="cf-turnstile" data-sitekey="0x4AAAAAACuzV-RCNNfHJxdF"></div>
+			<button
+				type="submit"
+				id="email-login-submit"
+				class="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 py-3 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+			>
+				<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+					<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+					<polyline points="22,6 12,13 2,6" />
+				</svg>
+				Send Login Link
+			</button>
+		</form>
+
+		<div id="email-login-success" class="hidden text-center">
+			<div class="mb-2 flex justify-center">
+				<svg class="h-12 w-12 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+					<polyline points="22 4 12 14.01 9 11.01" />
+				</svg>
+			</div>
+			<p class="text-zinc-700 dark:text-zinc-300">Check your email for the login link!</p>
+		</div>
+
 		<button
 			type="button"
 			id="login-modal-close"
@@ -39,3 +82,76 @@
 		</button>
 	</div>
 </div>
+
+<script>
+	import { sendEmailLogin } from '../lib/auth';
+
+	const form = document.getElementById('email-login-form') as HTMLFormElement;
+	const successDiv = document.getElementById('email-login-success');
+	const input = document.getElementById('email-login-input') as HTMLInputElement;
+	const submitBtn = document.getElementById('email-login-submit') as HTMLButtonElement;
+
+	// Get Turnstile token from the automatically rendered widget
+	function getTurnstileToken(): string {
+		// Turnstile auto-renders elements with class 'cf-turnstile'
+		// We can use turnstile.getResponse() to get the token
+		if (typeof (window as any).turnstile !== 'undefined') {
+			// Try to get token from all rendered widgets
+			const widgets = document.querySelectorAll('.cf-turnstile');
+			for (let i = 0; i < widgets.length; i++) {
+				const token = (window as any).turnstile.getResponse(i);
+				if (token) return token;
+			}
+		}
+		return '';
+	}
+
+	if (form) {
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const email = input.value.trim();
+			if (!email) return;
+
+			// Basic email validation
+			if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+				alert('Please enter a valid email address');
+				return;
+			}
+
+			// Disable button and show loading
+			submitBtn.disabled = true;
+			submitBtn.textContent = 'Verifying...';
+
+			// Wait for Turnstile to complete (poll for token)
+			let attempts = 0;
+			while (attempts < 20) {
+				const token = getTurnstileToken();
+				if (token) break;
+				await new Promise(resolve => setTimeout(resolve, 250));
+				attempts++;
+			}
+
+			const turnstileToken = getTurnstileToken();
+
+			if (!turnstileToken) {
+				alert('Please complete the captcha verification');
+				submitBtn.disabled = false;
+				submitBtn.textContent = 'Send Login Link';
+				return;
+			}
+
+			submitBtn.textContent = 'Sending...';
+
+			const result = await sendEmailLogin(email, turnstileToken);
+
+			if (result.ok) {
+				form.classList.add('hidden');
+				successDiv?.classList.remove('hidden');
+			} else {
+				alert(result.error ?? 'Failed to send email');
+				submitBtn.disabled = false;
+				submitBtn.textContent = 'Send Login Link';
+			}
+		});
+	}
+</script>

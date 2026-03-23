@@ -1,4 +1,6 @@
-const API_BASE = 'https://api.danarnoux.com';
+// Dynamically determine API base based on current host
+const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+const API_BASE = isLocalhost ? 'http://localhost:8787' : 'https://api.danarnoux.com';
 const TOKEN_KEY = 'blog_token';
 
 // Store on window to avoid redeclaration issues
