@@ -1,0 +1,109 @@
+---
+// ContactModal.astro - Contact form modal (placeholder)
+---
+
+<div
+	id="contact-modal"
+	class="fixed inset-0 z-[100] invisible opacity-0 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity duration-200 ease-out"
+	aria-hidden="true"
+>
+	<div
+		class="modal-content mx-4 w-[360px] rounded-xl bg-white p-6 shadow-xl transition-all duration-200 ease-out dark:bg-zinc-900 scale-95 opacity-0"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="contact-modal-title"
+		id="contact-modal-content"
+	>
+		<h2 id="contact-modal-title" class="mb-2 text-center text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+			Contact Me
+		</h2>
+
+		<p class="mb-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+			This feature is under development.
+		</p>
+
+		<div class="mb-4 rounded-lg bg-zinc-100 p-4 dark:bg-zinc-800">
+			<p class="text-sm text-zinc-600 dark:text-zinc-300">
+				<svg class="mb-2 inline-block h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<circle cx="12" cy="12" r="10"/>
+					<line x1="12" y1="16" x2="12" y2="12"/>
+					<line x1="12" y1="8" x2="12.01" y2="8"/>
+				</svg>
+				Currently, you can reach me via:
+			</p>
+			<ul class="mt-2 space-y-1 text-sm text-zinc-600 dark:text-zinc-300">
+				<li>
+					<a href="https://github.com/Dancncn" target="_blank" rel="noreferrer" class="text-blue-600 hover:underline dark:text-blue-400">
+						GitHub
+					</a>
+				</li>
+				<li>
+					<a href="https://space.bilibili.com/435440676" target="_blank" rel="noreferrer" class="text-blue-600 hover:underline dark:text-blue-400">
+						Bilibili
+					</a>
+				</li>
+			</ul>
+		</div>
+
+		<button
+			type="button"
+			id="contact-modal-close"
+			class="w-full rounded-lg border border-zinc-200 px-4 py-2 text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+		>
+			Close
+		</button>
+	</div>
+</div>
+
+<script>
+	const initContactModal = () => {
+		const modal = document.getElementById('contact-modal');
+		const modalClose = document.getElementById('contact-modal-close');
+
+		if (!modal || !modalClose) return;
+
+		const openModal = () => {
+			requestAnimationFrame(() => {
+				modal.classList.remove('opacity-0', 'invisible');
+				modal.classList.add('opacity-100');
+				const content = modal.querySelector('.modal-content');
+				if (content) {
+					content.classList.remove('scale-95', 'opacity-0');
+					content.classList.add('scale-100', 'opacity-100');
+				}
+			});
+		};
+
+		const closeModal = () => {
+			modal.classList.add('opacity-0');
+			modal.classList.remove('opacity-100');
+			const content = modal.querySelector('.modal-content');
+			if (content) {
+				content.classList.add('scale-95', 'opacity-0');
+				content.classList.remove('scale-100', 'opacity-100');
+			}
+			setTimeout(() => {
+				modal.classList.add('invisible');
+			}, 200);
+		};
+
+		modalClose.addEventListener('click', closeModal);
+
+		modal.addEventListener('click', (e) => {
+			if (e.target === modal) closeModal();
+		});
+
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && !modal.classList.contains('invisible')) {
+				closeModal();
+			}
+		});
+
+		// Expose open function globally
+		(window as any).openContactModal = openModal;
+	};
+
+	// Initialize
+	initContactModal();
+	document.addEventListener('astro:page-load', initContactModal);
+</script>

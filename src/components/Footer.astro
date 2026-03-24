@@ -3,11 +3,36 @@
  * Global footer shared by every page.
  * Keeps ownership/legal text centralized so layout-level pages stay content-focused.
  */
+import ContactModal from './ContactModal.astro';
+
 const today = new Date();
 ---
 
 <footer class="mt-16 border-t border-zinc-200 py-8 transition-colors duration-200 dark:border-zinc-800">
-	<div class="page-shell text-sm text-zinc-500 dark:text-zinc-400">
+	<div class="page-shell flex flex-col items-center justify-between gap-4 text-sm text-zinc-500 dark:text-zinc-400 md:flex-row">
 		<p class="m-0">&copy; {today.getFullYear()} Dan Arnoux. All rights reserved.</p>
+		<button
+			type="button"
+			id="contact-button"
+			class="font-medium text-zinc-500 transition-colors hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+		>
+			Contact
+		</button>
 	</div>
 </footer>
+
+<ContactModal />
+
+<script>
+	const initContactButton = () => {
+		const contactButton = document.getElementById('contact-button');
+		if (contactButton) {
+			contactButton.addEventListener('click', () => {
+				(window as any).openContactModal?.();
+			});
+		}
+	};
+
+	initContactButton();
+	document.addEventListener('astro:page-load', initContactButton);
+</script>
