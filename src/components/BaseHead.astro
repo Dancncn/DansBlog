@@ -4,7 +4,7 @@
  * Centralizing this keeps metadata/base-path behavior consistent across environments.
  */
 import '../styles/global.css';
-import { ViewTransitions } from 'astro:transitions';
+import { ClientRouter } from 'astro:transitions';
 import type { ImageMetadata } from 'astro';
 import FallbackImage from '../assets/blog-placeholder-1.jpg';
 import { SITE_TITLE } from '../consts';
@@ -29,7 +29,7 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <!-- Keep View Transitions globally enabled so only targeted links/routes opt out when needed. -->
-<ViewTransitions />
+<ClientRouter />
 <link rel="icon" type="image/x-icon" href={`${BASE}image/favicon.ico`} />
 <link rel="shortcut icon" href={`${BASE}image/favicon.ico`} />
 <link rel="sitemap" href={`${BASE}sitemap-index.xml`} />
@@ -72,18 +72,6 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 	rel="stylesheet"
 	href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=optional"
 />
-
-<script is:inline>
-	(() => {
-		const hostname = window.location.hostname;
-		const shouldRedirect = hostname === 'dansblog.pages.dev' || hostname.includes('github.io');
-
-		if (!shouldRedirect) return;
-
-		const targetUrl = `https://danarnoux.com${window.location.pathname}${window.location.search}${window.location.hash}`;
-		window.location.replace(targetUrl);
-	})();
-</script>
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
@@ -228,6 +216,7 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 {
 	import.meta.env.PROD && cfWebAnalyticsToken && (
 		<script
+			is:inline
 			defer
 			src="https://static.cloudflareinsights.com/beacon.min.js"
 			data-cf-beacon={`{"token":"${cfWebAnalyticsToken}"}`}

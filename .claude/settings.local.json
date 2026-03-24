@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(npx astro:*)",
+      "Bash(npx tsc:*)",
+      "mcp__MiniMax__understand_image",
+      "Bash(INDEXNOW_KEY=219dffd3d1534934a117580a1a680fd7 node scripts/indexnow.mjs https://danarnoux.com/)",
+      "Bash(node scripts/indexnow.mjs)"
     ]
   }
 }

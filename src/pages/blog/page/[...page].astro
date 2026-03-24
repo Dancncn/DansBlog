@@ -6,7 +6,9 @@ import Header from '../../../components/Header.astro';
 import MobileDrawer from '../../../components/MobileDrawer.astro';
 import Pagination from '../../../components/Pagination.astro';
 import PostCard from '../../../components/PostCard.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../../consts';
+import { SITE_TITLE } from '../../../consts';
+
+const BASE_DESCRIPTION = 'Browse all articles on this blog. Find technical tutorials, engineering guides, research notes, and programming tips.';
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -35,8 +37,8 @@ const { page } = Astro.props as Props;
 
 // Generate unique description for each page to avoid SEO penalties
 const pageDescription = page.currentPage === 1
-	? SITE_DESCRIPTION
-	: `Browse page ${page.currentPage} of ${page.lastPage}. ${SITE_DESCRIPTION}`;
+	? BASE_DESCRIPTION
+	: `Browse page ${page.currentPage} of ${page.lastPage}. ${BASE_DESCRIPTION}`;
 
 // Group all posts by year and month for archive view
 const allPosts = (await getCollection('blog')).sort(
@@ -64,7 +66,7 @@ allPosts.forEach((post) => {
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={`Blog - Page ${page.currentPage} | ${SITE_TITLE}`} description={pageDescription} />
+		<BaseHead title={`Blog Page ${page.currentPage} | ${SITE_TITLE} - All Articles`} description={pageDescription} />
 	</head>
 	<body>
 		<Header />

@@ -5,7 +5,7 @@ import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
 import MobileDrawer from '../../components/MobileDrawer.astro';
 import PostCard from '../../components/PostCard.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { SITE_TITLE } from '../../consts';
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog');
@@ -25,6 +25,7 @@ export async function getStaticPaths() {
 
 const BASE = import.meta.env.BASE_URL;
 const currentTag = decodeURIComponent(Astro.params.tag ?? '');
+const tagDescription = `Explore all articles tagged with "${currentTag}". Find tutorials, guides, and technical notes related to ${currentTag} on this blog.`;
 const posts = (await getCollection('blog'))
 	.filter((post) => (post.data.tags ?? []).includes(currentTag))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
@@ -33,7 +34,7 @@ const posts = (await getCollection('blog'))
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={`Tag: ${currentTag} | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+		<BaseHead title={`Tag: ${currentTag} | ${SITE_TITLE} - Articles & Tutorials`} description={tagDescription} />
 	</head>
 	<body>
 		<Header />

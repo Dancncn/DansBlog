@@ -6,6 +6,8 @@
     "dev": "astro dev",
     "build": "astro build && node scripts/ensure-sitemap-xml.mjs",
     "postbuild": "node scripts/postbuild-sitemap.mjs",
+    "indexnow": "node scripts/indexnow.mjs",
+    "indexnow:sitemap": "node scripts/indexnow.mjs sitemap",
     "preview": "astro preview",
     "astro": "astro"
   },

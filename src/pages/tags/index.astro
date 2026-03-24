@@ -4,7 +4,7 @@ import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
 import MobileDrawer from '../../components/MobileDrawer.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { SITE_TITLE } from '../../consts';
 
 const BASE = import.meta.env.BASE_URL;
 const posts = await getCollection('blog');
@@ -28,7 +28,7 @@ const sortedTags = [...tagCount.entries()].sort((a, b) => {
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={`Tags | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+		<BaseHead title={`Browse All Tags | ${SITE_TITLE} - Find Articles by Topic`} description="Browse all topics covered in this blog. Find articles by tags including programming, Cloudflare, SEO, and technical guides." />
 	</head>
 	<body>
 		<Header />

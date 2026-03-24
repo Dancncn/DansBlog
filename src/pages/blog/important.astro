@@ -6,7 +6,7 @@ import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
 import MobileDrawer from '../../components/MobileDrawer.astro';
 import PostCard from '../../components/PostCard.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { SITE_TITLE } from '../../consts';
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -27,7 +27,7 @@ const currentView = 'important';
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={`Blog - Important | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+		<BaseHead title={`Important Articles | ${SITE_TITLE} - Curated Technical Guides`} description="A curated selection of the most valuable articles on this blog. Find essential tutorials, guides, and technical notes worth reading." />
 	</head>
 	<body>
 		<Header />

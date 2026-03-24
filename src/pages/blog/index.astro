@@ -6,7 +6,7 @@ import Header from '../../components/Header.astro';
 import MobileDrawer from '../../components/MobileDrawer.astro';
 import Pagination from '../../components/Pagination.astro';
 import PostCard from '../../components/PostCard.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { SITE_TITLE } from '../../consts';
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -85,7 +85,7 @@ const currentView = isImportant ? 'important' : isArchive ? 'archive' : 'latest'
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={`Blog | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+		<BaseHead title={`Blog | ${SITE_TITLE} - Technical Tutorials & Engineering Guides`} description="Browse all articles on this blog. Find technical tutorials, engineering guides, research notes, and programming tips." />
 	</head>
 	<body>
 		<Header />
