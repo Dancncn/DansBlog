@@ -39,29 +39,47 @@ function getKey() {
 }
 
 /**
- * Fetch URLs from sitemap using simple regex (no extra deps)
+ * Fetch URLs from sitemap - handles both sitemapindex and urlset formats
  */
 async function fetchUrlsFromSitemap(sitemapUrl) {
-	try {
-		const response = await fetch(sitemapUrl);
-		if (!response.ok) {
-			throw new Error(`Failed to fetch sitemap: ${response.status}`);
-		}
-		const xml = await response.text();
+	const urls = [];
 
-		// Simple regex to extract URLs from <loc>...</loc>
-		const urlMatches = xml.match(/<loc>([^<]+)<\/loc>/g);
-		if (!urlMatches) {
-			console.log('⚠️  No URLs found in sitemap');
-			return [];
-		}
+	async function fetchSitemap(url) {
+		try {
+			const response = await fetch(url);
+			if (!response.ok) {
+				console.log(`⚠️  Failed to fetch ${url}: ${response.status}`);
+				return;
+			}
+			const xml = await response.text();
 
-		const urls = urlMatches.map((match) => match.replace(/<\/?loc>/g, ''));
-		return urls;
-	} catch (error) {
-		console.error(`❌ Failed to fetch sitemap: ${error.message}`);
-		process.exit(1);
+			// Check if it's a sitemapindex (contains <sitemapindex>)
+			if (xml.includes('<sitemapindex')) {
+				// It's an index file - recursively fetch each sitemap
+				const sitemapMatches = xml.match(/<loc>([^<]+)<\/loc>/g);
+				if (sitemapMatches) {
+					for (const match of sitemapMatches) {
+						const subUrl = match.replace(/<\/?loc>/g, '');
+						await fetchSitemap(subUrl);
+					}
+				}
+			} else {
+				// It's a urlset - extract URLs
+				const urlMatches = xml.match(/<loc>([^<]+)<\/loc>/g);
+				if (urlMatches) {
+					for (const match of urlMatches) {
+						const url = match.replace(/<\/?loc>/g, '');
+						urls.push(url);
+					}
+				}
+			}
+		} catch (error) {
+			console.log(`⚠️  Error fetching ${url}: ${error.message}`);
+		}
 	}
+
+	await fetchSitemap(sitemapUrl);
+	return urls;
 }
 
 /**

@@ -23,5 +23,11 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
+# VSCode settings
+.vscode/
+
+# Claude Code settings
+.claude/
+
 # git protection
 .git_disable/

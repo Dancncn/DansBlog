@@ -249,4 +249,12 @@ They still improve overall route feel across the rest of the site. The stricter 
 ### Why keep markdown-first image references?
 
 It keeps writing workflow simple and editor-friendly while remaining deployment-safe through base-path rewriting.
+
+## SEO Guide 🔍
+
+This blog uses Google Search Console and Bing Webmaster Tools for SEO optimization. For detailed setup and troubleshooting:
+
+- [SEO Guide (English)](./docs/seo-guide.md)
+- [SEO 优化指南 (中文)](./docs/seo-guide-zh-CN.md)
+
 V2
