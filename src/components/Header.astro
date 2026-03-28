@@ -56,8 +56,11 @@ const { showTocButton = false } = Astro.props as Props;
 					</button>
 				)
 			}
-			<a href={`${BASE}`} class="hidden text-base font-semibold tracking-tight text-zinc-900 no-underline md:inline dark:text-zinc-100">
-				{SITE_TITLE}
+			<a href={`${BASE}`} class="group hidden no-underline md:inline" aria-label={SITE_TITLE}>
+				<span class="inline-flex items-baseline gap-1.5 rounded-full border border-zinc-200/75 bg-white/70 px-3 py-1.5 text-[0.92rem] font-medium tracking-[-0.035em] text-zinc-800 shadow-[0_8px_20px_rgba(15,23,42,0.04)] backdrop-blur-md transition-all duration-200 group-hover:border-zinc-300/95 group-hover:bg-white/92 group-hover:text-zinc-950 dark:border-zinc-700/75 dark:bg-zinc-900/68 dark:text-zinc-100 dark:shadow-[0_8px_18px_rgba(0,0,0,0.16)] dark:group-hover:border-zinc-500/95 dark:group-hover:bg-zinc-800/92">
+					<span class="font-semibold tracking-[-0.05em]">Dan's</span>
+					<span class="font-serif text-[0.98rem] italic tracking-[-0.04em] text-zinc-500 transition-colors duration-200 group-hover:text-zinc-700 dark:text-zinc-400 dark:group-hover:text-zinc-200">Blog</span>
+				</span>
 			</a>
 			<div class="hidden items-center gap-1 text-sm md:flex">
 				{

@@ -25,6 +25,22 @@
 		@apply bg-zinc-50 text-zinc-800 font-sans antialiased transition-colors duration-200 dark:bg-zinc-950 dark:text-zinc-200;
 	}
 
+	@media (pointer: fine) {
+		html.has-custom-cursor,
+		html.has-custom-cursor body,
+		html.has-custom-cursor a,
+		html.has-custom-cursor button,
+		html.has-custom-cursor input,
+		html.has-custom-cursor textarea,
+		html.has-custom-cursor select,
+		html.has-custom-cursor summary,
+		html.has-custom-cursor label,
+		html.has-custom-cursor [role='button'],
+		html.has-custom-cursor [role='tab'] {
+			cursor: none !important;
+		}
+	}
+
 	a {
 		@apply text-blue-600 transition-colors duration-200 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300;
 	}
@@ -269,6 +285,95 @@ html.dark:hover::-webkit-scrollbar-thumb {
 
 	html.dark .apple-float-chip:hover {
 		box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
+	}
+
+	.app-cursor {
+		position: fixed;
+		left: 0;
+		top: 0;
+		width: 10px;
+		height: 10px;
+		border-radius: 999px;
+		pointer-events: none;
+		z-index: 9999;
+		opacity: 0;
+		transform: translate3d(-50%, -50%, 0) scale(0.92);
+		background: rgba(24, 24, 27, 0.96);
+		will-change: transform, width, height, opacity;
+		transition:
+			width 320ms cubic-bezier(0.22, 1.18, 0.32, 1),
+			height 320ms cubic-bezier(0.22, 1.18, 0.32, 1),
+			border-radius 260ms cubic-bezier(0.22, 1, 0.36, 1),
+			opacity 180ms ease,
+			background-color 220ms ease;
+	}
+
+	.app-cursor::before {
+		content: '';
+		position: absolute;
+		inset: -8px;
+		border-radius: inherit;
+		border: 1px solid rgba(24, 24, 27, 0.16);
+		opacity: 0;
+		transform: scale(0.72);
+		transition:
+			opacity 280ms ease,
+			transform 360ms cubic-bezier(0.22, 1.18, 0.32, 1),
+			border-color 220ms ease;
+	}
+
+	.app-cursor.is-visible {
+		opacity: 1;
+	}
+
+	.app-cursor.is-clickable {
+		width: 14px;
+		height: 14px;
+		background: rgba(24, 24, 27, 0.92);
+	}
+
+	.app-cursor.is-clickable::before {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	.app-cursor.is-text {
+		width: 3px;
+		height: 22px;
+		border-radius: 999px;
+		background: rgba(24, 24, 27, 0.92);
+	}
+
+	.app-cursor.is-text::before {
+		opacity: 0;
+	}
+
+	.app-cursor.is-pressed {
+		width: 8px;
+		height: 8px;
+	}
+
+	.app-cursor.is-clickable.is-pressed {
+		width: 11px;
+		height: 11px;
+	}
+
+	.app-cursor.is-text.is-pressed {
+		width: 3px;
+		height: 18px;
+	}
+
+	html.dark .app-cursor {
+		background: rgba(250, 250, 250, 0.94);
+	}
+
+	html.dark .app-cursor::before {
+		border-color: rgba(250, 250, 250, 0.22);
+	}
+
+	html.dark .app-cursor.is-clickable,
+	html.dark .app-cursor.is-text {
+		background: rgba(250, 250, 250, 0.92);
 	}
 
 	.icon-button {

@@ -213,6 +213,201 @@ const cfWebAnalyticsToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 		};
 	})();
 </script>
+<script is:inline>
+	(() => {
+		const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const supportsFinePointer = window.matchMedia('(pointer: fine)').matches;
+		if (prefersReducedMotion || !supportsFinePointer) return;
+
+		let cursorEl = null;
+		let rafId = 0;
+		let currentX = window.innerWidth / 2;
+		let currentY = window.innerHeight / 2;
+		let targetX = currentX;
+		let targetY = currentY;
+		let currentState = 'default';
+		let isPressed = false;
+
+		const TEXT_SELECTOR = [
+			'p',
+			'span',
+			'strong',
+			'em',
+			'blockquote',
+			'li',
+			'h1',
+			'h2',
+			'h3',
+			'h4',
+			'h5',
+			'h6',
+			'figcaption',
+			'td',
+			'th',
+			'summary',
+			'label',
+		].join(',');
+
+		const CLICKABLE_SELECTOR = [
+			'a',
+			'button',
+			'summary',
+			'label',
+			'input',
+			'textarea',
+			'select',
+			'[role="button"]',
+			'[role="tab"]',
+			'[data-auth-login]',
+			'.apple-float-chip',
+			'.icon-button',
+		].join(',');
+
+		const ensureCursor = () => {
+			if (cursorEl?.isConnected) return cursorEl;
+			cursorEl = document.createElement('div');
+			cursorEl.className = 'app-cursor';
+			document.body.appendChild(cursorEl);
+			document.documentElement.classList.add('has-custom-cursor');
+			return cursorEl;
+		};
+
+		const updateCursorClasses = () => {
+			const el = ensureCursor();
+			el.classList.toggle('is-visible', true);
+			el.classList.toggle('is-clickable', currentState === 'clickable');
+			el.classList.toggle('is-text', currentState === 'text');
+			el.classList.toggle('is-pressed', isPressed);
+		};
+
+		const animateCursor = () => {
+			const el = ensureCursor();
+			const easing = currentState === 'text' ? 0.28 : currentState === 'clickable' ? 0.2 : 0.16;
+			currentX += (targetX - currentX) * easing;
+			currentY += (targetY - currentY) * easing;
+			el.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
+			rafId = window.requestAnimationFrame(animateCursor);
+		};
+
+		const isPointInsideRect = (x, y, rect) => {
+			return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+		};
+
+		const isTextHit = (target, x, y) => {
+			if (!(target instanceof Element)) return false;
+
+			const textElement = target.closest(TEXT_SELECTOR);
+			if (!textElement) return false;
+
+			const caretRange = document.caretRangeFromPoint?.(x, y);
+			if (caretRange?.startContainer) {
+				const node = caretRange.startContainer;
+				const parentElement = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+				if (parentElement instanceof Element && parentElement.closest(TEXT_SELECTOR)) {
+					return true;
+				}
+			}
+
+			if (document.caretPositionFromPoint) {
+				const caretPosition = document.caretPositionFromPoint(x, y);
+				const node = caretPosition?.offsetNode;
+				const parentElement = node?.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+				if (parentElement instanceof Element && parentElement.closest(TEXT_SELECTOR)) {
+					return true;
+				}
+			}
+
+			const range = document.createRange();
+			const walker = document.createTreeWalker(textElement, NodeFilter.SHOW_TEXT, {
+				acceptNode(node) {
+					return node.textContent?.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+				},
+			});
+
+			let textNode = walker.nextNode();
+			while (textNode) {
+				range.selectNodeContents(textNode);
+				const rects = range.getClientRects();
+				for (const rect of rects) {
+					if (isPointInsideRect(x, y, rect)) {
+						return true;
+					}
+				}
+				textNode = walker.nextNode();
+			}
+
+			return false;
+		};
+
+		const setStateFromTarget = (target, x = targetX, y = targetY) => {
+			if (!(target instanceof Element)) {
+				currentState = 'default';
+				updateCursorClasses();
+				return;
+			}
+
+			if (target.closest(CLICKABLE_SELECTOR)) {
+				currentState = 'clickable';
+			} else if (isTextHit(target, x, y)) {
+				currentState = 'text';
+			} else {
+				currentState = 'default';
+			}
+			updateCursorClasses();
+		};
+
+		const initCursor = () => {
+			ensureCursor();
+			updateCursorClasses();
+
+			if (!rafId) {
+				rafId = window.requestAnimationFrame(animateCursor);
+			}
+		};
+
+		document.addEventListener('pointermove', (event) => {
+			targetX = event.clientX;
+			targetY = event.clientY;
+			initCursor();
+			setStateFromTarget(event.target, event.clientX, event.clientY);
+		}, { passive: true });
+
+		document.addEventListener('pointerdown', () => {
+			isPressed = true;
+			updateCursorClasses();
+		}, { passive: true });
+
+		document.addEventListener('pointerup', () => {
+			isPressed = false;
+			updateCursorClasses();
+		}, { passive: true });
+
+		document.addEventListener('pointerover', (event) => {
+			setStateFromTarget(event.target, targetX, targetY);
+		}, { passive: true });
+
+		document.addEventListener('pointerleave', () => {
+			if (!cursorEl) return;
+			cursorEl.classList.remove('is-visible');
+		});
+
+		window.addEventListener('blur', () => {
+			if (!cursorEl) return;
+			cursorEl.classList.remove('is-visible');
+		});
+
+		window.addEventListener('focus', () => {
+			if (!cursorEl) return;
+			cursorEl.classList.add('is-visible');
+		});
+
+		document.addEventListener('astro:after-swap', () => {
+			initCursor();
+		});
+
+		initCursor();
+	})();
+</script>
 {
 	import.meta.env.PROD && cfWebAnalyticsToken && (
 		<script
