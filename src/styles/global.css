@@ -132,7 +132,143 @@ html.dark:hover::-webkit-scrollbar-thumb {
 	}
 
 	.nav-item {
-		@apply transition-colors duration-200 ease-in-out hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80;
+		position: relative;
+		overflow: hidden;
+		transform-origin: center;
+		transition:
+			color 180ms ease,
+			background-color 180ms ease,
+			transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+			box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.nav-item::before {
+		content: '';
+		position: absolute;
+		inset: 0.15rem;
+		border-radius: 0.8rem;
+		background:
+			linear-gradient(135deg, rgba(255, 255, 255, 0.82), rgba(244, 244, 245, 0.68));
+		opacity: 0;
+		transform: scale(0.92);
+		transition:
+			opacity 180ms ease,
+			transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+			background-color 180ms ease;
+		pointer-events: none;
+	}
+
+	.nav-item:hover {
+		color: rgb(24 24 27);
+		transform: translateY(-1px) scale(1.035);
+		box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+	}
+
+	.nav-item:hover::before {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	.nav-item:active {
+		transform: translateY(0) scale(0.985);
+	}
+
+	.nav-item-label {
+		transition:
+			transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+			letter-spacing 180ms ease,
+			text-shadow 180ms ease;
+	}
+
+	.nav-item:hover .nav-item-label {
+		transform: scale(1.045);
+		letter-spacing: 0.01em;
+		text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+	}
+
+	html.dark .nav-item::before {
+		background:
+			linear-gradient(135deg, rgba(63, 63, 70, 0.88), rgba(39, 39, 42, 0.72));
+	}
+
+	html.dark .nav-item:hover {
+		color: rgb(250 250 250);
+		box-shadow: 0 12px 26px rgba(0, 0, 0, 0.26);
+	}
+
+	.nav-item-active {
+		box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+	}
+
+	.nav-item-active::before {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	.apple-float-chip {
+		position: relative;
+		overflow: hidden;
+		transform-origin: center;
+		transition:
+			color 180ms ease,
+			border-color 180ms ease,
+			background-color 180ms ease,
+			transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+			box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.apple-float-chip::before {
+		content: '';
+		position: absolute;
+		inset: 1px;
+		border-radius: inherit;
+		background:
+			linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(244, 244, 245, 0.68));
+		opacity: 0;
+		transform: scale(0.94);
+		transition:
+			opacity 180ms ease,
+			transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+		pointer-events: none;
+	}
+
+	.apple-float-chip:hover {
+		transform: translateY(-1px) scale(1.024);
+		box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+	}
+
+	.apple-float-chip:hover::before {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	.apple-float-chip:active {
+		transform: translateY(0) scale(0.988);
+	}
+
+	.apple-float-label {
+		position: relative;
+		z-index: 1;
+		display: inline-flex;
+		align-items: center;
+		gap: inherit;
+		transition:
+			transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+			letter-spacing 180ms ease;
+	}
+
+	.apple-float-chip:hover .apple-float-label {
+		transform: scale(1.028);
+		letter-spacing: 0.01em;
+	}
+
+	html.dark .apple-float-chip::before {
+		background:
+			linear-gradient(180deg, rgba(63, 63, 70, 0.92), rgba(39, 39, 42, 0.72));
+	}
+
+	html.dark .apple-float-chip:hover {
+		box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
 	}
 
 	.icon-button {
@@ -1008,4 +1144,3 @@ article :where(p, li, blockquote, table, span, h1, h2, h3, h4) {
 article :where(code, pre) {
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
 }
-

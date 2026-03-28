@@ -40,10 +40,12 @@ const sortedTags = [...tagCount.entries()].sort((a, b) => {
 					sortedTags.map(([tag, count]) => (
 						<a
 							href={`${BASE}tags/${encodeURIComponent(tag)}/`}
-							class="inline-flex items-center gap-2 rounded-xl bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 no-underline transition hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+							class="apple-float-chip inline-flex items-center gap-2 rounded-2xl border border-zinc-300/80 bg-zinc-50/96 px-4 py-2 text-sm font-medium text-zinc-700 no-underline dark:border-zinc-700/80 dark:bg-zinc-900/96 dark:text-zinc-200"
 						>
-							<span>{tag}</span>
-							<span class="text-zinc-500 dark:text-zinc-400">({count})</span>
+							<span class="apple-float-label">
+								<span>{tag}</span>
+								<span class="text-zinc-500 dark:text-zinc-400">({count})</span>
+							</span>
 						</a>
 					))
 				}

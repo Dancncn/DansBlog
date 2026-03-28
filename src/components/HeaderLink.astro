@@ -21,10 +21,10 @@ const isActive = normalizedHref === pathname || normalizedHref === firstSegmentP
 	href={href}
 	class:list={[
 		className,
-		'nav-item rounded-lg px-3 py-2 font-sans text-zinc-600 no-underline hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100',
-		{ 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100': isActive },
+		'nav-item apple-float-chip group relative rounded-xl px-3 py-2 font-sans text-zinc-600 no-underline dark:text-zinc-300',
+		{ 'nav-item-active bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100': isActive },
 	]}
 	{...props}
 >
-	<slot />
+	<span class="nav-item-label apple-float-label relative z-[1] inline-block"><slot /></span>
 </a>

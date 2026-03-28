@@ -339,14 +339,14 @@ const { showTocButton = false } = Astro.props as Props;
 
 		const loginButton = document.getElementById('auth-button');
 		const userDropdown = document.getElementById('user-dropdown');
-		const userAvatar = document.getElementById('user-avatar') as HTMLImageElement | null;
+		const userAvatar = document.getElementById('user-avatar');
 		const userName = document.getElementById('user-name');
 		const userDropdownButton = document.getElementById('user-dropdown-button');
 		const userDropdownMenu = document.getElementById('user-dropdown-menu');
 		const logoutButton = document.getElementById('logout-button');
 		const modal = document.getElementById('login-modal');
 		const modalClose = document.getElementById('login-modal-close');
-		const dropdownAvatar = document.getElementById('dropdown-user-avatar') as HTMLImageElement | null;
+		const dropdownAvatar = document.getElementById('dropdown-user-avatar');
 		const settingsButton = document.getElementById('settings-button');
 		const fallbackAvatar = 'https://img.danarnoux.com/misc/DanArnoux.webp';
 
@@ -401,7 +401,7 @@ const { showTocButton = false } = Astro.props as Props;
 			userDropdownMenu.classList.remove('opacity-100', 'visible');
 		};
 
-		const applyUserToUi = (user: { avatar?: string; username?: string } | null) => {
+		const applyUserToUi = (user) => {
 			const nextAvatar = user?.avatar || fallbackAvatar;
 			const nextName = user?.username || 'User';
 			if (userAvatar) userAvatar.src = nextAvatar;
@@ -409,16 +409,31 @@ const { showTocButton = false } = Astro.props as Props;
 			if (dropdownAvatar) dropdownAvatar.src = nextAvatar;
 		};
 
+		const showLoginButton = () => {
+			loginButton.classList.remove('hidden');
+			loginButton.classList.add('inline-flex');
+			userDropdown.classList.add('hidden');
+			userDropdown.style.display = '';
+			closeDropdown();
+		};
+
+		const showUserDropdown = () => {
+			loginButton.classList.add('hidden');
+			loginButton.classList.remove('inline-flex');
+			userDropdown.classList.remove('hidden');
+			userDropdown.style.display = 'block';
+		};
+
 		if (userDropdown.dataset.authBound !== 'true') {
 			userDropdown.dataset.authBound = 'true';
 
-			window.addEventListener('blog:user-updated', ((event: CustomEvent) => {
+			window.addEventListener('blog:user-updated', (event) => {
 				const detail = event.detail ?? {};
 				applyUserToUi({
 					avatar: detail.avatarUrl,
 					username: detail.username,
 				});
-			}) as EventListener);
+			});
 
 			userDropdownButton.addEventListener('click', (e) => {
 				e.stopPropagation();
@@ -452,8 +467,7 @@ const { showTocButton = false } = Astro.props as Props;
 			const hasToken = Boolean(getAuthToken());
 
 			if (hasToken) {
-				loginButton.style.display = 'none';
-				userDropdown.style.display = 'block';
+				showUserDropdown();
 				applyUserToUi({
 					avatar: userAvatar?.src || fallbackAvatar,
 					username: userName?.textContent || 'User',
@@ -463,17 +477,14 @@ const { showTocButton = false } = Astro.props as Props;
 			const user = await getCurrentUser();
 
 			if (user) {
-				loginButton.style.display = 'none';
-				userDropdown.style.display = 'block';
+				showUserDropdown();
 				applyUserToUi(user);
 			} else {
-				loginButton.style.display = 'inline-flex';
-				userDropdown.style.display = 'none';
+				showLoginButton();
 			}
 		} catch (error) {
 			console.error('Auth error:', error);
-			loginButton.style.display = 'inline-flex';
-			userDropdown.style.display = 'none';
+			showLoginButton();
 		}
 
 		if (loginButton.dataset.authBound !== 'true') {
