@@ -331,24 +331,28 @@ const { showTocButton = false } = Astro.props as Props;
 
 <script is:inline>
 	const initAuthButton = async () => {
-		const { storeTokenFromHash, getCurrentUser, logout } = window.__auth || {};
-		if (!storeTokenFromHash || !getCurrentUser || !logout) {
+		const { storeTokenFromHash, getCurrentUser, getAuthToken, logout } = window.__auth || {};
+		if (!storeTokenFromHash || !getCurrentUser || !getAuthToken || !logout) {
 			setTimeout(initAuthButton, 100);
 			return;
 		}
 
-		if (window.__authInitialized) return;
-		window.__authInitialized = true;
-
 		const loginButton = document.getElementById('auth-button');
 		const userDropdown = document.getElementById('user-dropdown');
-		const userAvatar = document.getElementById('user-avatar');
+		const userAvatar = document.getElementById('user-avatar') as HTMLImageElement | null;
 		const userName = document.getElementById('user-name');
 		const userDropdownButton = document.getElementById('user-dropdown-button');
 		const userDropdownMenu = document.getElementById('user-dropdown-menu');
 		const logoutButton = document.getElementById('logout-button');
 		const modal = document.getElementById('login-modal');
 		const modalClose = document.getElementById('login-modal-close');
+		const dropdownAvatar = document.getElementById('dropdown-user-avatar') as HTMLImageElement | null;
+		const settingsButton = document.getElementById('settings-button');
+		const fallbackAvatar = 'https://img.danarnoux.com/misc/DanArnoux.webp';
+
+		if (!loginButton || !userDropdown || !userDropdownButton || !userDropdownMenu || !logoutButton || !settingsButton) {
+			return;
+		}
 
 		const openModal = () => {
 			if (!modal) return;
@@ -397,63 +401,89 @@ const { showTocButton = false } = Astro.props as Props;
 			userDropdownMenu.classList.remove('opacity-100', 'visible');
 		};
 
+		const applyUserToUi = (user: { avatar?: string; username?: string } | null) => {
+			const nextAvatar = user?.avatar || fallbackAvatar;
+			const nextName = user?.username || 'User';
+			if (userAvatar) userAvatar.src = nextAvatar;
+			if (userName) userName.textContent = nextName;
+			if (dropdownAvatar) dropdownAvatar.src = nextAvatar;
+		};
+
+		if (userDropdown.dataset.authBound !== 'true') {
+			userDropdown.dataset.authBound = 'true';
+
+			window.addEventListener('blog:user-updated', ((event: CustomEvent) => {
+				const detail = event.detail ?? {};
+				applyUserToUi({
+					avatar: detail.avatarUrl,
+					username: detail.username,
+				});
+			}) as EventListener);
+
+			userDropdownButton.addEventListener('click', (e) => {
+				e.stopPropagation();
+				toggleDropdown();
+			});
+
+			logoutButton.addEventListener('click', async () => {
+				closeDropdown();
+				await logout();
+				window.location.reload();
+			});
+
+			settingsButton.addEventListener('click', () => {
+				closeDropdown();
+				document.getElementById('settings-modal')?.dispatchEvent(new CustomEvent('open-settings'));
+			});
+
+			document.addEventListener('click', (e) => {
+				if (userDropdown && !userDropdown.contains(e.target)) closeDropdown();
+			});
+		}
+
 		modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 		modalClose?.addEventListener('click', closeModal);
 		document.addEventListener('keydown', (e) => {
 			if (e.key === 'Escape' && modal && !modal.classList.contains('invisible')) closeModal();
 		});
 
-		// Always attach click listener to user dropdown button (before async user fetch)
-		userDropdownButton?.addEventListener('click', (e) => {
-			e.stopPropagation();
-			toggleDropdown();
-		});
-
 		try {
 			storeTokenFromHash();
+			const hasToken = Boolean(getAuthToken());
+
+			if (hasToken) {
+				loginButton.style.display = 'none';
+				userDropdown.style.display = 'block';
+				applyUserToUi({
+					avatar: userAvatar?.src || fallbackAvatar,
+					username: userName?.textContent || 'User',
+				});
+			}
+
 			const user = await getCurrentUser();
 
 			if (user) {
-				if (loginButton) loginButton.style.display = 'none';
-				if (userDropdown) userDropdown.style.display = 'block';
-				if (userAvatar && user.avatar) userAvatar.src = user.avatar;
-				if (userName) userName.textContent = user.username || 'User';
-				const dropdownAvatar = document.getElementById('dropdown-user-avatar');
-				if (dropdownAvatar && user.avatar) dropdownAvatar.src = user.avatar;
-
-				logoutButton?.addEventListener('click', async () => {
-					closeDropdown();
-					await logout();
-					window.__authInitialized = false;
-					window.location.reload();
-				});
-				const settingsButton = document.getElementById('settings-button');
-				settingsButton?.addEventListener('click', () => {
-					closeDropdown();
-					document.getElementById('settings-modal')?.dispatchEvent(new CustomEvent('open-settings'));
-				});
-				document.addEventListener('click', (e) => {
-					if (userDropdown && !userDropdown.contains(e.target)) closeDropdown();
-				});
+				loginButton.style.display = 'none';
+				userDropdown.style.display = 'block';
+				applyUserToUi(user);
 			} else {
-				if (loginButton) loginButton.style.display = 'inline-flex';
-				if (userDropdown) userDropdown.style.display = 'none';
-				loginButton?.addEventListener('click', openModal);
+				loginButton.style.display = 'inline-flex';
+				userDropdown.style.display = 'none';
 			}
 		} catch (error) {
 			console.error('Auth error:', error);
-			if (loginButton) loginButton.style.display = 'inline-flex';
-			if (userDropdown) userDropdown.style.display = 'none';
-			loginButton?.addEventListener('click', openModal);
+			loginButton.style.display = 'inline-flex';
+			userDropdown.style.display = 'none';
+		}
+
+		if (loginButton.dataset.authBound !== 'true') {
+			loginButton.dataset.authBound = 'true';
+			loginButton.addEventListener('click', openModal);
 		}
 	};
 
-	document.addEventListener('astro:page-load', () => {
-		window.__authInitialized = false;
-		initAuthButton();
-	});
-
 	initAuthButton();
+	document.addEventListener('astro:page-load', initAuthButton);
 
 	const initThemeToggle = () => {
 		const buttons = Array.from(document.querySelectorAll('[id="theme-toggle"], [id="theme-toggle-mobile"]'));

@@ -9,6 +9,9 @@ export interface User {
 	id: string;
 	username: string;
 	avatar: string;
+	login?: string;
+	name?: string;
+	profileUrl?: string;
 }
 
 /**
@@ -71,6 +74,9 @@ export async function getUser(): Promise<User | null> {
 			id: user.id ?? '',
 			username: user.username ?? user.login ?? user.name ?? '',
 			avatar: user.avatar ?? user.avatarUrl ?? user.avatar_url ?? '',
+			login: user.login ?? '',
+			name: user.name ?? '',
+			profileUrl: user.profileUrl ?? user.profile_url ?? '',
 		};
 	} catch {
 		return null;
@@ -119,6 +125,48 @@ export async function sendEmailLogin(email: string, turnstileToken?: string): Pr
 
 		return { ok: true };
 	} catch (error) {
+		return { ok: false, error: 'Network error' };
+	}
+}
+
+export async function updateProfileAvatar(avatarUrl: string): Promise<{ ok: boolean; user?: User; error?: string }> {
+	const token = getToken();
+	if (!token) {
+		return { ok: false, error: 'Not logged in' };
+	}
+
+	try {
+		const response = await fetch(`${API_BASE}/api/me`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify({ avatarUrl }),
+		});
+
+		const data = await response.json();
+		if (!response.ok) {
+			return { ok: false, error: data.error ?? 'Failed to update avatar' };
+		}
+
+		const user = data?.user ?? null;
+		if (!user || typeof user !== 'object') {
+			return { ok: false, error: 'Invalid user response' };
+		}
+
+		return {
+			ok: true,
+			user: {
+				id: user.id ?? '',
+				username: user.username ?? user.login ?? user.name ?? '',
+				avatar: user.avatar ?? user.avatarUrl ?? user.avatar_url ?? '',
+				login: user.login ?? '',
+				name: user.name ?? '',
+				profileUrl: user.profileUrl ?? user.profile_url ?? '',
+			},
+		};
+	} catch {
 		return { ok: false, error: 'Network error' };
 	}
 }
