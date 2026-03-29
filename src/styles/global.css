@@ -278,6 +278,167 @@ html.dark:hover::-webkit-scrollbar-thumb {
 		letter-spacing: 0.01em;
 	}
 
+	.apple-visit-button {
+		position: relative;
+		overflow: hidden;
+		transform-origin: center;
+		transition:
+			color 180ms ease,
+			border-color 180ms ease,
+			background-color 180ms ease,
+			transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+			box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.apple-visit-button::before {
+		content: '';
+		position: absolute;
+		inset: 1px;
+		border-radius: inherit;
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(248, 250, 252, 0.52));
+		opacity: 0;
+		transform: scale(0.95);
+		transition:
+			opacity 180ms ease,
+			transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+		pointer-events: none;
+	}
+
+	.apple-visit-button:hover {
+		transform: translateY(-1px) scale(1.028);
+		box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+	}
+
+	.apple-visit-button:hover::before {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	.apple-visit-button:active {
+		transform: translateY(0) scale(0.988);
+	}
+
+	.apple-visit-label {
+		position: relative;
+		z-index: 1;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		transition:
+			transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+			letter-spacing 180ms ease;
+	}
+
+	.apple-visit-button:hover .apple-visit-label {
+		transform: scale(1.026);
+		letter-spacing: 0.01em;
+	}
+
+	.apple-visit-emoji {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		transform-origin: center;
+		transition:
+			transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+			opacity 180ms ease;
+	}
+
+	.apple-visit-button:hover .apple-visit-emoji {
+		transform: translateX(1.5px) scale(1.08);
+	}
+
+	.apple-visit-button:active .apple-visit-emoji {
+		transform: translateX(0) scale(0.96);
+	}
+
+	html.dark .apple-visit-button::before {
+		background: linear-gradient(180deg, rgba(63, 63, 70, 0.76), rgba(39, 39, 42, 0.56));
+	}
+
+	html.dark .apple-visit-button:hover {
+		box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+	}
+
+	.apple-meta-pill {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		border-radius: 999px;
+		border: 1px solid rgba(228, 228, 231, 0.92);
+		background: rgba(255, 255, 255, 0.74);
+		padding: 0.4rem 0.8rem;
+		color: rgb(82 82 91);
+		backdrop-filter: blur(12px);
+		box-shadow: 0 8px 20px rgba(15, 23, 42, 0.035);
+		transition:
+			border-color 180ms ease,
+			background-color 180ms ease,
+			color 180ms ease,
+			transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+			box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.apple-meta-pill::before {
+		content: '';
+		position: absolute;
+		inset: 1px;
+		border-radius: inherit;
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(244, 244, 245, 0.42));
+		opacity: 0;
+		transform: scale(0.95);
+		transition:
+			opacity 180ms ease,
+			transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+		pointer-events: none;
+	}
+
+	.apple-meta-pill:hover {
+		transform: translateY(-1px) scale(1.02);
+		border-color: rgba(212, 212, 216, 0.96);
+		box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+		color: rgb(39 39 42);
+	}
+
+	.apple-meta-pill:hover::before {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	.apple-meta-pill-label {
+		position: relative;
+		z-index: 1;
+		display: inline-flex;
+		align-items: center;
+		transition:
+			transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+			letter-spacing 180ms ease;
+	}
+
+	.apple-meta-pill:hover .apple-meta-pill-label {
+		transform: scale(1.02);
+		letter-spacing: 0.01em;
+	}
+
+	html.dark .apple-meta-pill {
+		border-color: rgba(63, 63, 70, 0.9);
+		background: rgba(24, 24, 27, 0.6);
+		color: rgb(212 212 216);
+		box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+	}
+
+	html.dark .apple-meta-pill::before {
+		background: linear-gradient(180deg, rgba(63, 63, 70, 0.62), rgba(39, 39, 42, 0.38));
+	}
+
+	html.dark .apple-meta-pill:hover {
+		border-color: rgba(82, 82, 91, 0.96);
+		color: rgb(250 250 250);
+		box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+	}
+
 	html.dark .apple-float-chip::before {
 		background:
 			linear-gradient(180deg, rgba(63, 63, 70, 0.92), rgba(39, 39, 42, 0.72));

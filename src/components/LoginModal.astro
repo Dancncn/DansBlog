@@ -9,7 +9,7 @@
 	aria-hidden="true"
 >
 	<div
-		class="modal-content mx-4 w-[360px] rounded-xl bg-white p-6 shadow-xl transition-all duration-200 ease-out dark:bg-zinc-900 scale-95 opacity-0"
+		class="modal-content mx-4 w-[360px] rounded-[1.4rem] border border-zinc-200/85 bg-white/94 p-6 shadow-[0_28px_70px_rgba(15,23,42,0.18)] backdrop-blur-xl transition-all duration-200 ease-out dark:border-zinc-800/85 dark:bg-zinc-900/94 scale-95 opacity-0"
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="login-modal-title"
@@ -21,24 +21,22 @@
 
 		<a
 			href="https://api.danarnoux.com/api/auth/github/start"
-			class="flex w-full items-center justify-center gap-3 rounded-lg bg-black px-4 py-3 text-base font-medium text-white transition-colors hover:bg-gray-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-gray-200"
+			class="flex w-full items-center justify-center gap-3 rounded-xl bg-zinc-950 px-4 py-3 text-base font-medium text-white no-underline shadow-[0_14px_28px_rgba(24,24,27,0.16)] transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:scale-[1.01] active:translate-y-0 active:scale-[0.99] dark:bg-white dark:text-zinc-900 dark:shadow-[0_14px_30px_rgba(255,255,255,0.08)]"
 		>
-			<svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-				<path
-					d="M12 .3A12 12 0 0 0 8.2 23.7c.6.1.8-.2.8-.6v-2.3c-3.3.7-4-1.4-4-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.8 1.1 1.8 1.1 1 .1 1.6.7 2 1.3.9.2 1.8.4 2.7.1.1-.7.4-1.3.7-1.7-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.1-3.2-.1-.3-.5-1.5.1-3.2 0 0 .9-.3 3.2 1.1a10.9 10.9 0 0 1 5.9 0c2.2-1.4 3.2-1.1 3.2-1.1.6 1.7.2 2.9.1 3.2.7.8 1.1 1.9 1.1 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .4.2.7.8.6A12 12 0 0 0 12 .3"
-				/>
-			</svg>
-			Login with GitHub
+			<span class="inline-flex items-center gap-3">
+				<svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+					<path
+						d="M12 .3A12 12 0 0 0 8.2 23.7c.6.1.8-.2.8-.6v-2.3c-3.3.7-4-1.4-4-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.8 1.1 1.8 1.1 1 .1 1.6.7 2 1.3.9.2 1.8.4 2.7.1.1-.7.4-1.3.7-1.7-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.1-3.2-.1-.3-.5-1.5.1-3.2 0 0 .9-.3 3.2 1.1a10.9 10.9 0 0 1 5.9 0c2.2-1.4 3.2-1.1 3.2-1.1.6 1.7.2 2.9.1 3.2.7.8 1.1 1.9 1.1 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .4.2.7.8.6A12 12 0 0 0 12 .3"
+					/>
+				</svg>
+				<span>Login with GitHub</span>
+			</span>
 		</a>
 
-		<div class="relative my-4">
-			<div class="absolute inset-0 flex items-center">
-				<div class="w-full border-t border-zinc-200 dark:border-zinc-700"></div>
-			</div>
-			<div class="relative flex flex-col items-center text-sm">
-				<span class="bg-white px-2 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">or</span>
-				<span class="mt-1 text-xs text-zinc-400">(Email login under development)</span>
-			</div>
+		<div class="my-4 flex items-center gap-3 text-sm">
+			<span class="h-px flex-1 bg-zinc-200/85 dark:bg-zinc-700/85"></span>
+			<span class="shrink-0 bg-transparent px-0.5 text-[12px] font-medium tracking-[0.08em] text-zinc-400 dark:text-zinc-500">or</span>
+			<span class="h-px flex-1 bg-zinc-200/85 dark:bg-zinc-700/85"></span>
 		</div>
 
 		<form id="email-login-form" class="space-y-3" method="post">
@@ -54,13 +52,15 @@
 			<button
 				type="submit"
 				id="email-login-submit"
-				class="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 py-3 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+				class="apple-float-chip flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-200/90 bg-white/80 px-4 py-3 text-base font-medium text-zinc-700 shadow-[0_12px_24px_rgba(15,23,42,0.05)] transition dark:border-zinc-700/90 dark:bg-zinc-900/70 dark:text-zinc-300"
 			>
-				<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-					<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-					<polyline points="22,6 12,13 2,6" />
-				</svg>
-				Send Login Link
+				<span class="apple-float-label">
+					<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+						<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+						<polyline points="22,6 12,13 2,6" />
+					</svg>
+					<span>Send Login Link</span>
+				</span>
 			</button>
 		</form>
 
@@ -77,9 +77,9 @@
 		<button
 			type="button"
 			id="login-modal-close"
-			class="mt-4 w-full rounded-lg border border-zinc-200 px-4 py-2 text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+			class="apple-float-chip mt-4 w-full rounded-xl border border-zinc-200/85 bg-white/72 px-4 py-2.5 text-zinc-600 shadow-[0_10px_20px_rgba(15,23,42,0.04)] transition dark:border-zinc-700/85 dark:bg-zinc-900/62 dark:text-zinc-300"
 		>
-			Cancel
+			<span class="apple-float-label justify-center">Cancel</span>
 		</button>
 	</div>
 </div>

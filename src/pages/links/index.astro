@@ -140,16 +140,19 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 																	<span class="sr-only">Bilibili</span>
 																</a>
 															)}
-															{item.url && (
-																<a
-																	href={item.url}
-																	target="_blank"
-																	rel="noreferrer"
-																	class="inline-flex items-center rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-medium text-zinc-700 no-underline transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
-																>
-																	Visit
-																</a>
-															)}
+											{item.url && (
+												<a
+													href={item.url}
+													target="_blank"
+													rel="noreferrer"
+													class="apple-visit-button inline-flex items-center rounded-xl border border-zinc-200/70 bg-white/56 px-2.5 py-1.5 text-xs font-medium text-zinc-700 no-underline backdrop-blur-sm dark:border-zinc-700/75 dark:bg-zinc-950/36 dark:text-zinc-200"
+												>
+													<span class="apple-visit-label">
+														<span>Visit</span>
+														<span class="apple-visit-emoji" aria-hidden="true">↗</span>
+													</span>
+												</a>
+											)}
 														</div>
 													</div>
 
@@ -223,9 +226,12 @@ const projectLinks = links.filter((item) => item.kind === 'project');
 												href={item.url}
 												target="_blank"
 												rel="noreferrer"
-												class="inline-flex items-center rounded-full border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 no-underline transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+												class="apple-visit-button inline-flex items-center rounded-full border border-zinc-200/70 bg-white/56 px-3 py-1.5 text-sm font-medium text-zinc-700 no-underline backdrop-blur-sm dark:border-zinc-700/75 dark:bg-zinc-950/36 dark:text-zinc-200"
 											>
-												Visit
+												<span class="apple-visit-label">
+													<span>Visit</span>
+													<span class="apple-visit-emoji" aria-hidden="true">↗</span>
+												</span>
 											</a>
 										)}
 									</div>
