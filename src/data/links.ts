@@ -159,4 +159,13 @@ export const links: FriendLink[] = [
 		tags: ['Japanese', 'AI', 'Personalization'],
 		status: 'active',
 	},
+	{
+		name: 'RoL1n_SrP',
+		kind: 'github',
+		github: 'RolinShmily',
+		url: 'https://blog.srprolin.top/',
+		description: 'A personal tech blog sharing tutorials and hands-on experience, documenting every step of learning and tinkering.',
+		tags: ['Programming', 'DevOps', 'Config'],
+		status: 'active',
+	},
 ];
