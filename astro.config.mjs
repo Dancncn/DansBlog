@@ -82,7 +82,7 @@ const isGitHubPages = Boolean(process.env.GITHUB_ACTIONS) || process.env.DEPLOY_
 const isProduction = process.env.NODE_ENV === 'production';
 // Cloudflare serves from "/", while GitHub Pages needs the repository subpath.
 const runtimeBase = isCloudflarePages ? '/' : isGitHubPages && isProduction ? REPO_BASE : '/';
-const runtimeSite = 'https://danarnoux.com';
+const runtimeSite = 'https://www.ixoxi.cn';
 
 /*
  * Rewrites markdown `<img src="/image/...">` to include the active base path.
