@@ -9,7 +9,7 @@ import { SITE_TITLE } from '../../consts';
 import { getTagSlug, normalizeTagLabel } from '../../utils/tags';
 
 export async function getStaticPaths() {
-	const posts = await getCollection('blog');
+	const posts = (await getCollection('blog')).filter((post) => !import.meta.env.PROD || post.data.draft !== true);
 	const allTags = new Map<string, string>();
 	for (const post of posts) {
 		for (const tag of post.data.tags ?? []) {
@@ -30,7 +30,9 @@ const BASE = import.meta.env.BASE_URL;
 const currentTagSlug = decodeURIComponent(Astro.params.tag ?? '');
 const displayTag = Astro.props.displayTag ?? currentTagSlug;
 const tagDescription = `Explore all articles tagged with "${displayTag}". Find tutorials, guides, and technical notes related to ${displayTag} on this blog.`;
+
 const posts = (await getCollection('blog'))
+	.filter((post) => !import.meta.env.PROD || post.data.draft !== true)
 	.filter((post) => (post.data.tags ?? []).some((tag) => getTagSlug(tag) === currentTagSlug))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---

@@ -10,7 +10,7 @@ import { SITE_TITLE } from '../../consts';
 import { getTagSlug, normalizeTagLabel } from '../../utils/tags';
 
 const BASE = import.meta.env.BASE_URL;
-const posts = await getCollection('blog');
+const posts = (await getCollection('blog')).filter((post) => !import.meta.env.PROD || post.data.draft !== true);
 
 const tagCount = new Map<string, { label: string; count: number }>();
 for (const post of posts) {

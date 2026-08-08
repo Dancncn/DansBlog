@@ -14,6 +14,7 @@ import { BILIBILI_URL, CREATINF_URL, GITHUB_URL, SITE_DESCRIPTION, SITE_TITLE } 
 const BASE = import.meta.env.BASE_URL;
 // Keep home preview aligned with list pagination size for consistent editorial cadence.
 const posts = (await getCollection('blog'))
+	.filter((post) => !import.meta.env.PROD || post.data.draft !== true)
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.slice(0, 6);
 
