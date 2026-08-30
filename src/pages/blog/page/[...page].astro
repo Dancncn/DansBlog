@@ -17,9 +17,9 @@ const BASE = import.meta.env.BASE_URL;
 export async function getStaticPaths({ paginate }) {
 	// Keep page size colocated with route generation so pagination stays deterministic at build time.
 	const PAGE_SIZE = 6;
-	const posts = (await getCollection('blog')).sort(
-		(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-	);
+	const posts = (await getCollection('blog'))
+		.filter((post) => !import.meta.env.PROD || post.data.draft !== true)
+		.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 	// Page 1 is intentionally handled by /blog/ to avoid duplicate first-page routes.
 	return paginate(posts, { pageSize: PAGE_SIZE }).filter(

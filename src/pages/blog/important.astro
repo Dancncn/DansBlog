@@ -13,7 +13,7 @@ import { SITE_TITLE } from '../../consts';
 const BASE = import.meta.env.BASE_URL;
 
 // Get all posts
-const allPosts = await getCollection('blog');
+const allPosts = (await getCollection('blog')).filter((post) => !import.meta.env.PROD || post.data.draft !== true);
 
 // Filter important posts (where important === true), sorted by importantOrder
 const importantPosts = allPosts

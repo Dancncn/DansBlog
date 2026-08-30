@@ -18,7 +18,7 @@ const isImportant = pathname.endsWith('/important') || pathname === `${BASE}blog
 const isArchive = pathname.endsWith('/archive') || pathname === `${BASE}blog/archive`;
 
 // Get all posts
-const allPosts = await getCollection('blog');
+const allPosts = (await getCollection('blog')).filter((post) => !import.meta.env.PROD || post.data.draft !== true);
 const posts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 // Filter important posts (where important === true), sorted by importantOrder
