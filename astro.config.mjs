@@ -2,10 +2,10 @@
 
 /*
  * Astro runtime configuration:
- * - Uses one codebase for both GitHub Pages (repo subpath) and Cloudflare Pages (root path).
- * - Keeps asset/link behavior deterministic by deriving `site` + `base` from build environment.
+ * Cloudflare Pages serves the canonical site from the root path in every build.
  */
 import mdx from '@astrojs/mdx';
+import { unified } from '@astrojs/markdown-remark';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 
@@ -23,7 +23,9 @@ import tailwindcss from '@tailwindcss/vite';
 function remarkGitHubAlertFallback() {
 	const ALERT_TYPES = new Set(['note', 'tip', 'important', 'warning', 'caution']);
 
+	/** @param {import('mdast').Root} tree */
 	return (tree) => {
+		/** @param {import('mdast').Nodes} node */
 		const visit = (node) => {
 			if (!node || typeof node !== 'object') return;
 
@@ -41,12 +43,12 @@ function remarkGitHubAlertFallback() {
 									first.children.shift();
 								}
 
-								node.data ??= {};
-								node.data.hName = 'blockquote';
-								node.data.hProperties = {
-									className: ['markdown-alert', `markdown-alert-${rawType}`],
-								};
+								node.data = Object.assign(node.data ?? {}, {
+									hName: 'blockquote',
+									hProperties: { className: ['markdown-alert', `markdown-alert-${rawType}`] },
+								});
 
+								/** @type {import('mdast').Paragraph} */
 								const titleNode = {
 									type: 'paragraph',
 									data: {
@@ -67,7 +69,7 @@ function remarkGitHubAlertFallback() {
 				}
 			}
 
-			if (Array.isArray(node.children)) {
+			if ('children' in node && Array.isArray(node.children)) {
 				for (const child of node.children) visit(child);
 			}
 		};
@@ -76,21 +78,19 @@ function remarkGitHubAlertFallback() {
 	};
 }
 
-const REPO_BASE = '/DansBlog/';
-const isCloudflarePages = Boolean(process.env.CF_PAGES);
-const isGitHubPages = Boolean(process.env.GITHUB_ACTIONS) || process.env.DEPLOY_TARGET === 'github-pages';
-const isProduction = process.env.NODE_ENV === 'production';
-// Cloudflare serves from "/", while GitHub Pages needs the repository subpath.
-const runtimeBase = isCloudflarePages ? '/' : isGitHubPages && isProduction ? REPO_BASE : '/';
+const runtimeBase = '/';
 const runtimeSite = 'https://danarnoux.com';
 
 /*
  * Rewrites markdown `<img src="/image/...">` to include the active base path.
  * This prevents broken images when the same markdown is built for different hosts.
  */
+/** @param {string} basePath */
 function rehypePrefixPublicImageBase(basePath) {
 	return () => {
+		/** @param {import('hast').Root} tree */
 		return (tree) => {
+			/** @param {import('hast').Nodes} node */
 			const walk = (node) => {
 				if (!node || typeof node !== 'object') return;
 
@@ -106,7 +106,7 @@ function rehypePrefixPublicImageBase(basePath) {
 					}
 				}
 
-				if (Array.isArray(node.children)) {
+				if ('children' in node && Array.isArray(node.children)) {
 					for (const child of node.children) walk(child);
 				}
 			};
@@ -122,6 +122,7 @@ export default defineConfig({
 	base: runtimeBase,
 	trailingSlash: 'always',
 	output: 'static',
+	compressHTML: true,
 	integrations: [
 		mdx(),
 		sitemap({
@@ -134,9 +135,10 @@ export default defineConfig({
 		}),
 	],
 	markdown: {
-		// Keep markdown image URLs deployment-agnostic.
-		remarkPlugins: [remarkGitHubAlertFallback],
-		rehypePlugins: [rehypePrefixPublicImageBase(runtimeBase)],
+		processor: unified({
+			remarkPlugins: [remarkGitHubAlertFallback],
+			rehypePlugins: [rehypePrefixPublicImageBase(runtimeBase)],
+		}),
 		syntaxHighlight: 'shiki',
 		shikiConfig: {
 			themes: {

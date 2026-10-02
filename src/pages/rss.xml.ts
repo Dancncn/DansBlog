@@ -9,7 +9,6 @@ export async function GET(context: APIContext) {
 		posts,
 		title: SITE_TITLE,
 		description: SITE_DESCRIPTION,
-		feedUrl: '/rss.xml',
-		site: context.site,
+		site: context.site!,
 	});
 }

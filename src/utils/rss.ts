@@ -1,15 +1,13 @@
 import rss from '@astrojs/rss';
-import type { APIContext } from 'astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 import { getPostLang as getPostLangBase } from './postAnalytics';
 
 interface RssFeedOptions {
 	posts: CollectionEntry<'blog'>[];
 	title: string;
 	description: string;
-	feedUrl: string;
-	site?: string;
+	site: URL;
+	language?: 'zh-CN' | 'en-US';
 }
 
 export function getPostLang(post: CollectionEntry<'blog'>): string {
@@ -19,7 +17,7 @@ export function getPostLang(post: CollectionEntry<'blog'>): string {
 /**
  * Generate RSS feed
  */
-export async function generateRssFeed({ posts, title, description, feedUrl, site }: RssFeedOptions) {
+export async function generateRssFeed({ posts, title, description, site, language }: RssFeedOptions) {
 	const BASE_URL = import.meta.env.BASE_URL || '/';
 	const items = await Promise.all(
 		posts.map(async (post) => {
@@ -43,9 +41,9 @@ export async function generateRssFeed({ posts, title, description, feedUrl, site
 	return rss({
 		title,
 		description,
-		site: site ?? BASE_URL,
+		site,
 		items,
-		customData: `<language>en-us</language>`,
+		customData: language ? `<language>${language}</language>` : '',
 	});
 }
 

@@ -5,7 +5,7 @@ pubDate: 2026-03-16
 updatedDate: 2026-03-16
 lang: "cn"
 author: "Dan"
-group: "openclaw-windows-setup-guide"
+group: "openclaw-windows-uninstall-guide"
 tags: ["OpenClaw", "Uninstall", "Tutorial"]
 ---
 

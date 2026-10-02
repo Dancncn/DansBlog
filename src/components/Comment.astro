@@ -68,9 +68,9 @@ const { postSlug } = Astro.props;
 </section>
 
 <script>
-	const API_BASE = (window as any).__API_BASE || 'https://api.danarnoux.com';
+	import { API_BASE } from '../lib/config';
 
-	const { storeTokenFromHash, getAuthToken, getCurrentUser } = (window as any).__auth || {};
+	import { storeTokenFromHash, getToken as getAuthToken, getUser as getCurrentUser } from '../lib/auth';
 
 	const escapeHtml = (str: string): string => {
 		return str

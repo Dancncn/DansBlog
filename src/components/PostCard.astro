@@ -79,7 +79,7 @@ const Heading = titleTag;
 			const roots = Array.from(document.querySelectorAll('[data-post-card-views-root]'));
 			if (!roots.length) return;
 
-			const apiBase = window.__API_BASE || 'https://api.danarnoux.com';
+			const apiBase = window.__API_BASE;
 			const uniqueKeys = [...new Set(
 				roots
 					.map((root) => root.getAttribute('data-post-card-views-root') || '')

@@ -27,7 +27,7 @@ A practical stack for writing, documenting, and maintaining a technical blog ove
 - Reusable list UI (`PostCard`, `TagBadges`, `Pagination`)
 - Article TOC system: desktop sticky sidebar + mobile drawer
 - Language switch support for paired CN/EN posts
-- Repo-page and root-path deployment support (GitHub Pages + Cloudflare Pages)
+- Root-path deployment on Cloudflare Pages
 - GitHub OAuth + Email login with session management
 - Comment system (D1 backed, per-post)
 - **Cloudflare Workers AI** - AI-powered comment moderation (online)
@@ -66,7 +66,7 @@ The backend is built with:
 - **R2** - Object storage for image hosting (`img.danarnoux.com`)
 - **KV** - Rate limiting for email login and AI moderation cache
 - **Durable Objects** - Rate limiting mechanism
-- **Workers AI** - Llama 3 for comment moderation
+- **Workers AI** - Qwen3 with rule checks and manual review fallback
 - **GitHub OAuth** - Authentication flow with PKCE
 - **Resend** - Email service for login links
 - **Cloudflare Turnstile** - Captcha protection
@@ -140,14 +140,9 @@ For detailed backend implementation, see the [worker documentation](https://gith
 
 ## Engineering Decisions 🛠️
 
-### 1) Base-Path Safe Deployments
+### 1) Canonical Deployment
 
-The same codebase runs in two environments:
-
-- Cloudflare Pages root path (`/`)
-- GitHub Pages repo subpath (`/DansBlog/`)
-
-`astro.config.mjs` resolves `base`/`site` from environment flags (`CF_PAGES`, `NODE_ENV`), and markdown image URLs are base-adjusted in the pipeline for cross-host consistency.
+Every environment builds for `https://danarnoux.com/` with base `/`. GitHub Actions validates changes; it no longer publishes GitHub Pages. Cloudflare Pages builds the static site with Node 24 and `npm run build`.
 
 ### 2) Post Entry Stability Over Fancy Morphing
 
@@ -191,6 +186,8 @@ Desktop TOC stays in a dedicated sticky column; a placeholder keeps geometry sta
 - Check Network panel for asset/image 404s
 
 ## Development 💻
+
+Use Node 24 (`.node-version`). See [quality checks and maintenance](./docs/quality.md) for the build gate, browser tests and TypeScript compatibility.
 
 Install and run:
 

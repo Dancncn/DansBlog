@@ -27,7 +27,7 @@ GitHub Pages（`https://dancncn.github.io/DansBlog/`）已停止使用。现网�
 - 可复用列表组件（`PostCard`、`TagBadges`、`Pagination`）
 - 文章目录系统：桌面端 sticky 侧边栏 + 移动端抽屉
 - 中英文配对文章的语言切换支持
-- 仓库子路径和根路径双环境部署支持（GitHub Pages + Cloudflare Pages）
+- Cloudflare Pages 根路径部署，GitHub Actions 执行质量检查
 - GitHub OAuth + 邮箱登录与会话管理
 - 评论系统（D1 数据库支持，每篇文章独立评论）
 - **Cloudflare Workers AI** - 评论自动审核（已上线）
@@ -66,7 +66,7 @@ GitHub Pages（`https://dancncn.github.io/DansBlog/`）已停止使用。现网�
 - **R2** - 对象存储，托管图片（`img.danarnoux.com`）
 - **KV** - 邮箱登录速率限制和 AI 审核缓存
 - **Durable Objects** - 限流机制
-- **Workers AI** - Llama 3 进行评论审核
+- **Workers AI** - Qwen3，结合规则检查与人工待审降级
 - **GitHub OAuth** - 带 PKCE 的认证流程
 - **Resend** - 邮箱服务，用于发送登录链接
 - **Cloudflare Turnstile** - 验证码保护
@@ -142,12 +142,11 @@ GitHub Pages（`https://dancncn.github.io/DansBlog/`）已停止使用。现网�
 
 ### 1) 基础路径安全的部署
 
-同一代码库在两个环境中运行：
+统一部署目标：
 
-- Cloudflare Pages 根路径（`/`）
-- GitHub Pages 仓库子路径（`/DansBlog/`）
+- Cloudflare Pages 根路径（`/`），规范域名为 `https://danarnoux.com`。
 
-`astro.config.mjs` 通过环境变量（`CF_PAGES`、`NODE_ENV`）解析 `base`/`site`，Markdown 中的图片 URL 在构建时自动调整基础路径以保持跨平台一致性。
+`astro.config.mjs` 固定使用主站域名和根路径。GitHub Actions 仅执行质量检查，不再部署 GitHub Pages。构建使用 Node 24 和 `npm run build`；详见[持续检查与维护](./quality.md)。
 
 ### 2) 文章入口稳定性优先于炫酷过渡效果
 

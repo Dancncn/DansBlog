@@ -10,7 +10,7 @@ export async function GET(context: APIContext) {
 		posts,
 		title: `${SITE_TITLE} - English`,
 		description: 'English blog posts feed',
-		feedUrl: '/rss-en.xml',
-		site: context.site,
+		language: 'en-US',
+		site: context.site!,
 	});
 }

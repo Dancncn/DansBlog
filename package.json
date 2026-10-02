@@ -4,23 +4,37 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/ensure-sitemap-xml.mjs",
-    "postbuild": "node scripts/postbuild-sitemap.mjs",
+    "build": "npm run check && astro build && node scripts/ensure-sitemap-xml.mjs && npm run check:links",
     "indexnow": "node scripts/indexnow.mjs",
     "indexnow:sitemap": "node scripts/indexnow.mjs sitemap",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check && npm run check:content && npm test",
+    "check:content": "node scripts/check-content.mjs",
+    "check:links": "node scripts/check-links.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:e2e": "playwright test",
+    "ci": "npm run build && npm run test:e2e && npm audit --audit-level=moderate"
   },
   "dependencies": {
-    "@astrojs/mdx": "^4.3.13",
-    "@astrojs/rss": "^4.0.15",
-    "@astrojs/sitemap": "^3.7.0",
-    "@tailwindcss/vite": "^4.1.18",
-    "astro": "^5.17.1",
-    "sharp": "^0.34.3",
-    "tailwindcss": "^4.1.18"
+    "@astrojs/markdown-remark": "^7.3.1",
+    "@astrojs/mdx": "^8.0.2",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.5",
+    "sharp": "^0.35.5",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@tailwindcss/typography": "^0.5.19"
+    "@astrojs/check": "^0.9.10",
+    "@playwright/test": "^1.63.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "parse5": "^8.0.1",
+    "typescript": "^6.0.3",
+    "yaml": "^2.9.1"
+  },
+  "engines": {
+    "node": ">=24.0.0"
   }
 }

@@ -1,6 +1,14 @@
-const API_BASE = import.meta.env.DEV
-	? 'http://localhost:8787'
-	: 'https://api.danarnoux.com';
+import { API_BASE } from './config';
+import { getToken } from './auth';
+
+// The Worker verifies the blog session or an Access identity supplied by Cloudflare.
+// Browsers must never invent CF-Access identity headers.
+function adminFetch(url: string, options: RequestInit = {}): Promise<Response> {
+	const headers = new Headers(options.headers);
+	const token = getToken();
+	if (token) headers.set('Authorization', `Bearer ${token}`);
+	return fetch(url, { ...options, headers, credentials: 'include' });
+}
 
 export interface AdminStats {
 	total: number;
@@ -22,9 +30,7 @@ export interface AdminComment {
 }
 
 export async function getAdminStats(): Promise<AdminStats> {
-	const res = await fetch(`${API_BASE}/api/admin/stats`, {
-		headers: { 'CF-Access-Authenticated-User-Email': 'admin@placeholder.com' }
-	});
+	const res = await adminFetch(`${API_BASE}/api/admin/stats`);
 	if (!res.ok) throw new Error('Failed to fetch stats');
 	return res.json();
 }
@@ -32,19 +38,16 @@ export async function getAdminStats(): Promise<AdminStats> {
 export async function getAdminComments(status?: string): Promise<{ comments: AdminComment[] }> {
 	const url = new URL(`${API_BASE}/api/admin/comments`);
 	if (status && status !== 'all') url.searchParams.set('status', status);
-	const res = await fetch(url.toString(), {
-		headers: { 'CF-Access-Authenticated-User-Email': 'admin@placeholder.com' }
-	});
+	const res = await adminFetch(url.toString());
 	if (!res.ok) throw new Error('Failed to fetch comments');
 	return res.json();
 }
 
 export async function approveComment(id: string): Promise<{ success: boolean }> {
-	const res = await fetch(`${API_BASE}/api/admin/comment/approve`, {
+	const res = await adminFetch(`${API_BASE}/api/admin/comment/approve`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
-			'CF-Access-Authenticated-User-Email': 'admin@placeholder.com'
 		},
 		body: JSON.stringify({ id })
 	});
@@ -53,11 +56,10 @@ export async function approveComment(id: string): Promise<{ success: boolean }> 
 }
 
 export async function rejectComment(id: string): Promise<{ success: boolean }> {
-	const res = await fetch(`${API_BASE}/api/admin/comment/reject`, {
+	const res = await adminFetch(`${API_BASE}/api/admin/comment/reject`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
-			'CF-Access-Authenticated-User-Email': 'admin@placeholder.com'
 		},
 		body: JSON.stringify({ id })
 	});
@@ -66,25 +68,17 @@ export async function rejectComment(id: string): Promise<{ success: boolean }> {
 }
 
 export async function deleteComment(id: string): Promise<{ success: boolean }> {
-	const res = await fetch(`${API_BASE}/api/admin/comment?id=${encodeURIComponent(id)}`, {
+	const res = await adminFetch(`${API_BASE}/api/admin/comment?id=${encodeURIComponent(id)}`, {
 		method: 'DELETE',
-		headers: {
-			'CF-Access-Authenticated-User-Email': 'admin@placeholder.com'
-		}
 	});
 	if (!res.ok) throw new Error('Failed to delete comment');
 	return res.json();
 }
 
 export async function checkAdmin(): Promise<{ isAdmin: boolean; email: string | null }> {
-	// Note: This requires Cloudflare Access policy on api.danarnoux.com
-	// Cloudflare Access injects CF-Access-Authenticated-User-Email header
-	// when the user has an active Access session.
-	// Do NOT override this header - let Cloudflare inject the real value.
+	// Send the actual session token and allow Cloudflare Access cookies when present.
 	try {
-		const res = await fetch(`${API_BASE}/api/admin/check`, {
-			credentials: 'include'
-		});
+		const res = await adminFetch(`${API_BASE}/api/admin/check`);
 		if (!res.ok) return { isAdmin: false, email: null };
 		return res.json();
 	} catch {

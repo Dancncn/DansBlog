@@ -1,5 +1,6 @@
 ﻿---
 import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
 import BaseHead from '../../../components/BaseHead.astro';
 import Footer from '../../../components/Footer.astro';
 import Header from '../../../components/Header.astro';
@@ -14,7 +15,7 @@ const BASE_DESCRIPTION = 'Browse all articles on this blog. Find technical tutor
 
 const BASE = import.meta.env.BASE_URL;
 
-export async function getStaticPaths({ paginate }) {
+export const getStaticPaths = (async ({ paginate }) => {
 	// Keep page size colocated with route generation so pagination stays deterministic at build time.
 	const PAGE_SIZE = 6;
 	const posts = (await getCollection('blog'))
@@ -25,7 +26,7 @@ export async function getStaticPaths({ paginate }) {
 	return paginate(posts, { pageSize: PAGE_SIZE }).filter(
 		(entry) => entry.props.page.currentPage > 1,
 	);
-}
+}) satisfies GetStaticPaths;
 
 interface Props {
 	page: {
@@ -45,7 +46,6 @@ const pageDescription = page.currentPage === 1
 const importantUrl = `${BASE}blog/important/`;
 const latestUrl = `${BASE}blog/`;
 const archiveUrl = `${BASE}blog/archive/`;
-const currentView = 'latest';
 ---
 
 <!doctype html>
@@ -71,12 +71,10 @@ const currentView = 'latest';
 							href={importantUrl}
 							class:list={[
 								'apple-float-chip relative inline-flex items-center justify-center rounded-xl px-2 py-2 text-sm font-medium transition-all duration-200 md:px-3 md:gap-2',
-								currentView === 'important'
-									? 'bg-zinc-900/6 text-zinc-900 shadow-[0_6px_18px_rgba(15,23,42,0.08)] dark:bg-white/10 dark:text-white'
-									: 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200',
+								'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200',
 							]}
 							role="tab"
-							aria-selected={currentView === 'important'}
+							aria-selected={false}
 						>
 							<span class="apple-float-label">
 								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -89,12 +87,10 @@ const currentView = 'latest';
 							href={latestUrl}
 							class:list={[
 								'apple-float-chip relative inline-flex items-center justify-center rounded-xl px-2 py-2 text-sm font-medium transition-all duration-200 md:px-3 md:gap-2',
-								currentView === 'latest'
-									? 'bg-zinc-900/6 text-zinc-900 shadow-[0_6px_18px_rgba(15,23,42,0.08)] dark:bg-white/10 dark:text-white'
-									: 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200',
+								'bg-zinc-900/6 text-zinc-900 shadow-[0_6px_18px_rgba(15,23,42,0.08)] dark:bg-white/10 dark:text-white',
 							]}
 							role="tab"
-							aria-selected={currentView === 'latest'}
+							aria-selected={true}
 						>
 							<span class="apple-float-label">
 								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -107,12 +103,10 @@ const currentView = 'latest';
 							href={archiveUrl}
 							class:list={[
 								'apple-float-chip relative inline-flex items-center justify-center rounded-xl px-2 py-2 text-sm font-medium transition-all duration-200 md:px-3 md:gap-2',
-								currentView === 'archive'
-									? 'bg-zinc-900/6 text-zinc-900 shadow-[0_6px_18px_rgba(15,23,42,0.08)] dark:bg-white/10 dark:text-white'
-									: 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200',
+								'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200',
 							]}
 							role="tab"
-							aria-selected={currentView === 'archive'}
+							aria-selected={false}
 						>
 							<span class="apple-float-label">
 								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

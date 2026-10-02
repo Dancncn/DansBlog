@@ -234,7 +234,7 @@ You need to have **Node.js** installed first (LTS version recommended, 22 or hig
 1. Visit [Node.js Official Website](https://nodejs.org/en/download/)
 2. Download Windows Installer (.msi)
 3. Click Next through the wizard
-4. If you encounter network issues, refer to my other article: [Node.js detailed installation steps](https://danarnoux.com/blog/how-to-build-a-personal-blog-en/#nodejs-installation).
+4. If you encounter network issues, refer to my other article: [Node.js detailed installation steps](https://danarnoux.com/blog/how-to-build-a-personal-blog-en/#install-nodejs-windows).
 
 **Method 2: nvm (Recommended for managing multiple versions)**
 
@@ -268,7 +268,7 @@ npm config set registry https://registry.npmmirror.com
 Some skills depend on Git—it's recommended to install:
 
 - Visit [Git Official Website](https://git-scm.com/download/win)
-- For configuration issues, refer to my article: [Git Configuration](https://danarnoux.com/blog/how-to-get-started-with-programming-en/#git-basics)
+- For configuration issues, refer to my article: [Git Configuration](https://danarnoux.com/blog/how-to-get-started-with-programming-en/#42-git-installation-and-basic-setup-windows-mainline--mac-side-note)
 - Download and install, click Next through the wizard
 
 ### 4.2 Modify Execution Policy

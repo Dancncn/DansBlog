@@ -101,7 +101,7 @@
 			if (sitekey) {
 				turnstileWidgetId = (window as any).turnstile.render(turnstileContainer, {
 					sitekey: sitekey,
-					callback: function(token: string) {
+					callback: function() {
 						console.log('Contact Turnstile token obtained');
 					},
 					'error-callback': function() {
