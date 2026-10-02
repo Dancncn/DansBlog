@@ -19,8 +19,17 @@ export const links: FriendLink[] = [
 		url: 'https://github.com/Dancncn',
 		bilibili: 'https://space.bilibili.com/435440676',
 		description:
-			'Engineer and researcher-in-training, sharing research notes, technical essays, and practical engineering workflows.',
-		tags: ['Research', 'Engineering', 'Notes'],
+			'Intern at a research institute working on firmware reverse engineering, sharing research notes and practical engineering workflows.',
+		tags: ['Firmware', 'Reverse Engineering', 'Research'],
+		status: 'active',
+	},
+	{
+		name: 'Demiurge',
+		kind: 'project',
+		url: 'https://github.com/Dancncn/Demiurge',
+		description:
+			'An open-source desktop agent engine connecting character packs, local projects, tools, memory, and LLMs, with permission controls for actions.',
+		tags: ['AI Agents', 'Desktop', 'Open Source'],
 		status: 'active',
 	},
 	{
